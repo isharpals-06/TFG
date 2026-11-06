@@ -1,0 +1,17 @@
+# Godot editor installation (local only)
+Godot_v4.7.2-stable_win64.exe/
+
+# Godot generated files
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# Build output
+/build/
+/exports/
+
+# Temporary files
+*.tmp
+*.bak
+
