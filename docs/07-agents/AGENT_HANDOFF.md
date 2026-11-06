@@ -2,7 +2,7 @@
 
 ## Current state
 
-Workspace: `C:\Users\ishar\Projects\GGG`. Local Git branch `main`; root commit `db36a55` contains the initial route. Subsequent inventory, save, control, audio, artwork, and documentation changes are currently local and uncommitted. The remote is `https://github.com/isharpals-06/TFG.git`; the first push stalled during authentication, and the remote was empty at the last check. Do not claim the latest work is on GitHub until a push succeeds.
+Workspace: `C:\Users\ishar\Projects\GGG`. Local Git branch `main` contains committed milestones for the initial route and later inventory, save, controls, audio, artwork, and documentation work. The remote is `https://github.com/isharpals-06/TFG.git`; the first push stalled during authentication, and the remote was empty at the last check. Do not claim the latest work is on GitHub until a push succeeds.
 
 The Godot 4.7.2 editor is extracted in the workspace and excluded from Git. The title art is under `design/assets/`; inspiration links are in `design/references/VISUAL_REFERENCES.md`.
 
