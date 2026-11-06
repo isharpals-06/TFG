@@ -5,6 +5,7 @@ const BETH_SCENE := preload("res://src/scenes/beth.tscn")
 const WORLD_SIZE := Vector2(640, 360)
 const PUZZLE_ORDER := ["moon", "water", "seed"]
 const ARCHIVE_SOLUTION := {"west": 1, "center": 2, "east": 3}
+const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
 
 var traveler: Traveler
 var beth: Beth
@@ -20,6 +21,10 @@ var target_icon: ColorRect
 var transition_cover: ColorRect
 var journal_panel: PanelContainer
 var hint_panel: PanelContainer
+var pause_panel: PanelContainer
+var inventory_panel: PanelContainer
+var inventory_description_label: Label
+var pending_pickup_id := ""
 var inscription_panel: PanelContainer
 var inscription_label: Label
 const FINAL_INSCRIPTION := "YOUR HAND HAS BEEN HERE BEFORE."
@@ -41,6 +46,7 @@ func _ready() -> void:
 		phase = "ruins"
 	else:
 		phase = "crossing"
+	Soundscape.set_area(phase)
 	_create_traveler()
 	_create_camera()
 	_create_beth()
@@ -75,17 +81,28 @@ func _unhandled_input(_event: InputEvent) -> void:
 		elif Input.is_action_just_pressed("hints") or Input.is_action_just_pressed("pause"):
 			_close_hint_panel()
 		return
+	if pause_panel != null:
+		if Input.is_action_just_pressed("pause"):
+			_close_pause_menu()
+		return
+	if inventory_panel != null:
+		if Input.is_action_just_pressed("inventory") or Input.is_action_just_pressed("pause"):
+			_close_inventory()
+		return
 	if journal_panel != null:
 		if Input.is_action_just_pressed("journal") or Input.is_action_just_pressed("pause"):
 			_close_journal()
 		return
 	if Input.is_action_just_pressed("pause"):
-		RunState.save_game()
-		get_tree().change_scene_to_file("res://src/scenes/main_menu.tscn")
+		_open_pause_menu()
 	elif Input.is_action_just_pressed("journal"):
 		_open_journal()
 	elif Input.is_action_just_pressed("hints"):
 		_open_hint_panel()
+	elif Input.is_action_just_pressed("inventory"):
+		_open_inventory()
+	elif Input.is_action_just_pressed("use_item"):
+		_use_selected_item()
 	elif Input.is_action_just_pressed("examine"):
 		_examine_target()
 	elif Input.is_action_just_pressed("pick_up"):
@@ -176,7 +193,7 @@ func _create_hud() -> void:
 	icon_center.size = Vector2(3, 3)
 	icon_center.color = Color("#52685e")
 	target_icon.add_child(icon_center)
-	var controls := _new_label("WASD move   Shift run   E look   F take   Space act   Z/C turn   +/- zoom", 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
+	var controls := _new_label("WASD Move   Shift Run   E Look   F Take   U Use   I Bag   Space Act   J Notes   H Hints", 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
 	frame.add_child(controls)
 	transition_cover = ColorRect.new()
 	transition_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -200,9 +217,14 @@ func _new_label(text: String, size: int, color: Color, pos: Vector2, dimensions:
 
 func _get_targets() -> Array[Dictionary]:
 	if phase == "crossing":
+		var crossing_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("medallion_found", false):
-			return [{"id": "medallion", "name": "the medallion", "position": Vector2(302, 222)}]
-		return [{"id": "arch", "name": "the buried arch", "position": Vector2(420, 184)}]
+			crossing_targets.append({"id": "medallion", "name": "the medallion", "position": Vector2(302, 222)})
+		if not RunState.story_flags.get("moss_button_found", false):
+			crossing_targets.append({"id": "moss_button", "name": "the green brass button", "position": Vector2(190, 250)})
+		if RunState.story_flags.get("medallion_found", false):
+			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(420, 184)})
+		return crossing_targets
 	if phase == "orchard":
 		var orchard_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("orchard_mural_seen", false):
@@ -215,12 +237,18 @@ func _get_targets() -> Array[Dictionary]:
 			orchard_targets.append({"id": "sluice_east", "name": "the eastern sluice", "position": Vector2(380, 226)})
 		else:
 			orchard_targets.append({"id": "archive_gate", "name": "the archive gate", "position": Vector2(320, 145)})
+		if RunState.story_flags.get("orchard_memory_seen", false) and not RunState.story_flags.get("seed_pod_found", false):
+			orchard_targets.append({"id": "seed_pod", "name": "the pale seed pod", "position": Vector2(430, 196)})
+		if RunState.story_flags.get("orchard_water_restored", false) and not RunState.story_flags.get("river_glass_found", false):
+			orchard_targets.append({"id": "river_glass", "name": "a piece of river glass", "position": Vector2(460, 262)})
+		if RunState.story_flags.get("orchard_water_restored", false) and not RunState.story_flags.get("quiet_garden_restored", false):
+			orchard_targets.append({"id": "seed_bed", "name": "the empty garden bed", "position": Vector2(215, 266)})
 		return orchard_targets
 	if phase == "archive":
 		var archive_targets: Array[Dictionary] = []
-		if not RunState.story_flags.get("archive_mural_seen", false):
+		if not RunState.story_flags.get("archive_mural_seen", false) or (RunState.inventory.has("mirror_shard") and not RunState.journal_entries.has("archive_second_image")):
 			archive_targets.append({"id": "archive_mural", "name": "the ceiling mural", "position": Vector2(250, 154)})
-		if not RunState.story_flags.get("archive_memory_seen", false):
+		if not RunState.story_flags.get("archive_memory_seen", false) or (RunState.inventory.has("river_glass") and not RunState.journal_entries.has("river_glass_memory")):
 			archive_targets.append({"id": "archive_memory", "name": "the reflecting pool", "position": Vector2(434, 188)})
 		if not RunState.story_flags.get("archive_puzzle_solved", false):
 			archive_targets.append({"id": "lens_west", "name": "the western lens", "position": Vector2(264, 220)})
@@ -228,6 +256,8 @@ func _get_targets() -> Array[Dictionary]:
 			archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(376, 220)})
 		else:
 			archive_targets.append({"id": "archive_stair", "name": "the revealed stair", "position": Vector2(320, 142)})
+		if not RunState.story_flags.get("mirror_shard_found", false):
+			archive_targets.append({"id": "mirror_shard", "name": "a silvered glass shard", "position": Vector2(474, 255)})
 		return archive_targets
 	if phase == "observatory":
 		if not RunState.story_flags.get("ending_revealed", false):
@@ -236,8 +266,12 @@ func _get_targets() -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []
 	if not RunState.story_flags.get("beth_awake", false):
 		targets.append({"id": "beth", "name": "Beth", "position": Vector2(344, 214)})
-	if not RunState.story_flags.get("inscription_seen", false):
+	if not RunState.story_flags.get("inscription_seen", false) or (RunState.inventory.has("stone_chip") and not RunState.journal_entries.has("matching_stone_cuts")):
 		targets.append({"id": "inscription", "name": "the inscription", "position": Vector2(232, 177)})
+	if RunState.story_flags.get("inscription_seen", false) and not RunState.story_flags.get("stone_chip_found", false):
+		targets.append({"id": "stone_chip", "name": "a loose inscription chip", "position": Vector2(232, 202)})
+	if not RunState.story_flags.get("old_bead_found", false):
+		targets.append({"id": "old_bead", "name": "a cloudy bead", "position": Vector2(180, 250)})
 	if not RunState.story_flags.get("resonance_clue_seen", false):
 		targets.append({"id": "mosaic", "name": "the faded mosaic", "position": Vector2(276, 165)})
 	if not RunState.story_flags.get("first_gate_open", false):
@@ -261,7 +295,7 @@ func _nearest_target() -> Dictionary:
 func _update_prompt() -> void:
 	if prompt_label == null:
 		return
-	if journal_panel != null or hint_panel != null or transitioning:
+	if journal_panel != null or hint_panel != null or pause_panel != null or inventory_panel != null or transitioning:
 		prompt_label.text = ""
 		target_icon.visible = false
 		return
@@ -277,12 +311,16 @@ func _update_prompt() -> void:
 	match id:
 		"medallion":
 			prompt_label.text = "E  examine     F  take"
+		"moss_button", "stone_chip", "old_bead", "seed_pod", "river_glass", "mirror_shard":
+			prompt_label.text = "E  examine     F  take"
 		"arch":
 			prompt_label.text = "E  examine     Space  cross"
 		"beth":
 			prompt_label.text = "E  wake the small light"
 		"inscription":
 			prompt_label.text = "E  examine inscription"
+			if RunState.selected_item_id == "stone_chip":
+				prompt_label.text += "     U  fit chip"
 		"mosaic":
 			prompt_label.text = "E  study the worn symbols"
 		"resonator_moon", "resonator_water", "resonator_seed":
@@ -307,8 +345,35 @@ func _update_prompt() -> void:
 			prompt_label.text = "Space  turn the lens"
 		"archive_stair":
 			prompt_label.text = "E  look into the light     Space  climb"
+		"seed_bed":
+			prompt_label.text = "E  examine     U  plant the pale seed"
 		"final_inscription":
-			prompt_label.text = "E  examine     Space  touch the medallion to the stone"
+			prompt_label.text = "E  examine     U  use the selected keepsake"
+	var item_hint := ""
+	if id == "arch" and RunState.selected_item_id == "moss_button":
+		item_hint = "fit the brass button"
+	elif id == "arch" and RunState.selected_item_id == "medallion":
+		item_hint = "use the medallion"
+	elif id == "inscription" and RunState.selected_item_id == "stone_chip":
+		item_hint = "fit the chip"
+	elif id == "resonator_water" and RunState.selected_item_id == "old_bead":
+		item_hint = "listen with the bead"
+	elif id == "archive_mural" and RunState.selected_item_id == "mirror_shard":
+		item_hint = "look through the shard"
+	elif id == "archive_memory" and RunState.selected_item_id == "river_glass":
+		item_hint = "hold up the glass"
+	if not item_hint.is_empty() and not prompt_label.text.contains("U  "):
+		prompt_label.text += "     U  " + item_hint
+	var item_hint := ""
+	match [id, RunState.selected_item_id]:
+		["arch", "moss_button"]: item_hint = "fit the brass button"
+		["arch", "medallion"]: item_hint = "use the medallion"
+		["inscription", "stone_chip"]: item_hint = "fit the chip"
+		["resonator_water", "old_bead"]: item_hint = "listen with the bead"
+		["archive_mural", "mirror_shard"]: item_hint = "look through the shard"
+		["archive_memory", "river_glass"]: item_hint = "hold up the glass"
+	if not item_hint.is_empty() and not prompt_label.text.contains("U  "):
+		prompt_label.text += "     U  " + item_hint
 
 func _examine_target() -> void:
 	var target := _nearest_target()
@@ -318,6 +383,8 @@ func _examine_target() -> void:
 	match target.id:
 		"medallion":
 			_set_status("A cool medallion rests in the dust. Its worn marks catch the light.")
+		"moss_button":
+			_set_status("A green brass button, polished by someone's thumb long ago.")
 		"arch":
 			_set_status("The buried arch is older than the path around it. The medallion stirs in your hand.")
 		"beth":
@@ -328,6 +395,10 @@ func _examine_target() -> void:
 				Soundscape.play_event("journal")
 				RunState.set_story_flag("inscription_seen")
 				_animate_journal_signal()
+		"stone_chip":
+			_set_status("A broken chip fits the blank at the edge of the unreadable line.")
+		"old_bead":
+			_set_status("A cloudy bead rolls gently in its stone cradle. It holds a fleck of blue light.")
 		"mosaic":
 			_set_status("Three worn shapes repeat across the stone: crescent, rain-line, seed.")
 			if RunState.record_clue("resonance_mosaic"):
@@ -343,7 +414,7 @@ func _examine_target() -> void:
 		"gate":
 			_set_status("Beyond the open arch, pale grasses move under a vast unfamiliar sky.")
 		"orchard_mural":
-			_set_status("The mural shows three sluices feeding one dry basin.")
+			_set_status("Three channels meet at one basin. Each sluice must point along its channel toward the center.")
 			RunState.set_story_flag("orchard_mural_seen")
 		"memory_bloom":
 			_set_status("A pale flower releases a soft chime. For a moment, the orchard feels inhabited.")
@@ -351,12 +422,18 @@ func _examine_target() -> void:
 				Soundscape.play_event("journal")
 				RunState.set_story_flag("orchard_memory_seen")
 				_animate_journal_signal()
+		"seed_pod":
+			_set_status("The pale bloom has left one small seed pod, warm despite the dry earth.")
+		"river_glass":
+			_set_status("A smooth green shard rests where the restored stream bends around a stone.")
+		"seed_bed":
+			_set_status("An empty bed waits beside the old channel. A shallow hollow remains in the soil.")
 		"sluice_west":
-			_set_status("The western sluice turns freely. Its channel is dry.")
+			_set_status("The western sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("west")))
 		"sluice_north":
-			_set_status("The northern sluice points toward the basin.")
+			_set_status("The northern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("north")))
 		"sluice_east":
-			_set_status("The eastern sluice is stiff with age, but not broken.")
+			_set_status("The eastern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("east")))
 		"archive_gate":
 			_set_status("The stone lintel is marked with the same three shapes as the mural.")
 		"archive_mural":
@@ -371,6 +448,8 @@ func _examine_target() -> void:
 				RunState.set_story_flag("archive_memory_seen")
 				Soundscape.play_event("journal")
 				_animate_journal_signal()
+		"mirror_shard":
+			_set_status("A silvered shard reflects the room as it might have looked before the roof fell.")
 		"lens_west":
 			_set_status("The western lens can turn through four resting positions.")
 		"lens_center":
@@ -384,15 +463,61 @@ func _examine_target() -> void:
 
 func _pick_up_target() -> void:
 	var target := _nearest_target()
-	if target.is_empty() or target.id != "medallion":
+	if target.is_empty():
 		_set_status("There is nothing nearby to carry.")
 		return
-	if RunState.add_item("medallion"):
-		Soundscape.play_event("pickup")
-		RunState.set_story_flag("medallion_found")
+	var item_id := ""
+	match target.id:
+		"medallion": item_id = "medallion"
+		"moss_button": item_id = "moss_button"
+		"stone_chip": item_id = "stone_chip"
+		"old_bead": item_id = "old_bead"
+		"seed_pod": item_id = "seed_pod"
+		"river_glass": item_id = "river_glass"
+		"mirror_shard": item_id = "mirror_shard"
+		_:
+			_set_status("That cannot be carried.")
+			return
+	if RunState.add_item(item_id):
+		_on_item_collected(item_id)
+	else:
+		pending_pickup_id = item_id
+		_open_inventory()
+		_set_status("Your hands are full. Leave one keepsake to take this one.")
+
+func _on_item_collected(item_id: String) -> void:
+	var flag := "%s_found" % item_id
+	RunState.set_story_flag(flag)
+	Soundscape.play_event("pickup")
+	if item_id == "medallion":
 		_set_status("The medallion warms in your palm. The buried arch answers with a low vibration.")
-		_update_objective()
-		queue_redraw()
+	else:
+		_set_status("You tuck away %s. Press I to choose or inspect keepsakes." % _item_name(item_id))
+	_update_hud()
+	_update_objective()
+	queue_redraw()
+
+func _item_name(item_id: String) -> String:
+	match item_id:
+		"medallion": return "the medallion"
+		"moss_button": return "the green brass button"
+		"stone_chip": return "the broken inscription chip"
+		"old_bead": return "the cloudy bead"
+		"seed_pod": return "the pale seed pod"
+		"river_glass": return "the river glass"
+		"mirror_shard": return "the silvered glass shard"
+		_: return item_id.replace("_", " ")
+
+func _item_description(item_id: String) -> String:
+	match item_id:
+		"medallion": return "A worn disk. It wakes the buried arch and fits the hollow at the observatory."
+		"moss_button": return "A keepsake from the crossing. One side bears a mark like a small sun."
+		"stone_chip": return "A chipped fragment from the first inscription. Its marks remain unreadable."
+		"old_bead": return "Cloudy glass with one blue fleck held inside. Beth circles it when you carry it."
+		"seed_pod": return "A pale seed from the orchard's last bloom. It still holds a little warmth."
+		"river_glass": return "A green shard made smooth by water that had been still for many years."
+		"mirror_shard": return "A sliver of silvered glass. It catches a second, older image of each room."
+		_: return "A small keepsake from the forgotten world."
 
 func _activate_target() -> void:
 	var target := _nearest_target()
@@ -413,24 +538,66 @@ func _activate_target() -> void:
 		_rotate_archive_lens(target.id.trim_prefix("lens_"))
 	elif target.id == "archive_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
 		_enter_observatory()
-	elif target.id == "final_inscription":
-		if RunState.inventory.has("medallion"):
-			_begin_inscription_reveal()
-		else:
-			_set_status("The stone waits. You have nothing that answers its hollow center.")
+	elif target.id == "seed_bed" or target.id == "final_inscription":
+		_use_selected_item()
 	else:
 		_set_status("The stone remains still.")
 
+func _use_selected_item() -> void:
+	var target := _nearest_target()
+	if target.is_empty():
+		_set_status("Move closer to something that might accept a keepsake.")
+		return
+	var item_id := RunState.selected_item_id
+	if item_id.is_empty():
+		_set_status("Open the keepsakes page and choose something to use.")
+		return
+	if (target.id == "arch" or target.id == "final_inscription") and item_id == "medallion":
+		if target.id == "arch":
+			_cross_into_world()
+		else:
+			_begin_inscription_reveal()
+		return
+	if target.id == "arch" and item_id == "moss_button":
+		_record_clue_animated("crossing_sun_mark")
+		_set_status("The brass button fits a shallow mark. A small sun appears in the arch's stonework.")
+		return
+	if target.id == "seed_bed" and item_id == "seed_pod":
+		RunState.remove_item(item_id)
+		RunState.set_story_flag("quiet_garden_restored")
+		_record_clue_animated("quiet_garden_memory")
+		Soundscape.play_event("complete")
+		_set_status("A small green shoot lifts through the soil. Beth rests beside it for a moment.")
+		_update_objective()
+		queue_redraw()
+		return
+	if (target.id == "inscription" or target.id == "final_inscription") and item_id == "stone_chip":
+		_record_clue_animated("matching_stone_cuts")
+		_set_status("The chip fits a narrow break in the old stone. Its marks align with the line, but remain unreadable.")
+		return
+	if target.id == "archive_mural" and item_id == "mirror_shard":
+		_record_clue_animated("archive_second_image")
+		_set_status("In the shard, a fourth path crosses the ceiling map and ends at the empty pool.")
+		return
+	if target.id == "archive_memory" and item_id == "river_glass":
+		_record_clue_animated("river_glass_memory")
+		_set_status("The green glass catches a thread of reflected water beneath the false sky.")
+		return
+	if target.id == "resonator_water" and item_id == "old_bead":
+		_record_clue_animated("bead_resonance")
+		Soundscape.play_event("resonance")
+		_set_status("The blue fleck answers the rain-line with a single, low note.")
+		return
+	_set_status("%s does not belong here." % _item_name(item_id).capitalize())
+
 func _toggle_sluice(which: String) -> void:
-	var states: Dictionary = RunState.puzzle_progress.get("orchard_valves", {
-		"west": false, "north": false, "east": false
-	})
-	states[which] = not bool(states.get(which, false))
+	var states: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
+	states[which] = (_valve_orientation(states.get(which, 0)) + 1) % 4
 	RunState.puzzle_progress["orchard_valves"] = states
 	RunState.save_game()
 	var opened := 0
 	for name in ["west", "north", "east"]:
-		if states.get(name, false):
+		if _valve_orientation(states.get(name, 0)) == int(ORCHARD_SOLUTION[name]):
 			opened += 1
 	if opened == 3:
 		Soundscape.play_event("complete")
@@ -442,8 +609,20 @@ func _toggle_sluice(which: String) -> void:
 		_update_objective()
 	else:
 		Soundscape.play_event("resonance")
-		_set_status("The channel answers with a hollow trickle. %d of 3 sluices are open." % opened)
+		_set_status("Stone turns beneath your hand. %d of 3 channels now point toward the basin." % opened)
 	queue_redraw()
+
+func _get_valve_orientation(which: String) -> int:
+	var states: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
+	return _valve_orientation(states.get(which, 0))
+
+func _valve_orientation(value: Variant) -> int:
+	if value is bool:
+		return 1 if value else 0
+	return posmod(int(value), 4)
+
+func _direction_name(direction: int) -> String:
+	return ["north", "east", "south", "west"][posmod(direction, 4)]
 
 func _enter_orchard() -> void:
 	if transitioning:
@@ -454,6 +633,7 @@ func _enter_orchard() -> void:
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.45)
 	await fade_out.finished
 	phase = "orchard"
+	Soundscape.set_area(phase)
 	RunState.set_story_flag("reached_orchard")
 	traveler.global_position = Vector2(320, 248)
 	beth.global_position = Vector2(337, 232)
@@ -478,6 +658,7 @@ func _enter_archive() -> void:
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
 	await fade_out.finished
 	phase = "archive"
+	Soundscape.set_area(phase)
 	RunState.set_story_flag("reached_archive")
 	traveler.global_position = Vector2(320, 248)
 	camera_target_rotation = 0.0
@@ -500,6 +681,7 @@ func _enter_observatory() -> void:
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
 	await fade_out.finished
 	phase = "observatory"
+	Soundscape.set_area(phase)
 	RunState.set_story_flag("reached_observatory")
 	traveler.global_position = Vector2(320, 250)
 	camera_target_rotation = 0.0
@@ -559,7 +741,7 @@ func _finish_inscription_reveal() -> void:
 	RunState.set_story_flag("ending_revealed")
 	RunState.record_clue("message_from_past")
 	Soundscape.play_event("complete")
-	_set_status("Beth turns toward the medallion. Its worn mark matches the new line on the stone.")
+	_set_status("Beth turns toward the medallion. The last mark gives a faint pulse beneath your hand.")
 	queue_redraw()
 	var ending_tween := create_tween()
 	ending_tween.tween_interval(3.0)
@@ -636,6 +818,7 @@ func _cross_into_world() -> void:
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.45)
 	await fade_out.finished
 	phase = "ruins"
+	Soundscape.set_area(phase)
 	RunState.set_story_flag("crossed_into_world")
 	traveler.global_position = Vector2(285, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
@@ -690,6 +873,109 @@ func _close_journal() -> void:
 	tween.tween_property(panel, "position:y", 180.0, 0.2)
 	tween.tween_callback(panel.queue_free)
 
+func _open_inventory() -> void:
+	if inventory_panel != null or transitioning:
+		return
+	traveler.set_movement_enabled(false)
+	inventory_panel = PanelContainer.new()
+	inventory_panel.position = Vector2(34, 180)
+	inventory_panel.size = Vector2(252, 136)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#17252a")
+	style.border_color = Color("#728781")
+	style.set_border_width_all(1)
+	inventory_panel.add_theme_stylebox_override("panel", style)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 2)
+	inventory_panel.add_child(column)
+	column.add_child(_new_label("KEEPSAKES  %d / %d" % [RunState.inventory.size(), RunState.INVENTORY_LIMIT], 8, Color("#e2ddc9"), Vector2.ZERO, Vector2.ZERO))
+	inventory_description_label = _new_label("Choose an item to read its note.", 6, Color("#b8c2b9"), Vector2.ZERO, Vector2(232, 18))
+	inventory_description_label.custom_minimum_size = Vector2(232, 18)
+	inventory_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(inventory_description_label)
+	if pending_pickup_id != "":
+		column.add_child(_new_label("Leave one keepsake to take %s:" % _item_name(pending_pickup_id), 6, Color("#d5c59a"), Vector2.ZERO, Vector2.ZERO))
+	if RunState.inventory.is_empty():
+		column.add_child(_new_label("Your hands are empty.", 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO))
+	else:
+		for item_id in RunState.inventory:
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 3)
+			var item_button := Button.new()
+			item_button.text = ("● " if item_id == RunState.selected_item_id else "  ") + _item_name(item_id)
+			item_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			item_button.custom_minimum_size = Vector2(154, 14)
+			item_button.add_theme_font_size_override("font_size", 7)
+			item_button.pressed.connect(_select_inventory_item.bind(item_id))
+			row.add_child(item_button)
+			var item_action := Button.new()
+			item_action.custom_minimum_size = Vector2(58, 14)
+			item_action.add_theme_font_size_override("font_size", 6)
+			if pending_pickup_id != "":
+				item_action.text = "Story item" if item_id == "medallion" else "Swap"
+				if item_id != "medallion":
+					item_action.pressed.connect(_swap_pending_item.bind(item_id))
+			else:
+				item_action.text = "Keep" if item_id == "medallion" else "Drop"
+				if item_id != "medallion":
+					item_action.pressed.connect(_drop_inventory_item.bind(item_id))
+			row.add_child(item_action)
+			column.add_child(row)
+	var close := Button.new()
+	close.text = "I / Esc  close"
+	close.custom_minimum_size = Vector2(224, 15)
+	close.add_theme_font_size_override("font_size", 6)
+	close.pressed.connect(_close_inventory)
+	column.add_child(close)
+	hud.add_child(inventory_panel)
+	if RunState.inventory.has(RunState.selected_item_id):
+		inventory_description_label.text = _item_description(RunState.selected_item_id)
+	var tween := create_tween()
+	tween.tween_property(inventory_panel, "position:y", 20.0, 0.24).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+func _close_inventory() -> void:
+	var panel := inventory_panel
+	if panel == null:
+		return
+	inventory_panel = null
+	inventory_description_label = null
+	if pending_pickup_id != "":
+		pending_pickup_id = ""
+	var tween := create_tween()
+	tween.tween_property(panel, "position:y", 180.0, 0.16)
+	tween.tween_callback(func() -> void:
+		panel.queue_free()
+		if is_instance_valid(traveler) and not transitioning:
+			traveler.set_movement_enabled(true)
+	)
+
+func _select_inventory_item(item_id: String) -> void:
+	RunState.select_item(item_id)
+	if is_instance_valid(inventory_description_label):
+		inventory_description_label.text = _item_description(item_id)
+		for child in inventory_panel.get_child(0).get_children():
+			if child is HBoxContainer:
+				var item_button := child.get_child(0) as Button
+				var displayed_name: String = item_button.text.trim_prefix("● ").strip_edges()
+				item_button.text = ("● " if displayed_name == _item_name(item_id) else "  ") + displayed_name
+	_update_hud()
+
+func _drop_inventory_item(item_id: String) -> void:
+	RunState.remove_item(item_id)
+	RunState.set_story_flag("%s_found" % item_id, false)
+	_set_status("You leave %s where someone else may find it." % _item_name(item_id))
+	_close_inventory()
+
+func _swap_pending_item(old_item_id: String) -> void:
+	if pending_pickup_id.is_empty():
+		return
+	var new_item_id := pending_pickup_id
+	if RunState.replace_item(old_item_id, new_item_id):
+		pending_pickup_id = ""
+		RunState.set_story_flag("%s_found" % old_item_id, false)
+		_on_item_collected(new_item_id)
+		_close_inventory()
+
 func _open_hint_panel() -> void:
 	hint_panel = PanelContainer.new()
 	hint_panel.position = Vector2(45, 180)
@@ -704,6 +990,7 @@ func _open_hint_panel() -> void:
 	hint_panel.add_child(column)
 	column.add_child(_new_label("BETH'S WHISPER", 9, Color("#d6f0f2"), Vector2.ZERO, Vector2.ZERO))
 	column.add_child(_new_label("Choose how much help you want.", 6, Color("#b8c5c2"), Vector2.ZERO, Vector2.ZERO))
+	column.add_child(_new_label("The old stones remember each whisper.", 6, Color("#a999b2"), Vector2.ZERO, Vector2.ZERO))
 	_add_hint_button(column, "1  A gentle nudge", 1)
 	_add_hint_button(column, "2  A clearer clue", 2)
 	_add_hint_button(column, "3  Nearly the answer", 3)
@@ -731,17 +1018,17 @@ func _close_hint_panel() -> void:
 	tween.tween_callback(panel.queue_free)
 
 func _give_hint(level: int) -> void:
-	RunState.add_hint(level)
-	beth.react_to_hint(level)
+	var echo_cost := RunState.add_hint(level)
+	beth.react_to_hint(echo_cost)
 	var hint_text := ""
 	if phase == "orchard":
 		match level:
 			1:
-				hint_text = "Beth listens where three dry channels meet."
+				hint_text = "Beth listens along the three dry channels."
 			2:
-				hint_text = "The mural shows each sluice feeding the same basin."
+				hint_text = "The mural shows each channel pointing inward toward the basin."
 			3:
-				hint_text = "Open the west, north, and east sluices."
+				hint_text = "Point the western sluice east, the northern sluice south, and the eastern sluice west."
 	elif phase == "archive":
 		match level:
 			1:
@@ -763,11 +1050,66 @@ func _give_hint(level: int) -> void:
 	_close_hint_panel()
 	queue_redraw()
 
+func _open_pause_menu() -> void:
+	if pause_panel != null or transitioning:
+		return
+	traveler.set_movement_enabled(false)
+	pause_panel = PanelContainer.new()
+	pause_panel.position = Vector2(55, 180)
+	pause_panel.size = Vector2(210, 84)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#17252a")
+	style.border_color = Color("#728781")
+	style.set_border_width_all(1)
+	pause_panel.add_theme_stylebox_override("panel", style)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 3)
+	pause_panel.add_child(column)
+	column.add_child(_new_label("PAUSED", 9, Color("#e2ddc9"), Vector2.ZERO, Vector2.ZERO))
+	var resume := Button.new()
+	resume.text = "Resume journey"
+	resume.custom_minimum_size = Vector2(190, 17)
+	resume.add_theme_font_size_override("font_size", 8)
+	resume.pressed.connect(_close_pause_menu)
+	column.add_child(resume)
+	var save_and_leave := Button.new()
+	save_and_leave.text = "Save and return to title"
+	save_and_leave.custom_minimum_size = Vector2(190, 17)
+	save_and_leave.add_theme_font_size_override("font_size", 8)
+	save_and_leave.pressed.connect(_save_and_return_to_title)
+	column.add_child(save_and_leave)
+	hud.add_child(pause_panel)
+	resume.call_deferred("grab_focus")
+	var tween := create_tween()
+	tween.tween_property(pause_panel, "position:y", 49.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+func _close_pause_menu() -> void:
+	var panel := pause_panel
+	if panel == null:
+		return
+	pause_panel = null
+	var tween := create_tween()
+	tween.tween_property(panel, "position:y", 180.0, 0.16)
+	tween.tween_callback(func() -> void:
+		panel.queue_free()
+		if is_instance_valid(traveler) and not transitioning:
+			traveler.set_movement_enabled(true)
+	)
+
+func _save_and_return_to_title() -> void:
+	RunState.save_game()
+	get_tree().change_scene_to_file("res://src/scenes/main_menu.tscn")
+
 func _animate_journal_signal() -> void:
 	if is_instance_valid(inventory_label):
 		var tween := create_tween()
 		tween.tween_property(inventory_label, "modulate", Color("#e3dfb5"), 0.12)
 		tween.tween_property(inventory_label, "modulate", Color("#bdc8bb"), 0.5)
+
+func _record_clue_animated(clue_id: String) -> void:
+	if RunState.record_clue(clue_id):
+		Soundscape.play_event("journal")
+		_animate_journal_signal()
 
 func _clue_text(clue_id: String) -> String:
 	match clue_id:
@@ -785,6 +1127,18 @@ func _clue_text(clue_id: String) -> String:
 			return "The reflecting pool holds a sky that is absent above the ruins."
 		"archive_hidden_stair":
 			return "Aligned lenses reveal a stair below the archive."
+		"matching_stone_cuts":
+			return "A broken chip fits a narrow break at the observatory inscription."
+		"crossing_sun_mark":
+			return "A green brass button fits an old mark on the buried arch."
+		"quiet_garden_memory":
+			return "A small green shoot returned where the orchard channels meet."
+		"archive_second_image":
+			return "A silvered shard shows one more path in the archive ceiling."
+		"river_glass_memory":
+			return "Green river glass catches a hidden thread beneath the pool's false sky."
+		"bead_resonance":
+			return "A blue fleck in a cloudy bead answers the rain-line with a low note."
 		"message_from_past":
 			return "The old inscription changed: Your hand has been here before."
 		_:
@@ -818,10 +1172,10 @@ func _update_objective() -> void:
 func _update_hud(_items: Array[String] = []) -> void:
 	if inventory_label == null:
 		return
-	var display_items := []
-	for item_id in RunState.inventory:
-		display_items.append("Medallion" if item_id == "medallion" else item_id.capitalize())
-	inventory_label.text = "Carrying: " + (", ".join(display_items) if not display_items.is_empty() else "nothing")
+	if RunState.selected_item_id.is_empty():
+		inventory_label.text = "I  Keepsakes %d / %d" % [RunState.inventory.size(), RunState.INVENTORY_LIMIT]
+	else:
+		inventory_label.text = "I  Active: %s   (%d / %d)" % [_item_name(RunState.selected_item_id), RunState.inventory.size(), RunState.INVENTORY_LIMIT]
 
 func _on_hint_echo_changed(_value: int) -> void:
 	queue_redraw()
@@ -876,6 +1230,11 @@ func _draw_threshold() -> void:
 	_draw_tree(Vector2(126, 163), Color("#253c39"))
 	_draw_tree(Vector2(536, 184), Color("#2a4038"))
 	_draw_altar(Vector2(302, 222))
+	if RunState.journal_entries.has("crossing_sun_mark"):
+		_draw_symbol(Vector2(420, 132), "seed", Color("#d6c995"))
+	if not RunState.story_flags.get("moss_button_found", false):
+		draw_rect(Rect2(188, 248, 4, 3), Color("#788c70"))
+		draw_rect(Rect2(189, 247, 2, 1), Color("#b8aa76"))
 	_draw_arch(Vector2(420, 170), false)
 	_draw_stone(Vector2(365, 218), 8, Color("#69756b"))
 	_draw_stone(Vector2(468, 204), 11, Color("#58685f"))
@@ -895,6 +1254,11 @@ func _draw_ruins() -> void:
 	_draw_stone(Vector2(180, 224), 9, Color("#65756b"))
 	_draw_stone(Vector2(448, 240), 12, Color("#5f7068"))
 	_draw_stone(Vector2(215, 255), 6, Color("#707a68"))
+	if not RunState.story_flags.get("old_bead_found", false):
+		draw_rect(Rect2(178, 248, 5, 3), Color("#657b79"))
+		draw_rect(Rect2(179, 249, 2, 2), Color("#9acbd2"))
+	if RunState.story_flags.get("inscription_seen", false) and not RunState.story_flags.get("stone_chip_found", false):
+		draw_rect(Rect2(229, 200, 5, 3), Color("#aaa18a"))
 	if RunState.story_flags.get("first_gate_open", false):
 		draw_rect(Rect2(312, 163, 16, 2), Color("#a9d7cc"))
 
@@ -911,12 +1275,15 @@ func _draw_orchard() -> void:
 	draw_rect(Rect2(225, 186, 40, 20), Color("#4f5b53"))
 	for index in range(4):
 		draw_rect(Rect2(230 + index * 9, 191 + (index % 2) * 4, 4, 3), Color("#a7aa85"))
+	_draw_arrow(Vector2(232, 193), 1, Color("#c2c09c"))
+	_draw_arrow(Vector2(245, 193), 2, Color("#a5c3bc"))
+	_draw_arrow(Vector2(258, 193), 3, Color("#b0bd99"))
 	_draw_orchard_sluice(Vector2(260, 226), "west", 0)
 	_draw_orchard_sluice(Vector2(320, 198), "north", 1)
 	_draw_orchard_sluice(Vector2(380, 226), "east", 2)
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
 	for name in ["west", "north", "east"]:
-		if valves.get(name, false) or RunState.story_flags.get("orchard_water_restored", false):
+		if _valve_orientation(valves.get(name, 0)) == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false):
 			_draw_water_channel(name)
 	_draw_tree(Vector2(430, 196), Color("#526652"))
 	draw_rect(Rect2(426, 186, 8, 7), Color("#c3d7bf"))
@@ -926,22 +1293,29 @@ func _draw_orchard() -> void:
 		draw_rect(Rect2(306, 209, 28, 2), Color("#9fc9be"))
 		for index in range(3):
 			draw_rect(Rect2(306 + index * 5, 205 - index % 2, 3, 2), Color("#badbd0"))
+		if not RunState.story_flags.get("river_glass_found", false):
+			draw_rect(Rect2(458, 260, 5, 2), Color("#84b6ad"))
+			draw_rect(Rect2(460, 259, 3, 1), Color("#c0d6bc"))
+	if RunState.story_flags.get("quiet_garden_restored", false):
+		_draw_tree(Vector2(215, 261), Color("#68785b"))
+		draw_rect(Rect2(212, 238, 6, 4), Color("#bcc99a"))
+		draw_rect(Rect2(213, 236, 4, 2), Color("#e0dfb6"))
+	elif RunState.story_flags.get("orchard_water_restored", false):
+		draw_rect(Rect2(199, 260, 32, 8), Color("#645d49"))
+		draw_rect(Rect2(203, 258, 24, 2), Color("#7b7255"))
 
 func _draw_orchard_sluice(pos: Vector2, name: String, index: int) -> void:
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
-	var is_open := bool(valves.get(name, false)) or RunState.story_flags.get("orchard_water_restored", false)
-	var body := Color("#77806b") if not is_open else Color("#a0aa83")
+	var orientation := _valve_orientation(valves.get(name, 0))
+	var is_aligned := orientation == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false)
+	var body := Color("#77806b") if not is_aligned else Color("#a0aa83")
 	draw_colored_polygon(PackedVector2Array([
 		pos + Vector2(-12, 7), pos + Vector2(0, 0),
 		pos + Vector2(12, 7), pos + Vector2(0, 13)
 	]), Color("#34443e"))
 	draw_rect(Rect2(pos.x - 7, pos.y - 8, 14, 14), body)
 	draw_rect(Rect2(pos.x - 8, pos.y - 10, 16, 3), Color("#9b9c7a"))
-	draw_rect(Rect2(pos.x - 1, pos.y - 5, 2, 8), Color("#49564b"))
-	if is_open:
-		draw_rect(Rect2(pos.x - 5, pos.y - 3, 10, 2), Color("#8bc2c0"))
-	else:
-		draw_rect(Rect2(pos.x - 3, pos.y - 2, 6, 2), Color("#4f6159"))
+	_draw_arrow(pos + Vector2(0, -1), orientation, Color("#8bc2c0") if is_aligned else Color("#4f6159"))
 
 func _draw_water_channel(name: String) -> void:
 	var water := Color("#6eaaa8")
@@ -981,6 +1355,9 @@ func _draw_archive() -> void:
 		draw_rect(Rect2(309, 147, 22, 4), Color("#9ebbb2"))
 		draw_rect(Rect2(313, 139, 14, 9), Color("#657c73"))
 		draw_rect(Rect2(316, 133, 8, 7), Color("#bfd7c7"))
+	if not RunState.story_flags.get("mirror_shard_found", false):
+		draw_rect(Rect2(472, 253, 5, 3), Color("#97babb"))
+		draw_rect(Rect2(473, 252, 2, 1), Color("#d6e4da"))
 
 func _draw_archive_arrows(pos: Vector2) -> void:
 	_draw_arrow(pos + Vector2(-9, 0), 1, Color("#c2c09c"))

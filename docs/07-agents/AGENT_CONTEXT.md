@@ -1,20 +1,25 @@
 # Agent Context
 
 ## Creator
-Beginner, a few hours per week, personal learning project. Make routine low-risk choices and ask only about material decisions. Use multiple choice when questions are needed. Do not begin implementation until explicitly instructed.
+
+Beginner, a few hours per week, personal learning project. The creator authorized full implementation and asked for routine creative choices to be made independently; ask only about material decisions. Use multiple choice if a question is necessary.
 
 ## Vision
-The Forgotten World: peaceful, mysterious, nostalgic, occasionally melancholic fictional medieval fantasy. Isometric pixel art, no combat, 2–3 hour target, silent protagonist, Beth as playful glowing spirit orb. Environmental storytelling carries the experience.
+
+The Forgotten World: peaceful, mysterious, nostalgic, occasionally melancholic fictional medieval fantasy. Isometric pixel art, no combat, 2–3 hour target, silent traveler, Beth as playful glowing spirit orb. Environmental storytelling carries the experience.
 
 ## Story
-Opening crossing and discovery are preliminary. A subtle inscription is found earlier, starts as gibberish, and animates into a hidden message near the end. This is the first clear sign of the protagonist's connection to the world's past. Exact wording and meaning remain open.
+
+The opening combines a crossing and the discovery of an unusual medallion. The traveler enters abandoned ruins and wakes Beth. A previously discovered inscription starts as gibberish and animates into a hidden message near the ending. The reveal is subtle. The cliffhanger message “YOUR HAND HAS BEEN HERE BEFORE.” is the first clear sign of the traveler's connection to the world's past. Do not explain the full connection in this release.
 
 ## Gameplay
-Fair observation-led puzzles with free experimentation; mostly short with occasional multi-step puzzles; gradual main-route difficulty plus harder optional puzzles; progress usually persists. Continuous journey, four areas as a planning estimate, clear main route, short optional branches, limited return paths. Rewards mix routes, history, and visible change.
 
-Direct eight-direction movement mapped to iso, walk/run, occasional prompted low-pressure traversal. Camera gradually reframes, limited zoom, smooth rotation among consistent iso views with optional snap, and occlusion response. Nearby interaction icon; separate examine/pickup/activate. Four provisional inventory slots; mostly reusable items, rare consumables, swap if full. Journal auto-archives clues with animation; player connects them.
-
-Beth mainly guides subtly. Three hint levels. Repeated hints create escalating in-world traces, communicated through world and Beth without direct warning. Effects build locally, mostly recede, leave small persistence, and may affect later puzzles, optional discoveries, Beth, and ending details. Main route remains completable.
+Exploration, fair observation-led puzzles, safe experimentation, occasional multi-step mechanisms, optional clues, and a clear main route. Four provisional inventory slots with safe swapping. Journal clues are recorded but not connected for the player. Beth offers three hint levels; each use increases the journey-wide echo, while solving a puzzle clears local intensity. The echo affects Beth, the environment, optional findings, and the ending without hard-locking progress.
 
 ## Technical baseline
-Godot 4.7.2 stable, GDScript, Windows PC, keyboard/controller, provisional 320×180 canvas and 32×16 isometric tile. Local Git; remote optional. Figma/Canva optional. Placeholder assets and writing are acceptable early.
+
+Godot 4.7.2 stable, GDScript, Windows PC, keyboard/controller, provisional 320×180 canvas and 32×16 isometric tile, local JSON save, Git repository supplied by creator. Figma/Canva are optional. Only the title illustration is generated art at this stage; in-game shapes remain placeholders.
+
+## Status
+
+The first route and core prototypes are in the workspace. The 2–3 hour content target, full art/audio, runtime review, and Windows release remain incomplete.

@@ -1,7 +1,31 @@
 # Architecture
 
-Proposed folders: src/core for shared state, settings, and saves; src/player; src/camera; src/world for areas/interactables/puzzles; src/companion for Beth; src/ui; src/data; and src/audio. Do not create every subsystem before a real need appears.
+## Current project map
 
-Keep player, Beth, interactables, puzzle mechanisms, and UI in clear scene boundaries. The system that changes a state owns it: puzzles own puzzle progress, journal owns discovered clues, hint logic owns hint consequence state, and the save service serializes persistent state.
+- `project.godot`: startup scene, display settings, autoloads, rendering.
+- `src/core/run_state.gd`: global state, input map, settings, JSON save, inventory, journal IDs, hint counter.
+- `src/audio/soundscape.gd`: generated sound streams and area ambience.
+- `src/actors/traveler.gd`, `beth.gd`: player and companion.
+- `src/scenes/main_menu.gd`: menu, settings, controls, and remapping UI.
+- `src/scenes/prologue.gd`: current route, puzzle flow, HUD, hand-drawn environment, and item interactions. This script is intentionally a prototype and is now large; split it before adding substantial chapters.
+- `src/scenes/ending.gd`: cliffhanger presentation.
+- `design/assets/`: original project artwork and credits.
 
-Build one small slice first; avoid premature frameworks.
+## Runtime relationships
+
+```mermaid
+flowchart TD
+    Menu[Title and settings] --> World[Journey scene]
+    World --> Traveler[Traveler]
+    World --> Beth[Beth companion]
+    World --> HUD[Journal, hints, inventory, prompts]
+    Traveler --> World
+    HUD --> RunState[RunState]
+    World --> RunState
+    RunState --> Save[Local versioned JSON]
+    World --> Soundscape[Soundscape]
+```
+
+## Refactor direction
+
+Keep one owner for each persistent value. Move world state into RunState, area drawing and transitions into world/area scripts, interaction prompts into reusable interactables, and HUD panels into UI scripts when new content makes that separation useful. Avoid building empty abstractions ahead of a need.

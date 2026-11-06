@@ -1,5 +1,28 @@
 # Design System
 
-Current principles: consistent pixel-art scale; restrained blue-white glow for Beth; readable silhouettes and interaction states; atmospheric palette that is beautiful without being overly cheerful; purposeful, quiet motion.
+## Experience principles
 
-Provisional baseline: 320×180 logical canvas and 32×16 isometric tile grid, with crisp integer scaling where practical. Validate visually before treating these values as final.
+- Peaceful, mysterious, nostalgic, occasionally melancholic.
+- Beautiful without becoming overly cheerful.
+- Original medieval fantasy, with subtle magic and no combat spectacle.
+- Environmental storytelling and expressive animation over exposition.
+- Use silence and space; avoid busy HUD decoration.
+
+## Palette
+
+- Deep blue-green and charcoal for night and shadow.
+- Sage, moss, and lichen for vegetation.
+- Dusty gray-green for aged stone.
+- Quiet brass and faded cream for warm points of attention.
+- Blue-white light for Beth; a restrained violet trace for accumulated hint echoes.
+
+## Scale and rendering
+
+- Provisional canvas: 320×180 logical pixels.
+- Provisional isometric tile: 32×16 pixels.
+- Nearest filtering and integer viewport scaling.
+- Traveler and interactable silhouettes must read against the ground at the logical resolution.
+
+## Current state
+
+The current in-world environment, characters, and interface are drawn from simple script shapes. The title image is a generated illustration scaled with nearest filtering. This is a style exploration, not a finished matching asset set; a production sprite/tile pass remains.

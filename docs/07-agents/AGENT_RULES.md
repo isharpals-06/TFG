@@ -1,10 +1,10 @@
 # Agent Rules
 
 - The human creator has final authority.
-- Do not begin game implementation or generate game assets until explicitly asked.
-- Preserve existing user files and treat tentative story details as undecided.
-- Do not invent canon or convert exploratory ideas into final requirements without approval.
-- Keep scope appropriate for a beginner solo creator with limited weekly time and a personal learning goal.
-- Explain unfamiliar tools plainly.
-- Do not add or run tests unless asked to test or verify.
-- Do not publish, deploy, or connect accounts without explicit authorization.
+- Full game implementation is authorized; do not wait for another start confirmation.
+- The creator invited routine creative choices that fit the original brief. Preserve the approved tone, silent protagonist, Beth, no-combat scope, and inscription cliffhanger; do not add an explicit explanation of the traveler's past.
+- Preserve user files and record meaningful changes.
+- Keep work appropriate for a beginner solo creator; explain unfamiliar tools plainly.
+- Do not add or run tests unless the creator asks to test or verify.
+- Do not publish a release or deploy without explicit approval.
+- Track rights and attribution for all added assets.

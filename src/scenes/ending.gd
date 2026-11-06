@@ -10,7 +10,7 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", Color("#e7e2cf"))
 	add_child(title)
 	var note := Label.new()
-	note.text = "Beth's light turns toward the medallion. Its worn mark answers the old inscription."
+	note.text = "Beth leans close to the medallion. The old stone gives one quiet pulse."
 	note.position = Vector2(34, 78)
 	note.size = Vector2(252, 35)
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -19,7 +19,7 @@ func _ready() -> void:
 	note.add_theme_color_override("font_color", Color("#b9c6bd"))
 	add_child(note)
 	var final_line := Label.new()
-	final_line.text = "Somewhere beyond the stone, something answers."
+	final_line.text = "Beyond the arch, a second light answers."
 	final_line.position = Vector2(32, 118)
 	final_line.size = Vector2(256, 18)
 	final_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -53,3 +53,16 @@ func _draw() -> void:
 	draw_rect(Rect2(153, 22, 14, 12), medallion)
 	draw_rect(Rect2(155, 34, 10, 2), medallion)
 	draw_rect(Rect2(158, 25, 4, 6), Color("#24343a"))
+	var echo := clampf(float(RunState.total_hint_points) / 16.0, 0.0, 1.0)
+	var beth_light := Color("#a8e1ec").lerp(Color("#d08faa"), echo)
+	var glow := Color(beth_light.r, beth_light.g, beth_light.b, 0.22)
+	draw_rect(Rect2(170, 37, 12, 6), glow)
+	draw_rect(Rect2(172, 35, 8, 10), beth_light)
+	draw_rect(Rect2(174, 37, 4, 5), Color("#eef8ec"))
+	draw_rect(Rect2(174, 38, 1, 1), Color("#34414a"))
+	draw_rect(Rect2(177, 38, 1, 1), Color("#34414a"))
+	if RunState.hint_uses >= 3:
+		for index in range(mini(RunState.hint_uses - 2, 6)):
+			var mote_x := 185 + (index * 13) % 25
+			var mote_y := 39 + (index * 7) % 12
+			draw_rect(Rect2(mote_x, mote_y, 1, 1), glow)

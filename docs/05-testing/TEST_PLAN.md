@@ -1,5 +1,5 @@
 # Test Plan
 
-Planning only; no tests have been added or run.
+No automated or manual playthrough tests have been run. The Godot editor has imported the project successfully; that only confirms resources/scripts load in the editor.
 
-For the future slice, manually review controls, camera readability, fair puzzle clues, safe wrong attempts, persistence, journal/inventory/Beth flow, and accessibility options. Add automated tests only if the creator requests them or a concrete need emerges.
+When runtime verification is requested and the route is expanded, review a fresh save and Continue path, all main puzzles without hints, optional hint levels and consequences, inventory full/swap/use behavior, controller and keyboard flow, settings, text scaling, reduced motion, save migration, autosave, and the ending. Do not add or run tests until the creator asks.

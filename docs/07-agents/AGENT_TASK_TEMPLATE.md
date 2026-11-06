@@ -4,16 +4,17 @@
 What player-facing or documentation outcome should this task produce?
 
 ## Context
-Relevant current decisions and files.
+Relevant decisions, current implementation, and files.
 
 ## Scope
-What is included?
+What is included and which existing behavior must be preserved?
 
 ## Constraints
-Preserve creator direction; keep work understandable for a beginner; do not expand scope or implement without authorization.
+Keep work understandable to a beginner. Respect the creative brief and creator authority. Do not add or run tests unless requested.
 
 ## Completion notes
 - Files changed:
 - Behavior/content added:
-- Verification performed (only if requested):
-- Open decisions:
+- Editor/runtime validation performed:
+- Tests run (only when requested):
+- Remaining work or decisions:

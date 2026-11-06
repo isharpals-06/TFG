@@ -2,8 +2,43 @@ extends Control
 
 var _view_root: Control
 var _has_focus_target := false
+var waiting_for_action := ""
+
+func _input(event: InputEvent) -> void:
+	if waiting_for_action.is_empty():
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_ESCAPE:
+			waiting_for_action = ""
+			_show_controls()
+		else:
+			_finish_rebind(event)
+		get_viewport().set_input_as_handled()
+	elif event is InputEventJoypadButton and event.pressed:
+		_finish_rebind(event)
+		get_viewport().set_input_as_handled()
+
+func _finish_rebind(event: InputEvent) -> void:
+	var action_name := waiting_for_action
+	waiting_for_action = ""
+	if not RunState.rebind_action(action_name, event):
+		_set_rebind_status("That control is already assigned or cannot be used here.")
+		return
+	_show_controls()
 
 func _ready() -> void:
+	var backdrop := TextureRect.new()
+	backdrop.texture = load("res://design/assets/title_background.png")
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_SCALE
+	backdrop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(backdrop)
+	var shade := ColorRect.new()
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.color = Color(0.025, 0.045, 0.06, 0.36)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
 	_show_main_menu()
 
 func _draw() -> void:
@@ -77,21 +112,46 @@ func _show_identity_choice() -> void:
 func _show_controls() -> void:
 	_clear_view()
 	_add_centered_title("Controls", 26)
-	var rows := [
-		"Move  WASD / arrows / left stick",
-		"Run  Shift / left-stick press",
-		"Examine  E / controller A",
-		"Pick up  F / controller Y",
-		"Activate  Space / controller X",
-		"Journal  J    Hints  H",
-		"Camera  Z/C turn  +/- zoom  V snap"
+	var movement := _label("Move: WASD / arrows / stick   Camera: Z/C, +/-", 6, Color("#bdc9c0"))
+	movement.position = Vector2(19, 43)
+	movement.size = Vector2(282, 12)
+	_view_root.add_child(movement)
+	var remappable := [
+		["run", "Run"], ["examine", "Examine"], ["pick_up", "Take"],
+		["activate", "Activate"], ["journal", "Journal"], ["hints", "Beth's hints"]
 	]
-	for index in range(rows.size()):
-		var row := _label(rows[index], 7, Color("#d4d7cc"))
-		row.position = Vector2(34, 48 + index * 13)
-		row.size = Vector2(252, 12)
+	for index in range(remappable.size()):
+		var action_name: String = remappable[index][0]
+		var display_name: String = remappable[index][1]
+		var row_y := 56.0 + index * 13.0
+		var row := _label("%s   %s" % [display_name, RunState.get_binding_text(action_name)], 7, Color("#d4d7cc"))
+		row.position = Vector2(35, row_y + 2)
+		row.size = Vector2(150, 12)
 		_view_root.add_child(row)
-	_add_button("Back", Vector2(116, 137), _show_main_menu)
+		var change := Button.new()
+		change.text = "Change"
+		change.position = Vector2(210, row_y)
+		change.size = Vector2(76, 15)
+		change.focus_mode = Control.FOCUS_ALL
+		change.add_theme_font_size_override("font_size", 7)
+		change.pressed.connect(_begin_rebind.bind(action_name))
+		_view_root.add_child(change)
+	_add_button("Back", Vector2(116, 158), _show_main_menu)
+
+func _begin_rebind(action_name: String) -> void:
+	waiting_for_action = action_name
+	_set_rebind_status("Press a key or controller button. Esc cancels.")
+
+func _set_rebind_status(message: String) -> void:
+	var old_message := _view_root.get_node_or_null("RebindStatus")
+	if is_instance_valid(old_message):
+		old_message.queue_free()
+	var label := _label(message, 6, Color("#d5c59a"))
+	label.name = "RebindStatus"
+	label.position = Vector2(18, 139)
+	label.size = Vector2(284, 12)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_view_root.add_child(label)
 
 func _show_settings() -> void:
 	_clear_view()
