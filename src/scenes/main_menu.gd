@@ -225,9 +225,12 @@ func _add_button(text: String, pos: Vector2, callback: Callable) -> void:
 	var button := Button.new()
 	button.text = text
 	button.position = pos
-	button.size = Vector2(124, 18)
+	var large_text := bool(RunState.settings.get("large_text", false))
+	var button_width := maxf(124.0, minf(230.0, float(text.length()) * (10.0 if large_text else 8.0) * 0.62 + 14.0))
+	button.position.x -= (button_width - 124.0) * 0.5
+	button.size = Vector2(button_width, 18.0 + (2.0 if large_text else 0.0))
 	button.focus_mode = Control.FOCUS_ALL
-	button.add_theme_font_size_override("font_size", 10 if RunState.settings.get("large_text", false) else 8)
+	button.add_theme_font_size_override("font_size", 10 if large_text else 8)
 	button.add_theme_color_override("font_color", Color("#d9e0d9"))
 	button.add_theme_color_override("font_hover_color", Color("#f1edda"))
 	button.add_theme_color_override("font_pressed_color", Color("#b8dbd8"))

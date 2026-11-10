@@ -25,4 +25,4 @@
 
 ## Current state
 
-All nine main locations and the optional garden use original generated pixel-art-style backgrounds. Traveler and Beth use original pixel-art sprites; the traveler has a resting pose and an alternate walking pose, and Beth has reduced-motion-aware floating, nearby-object investigation, and discovery movement. Puzzle marks and much of the interface are drawn in GDScript. The game remains a prototype: character frame coverage, tile-level animation, and a final polish pass remain.
+All nine main locations and the optional garden use original generated pixel-art-style backgrounds. Traveler and Beth use original pixel-art sprites; the traveler has a four-frame walk cycle and resting pose, while Beth has four expression poses with reduced-motion-aware floating, nearby-object investigation, and discovery movement. Puzzle marks and much of the interface are drawn in GDScript. The game remains a prototype: runtime animation review, tile-level animation, and a final polish pass remain.

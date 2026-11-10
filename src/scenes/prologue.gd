@@ -1651,13 +1651,13 @@ func _open_inventory() -> void:
 			var item_button := Button.new()
 			item_button.text = ("● " if item_id == RunState.selected_item_id else "  ") + _item_name(item_id)
 			item_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			item_button.custom_minimum_size = Vector2(154, 14)
-			item_button.add_theme_font_size_override("font_size", 7)
+			item_button.custom_minimum_size = Vector2(154, 14 + (4 if RunState.settings.get("large_text", false) else 0))
+			item_button.add_theme_font_size_override("font_size", 9 if RunState.settings.get("large_text", false) else 7)
 			item_button.pressed.connect(_select_inventory_item.bind(item_id))
 			row.add_child(item_button)
 			var item_action := Button.new()
-			item_action.custom_minimum_size = Vector2(58, 14)
-			item_action.add_theme_font_size_override("font_size", 6)
+			item_action.custom_minimum_size = Vector2(58, 14 + (4 if RunState.settings.get("large_text", false) else 0))
+			item_action.add_theme_font_size_override("font_size", 8 if RunState.settings.get("large_text", false) else 6)
 			if pending_pickup_id != "":
 				item_action.text = "Story item" if item_id == "medallion" else "Swap"
 				if item_id != "medallion":
@@ -1670,8 +1670,8 @@ func _open_inventory() -> void:
 			column.add_child(row)
 	var close := Button.new()
 	close.text = "%s / %s  close" % [_action_mark("inventory"), _action_mark("pause")]
-	close.custom_minimum_size = Vector2(224, 15)
-	close.add_theme_font_size_override("font_size", 6)
+	close.custom_minimum_size = Vector2(224, 15 + (4 if RunState.settings.get("large_text", false) else 0))
+	close.add_theme_font_size_override("font_size", 8 if RunState.settings.get("large_text", false) else 6)
 	close.pressed.connect(_close_inventory)
 	column.add_child(close)
 	hud.add_child(inventory_panel)
@@ -1899,14 +1899,14 @@ func _open_pause_menu() -> void:
 	column.add_child(_new_label("PAUSED", 9, Color("#e2ddc9"), Vector2.ZERO, Vector2.ZERO))
 	var resume := Button.new()
 	resume.text = "Resume journey"
-	resume.custom_minimum_size = Vector2(190, 17)
-	resume.add_theme_font_size_override("font_size", 8)
+	resume.custom_minimum_size = Vector2(190, 17 + (4 if RunState.settings.get("large_text", false) else 0))
+	resume.add_theme_font_size_override("font_size", 10 if RunState.settings.get("large_text", false) else 8)
 	resume.pressed.connect(_close_pause_menu)
 	column.add_child(resume)
 	var save_and_leave := Button.new()
 	save_and_leave.text = "Save and return to title"
-	save_and_leave.custom_minimum_size = Vector2(190, 17)
-	save_and_leave.add_theme_font_size_override("font_size", 8)
+	save_and_leave.custom_minimum_size = Vector2(190, 17 + (4 if RunState.settings.get("large_text", false) else 0))
+	save_and_leave.add_theme_font_size_override("font_size", 10 if RunState.settings.get("large_text", false) else 8)
 	save_and_leave.pressed.connect(_save_and_return_to_title)
 	column.add_child(save_and_leave)
 	hud.add_child(pause_panel)
