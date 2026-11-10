@@ -16,9 +16,12 @@ No versioned release has been published.
 - Remapping for movement, interaction, inventory, journal, hints, pause, and camera actions; prompts reflect current bindings.
 - Subtle Beth float and discovery reactions, with reduced-motion behavior.
 - Version 3 saves resume at the current room and position; playtime pauses while menus are open.
+- Reduced-motion support now removes journey fades and sliding interface panels and resolves the inscription without scrambling.
+- Heavy hint use can add an extra Bell Court note and alter the High Steps map; both variants are shown in the world, journal, and Beth's hints.
+- Traveler's two-pose walk cycle now turns left/right with isometric movement and camera turns.
 - Windows x86_64 export preset and local single-file release build; runtime review remains due.
 
 ### In progress
 
 - Content and puzzle depth for the 2–3 hour target.
-- Full-duration content, final animation/audio, creator runtime and accessibility review, and release materials.
+- Full-duration content, additional animation/audio production, creator runtime and accessibility review, and release materials.
