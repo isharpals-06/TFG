@@ -1517,7 +1517,7 @@ func _activate_resonator(symbol: String) -> void:
 			_update_objective()
 			queue_redraw()
 		else:
-			var next_name := ["crescent", "rain-line", "seed"][progress]
+			var next_name: String = ["crescent", "rain-line", "seed"][progress]
 			_set_status("A low note settles into the wall. The next mark is the %s." % next_name)
 	else:
 		Soundscape.play_event("soft_fade")
@@ -2105,9 +2105,9 @@ func _draw() -> void:
 		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"archive": draw_texture_rect(ARCHIVE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"gallery":
-		draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+			draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"bell_court":
-		draw_texture_rect(BELL_COURT_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+			draw_texture_rect(BELL_COURT_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"quiet_garden":
 			draw_texture_rect(QUIET_GARDEN_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"high_steps":
@@ -2184,8 +2184,8 @@ func _draw_ground() -> void:
 			var center := Vector2(320 + (i - j) * 16, 42 + (i + j) * 8)
 			if center.x < -24 or center.x > WORLD_SIZE.x + 24 or center.y < -16 or center.y > WORLD_SIZE.y + 16:
 				continue
-			var path_tile := abs(i - j) <= 1
-			var court_tile := abs(i - 20) <= 5 and abs(j - 20) <= 5
+			var path_tile: bool = abs(i - j) <= 1
+			var court_tile: bool = abs(i - 20) <= 5 and abs(j - 20) <= 5
 			var variant := (i * 17 + j * 11) % 5
 			var base := Color("#40544a")
 			if path_tile:
@@ -2227,7 +2227,7 @@ func _draw_ruins() -> void:
 	var progress := int(RunState.puzzle_progress.get("first_gate", 0))
 	var resonators := [Vector2(230, 208), Vector2(320, 197), Vector2(420, 208)]
 	for index in range(resonators.size()):
-		var lit := index < progress or RunState.story_flags.get("first_gate_open", false)
+		var lit: bool = index < progress or RunState.story_flags.get("first_gate_open", false)
 		_draw_symbol(resonators[index], PUZZLE_ORDER[index], Color("#d5e8d5") if lit else Color("#a9a58a"))
 	if not RunState.story_flags.get("old_bead_found", false):
 		draw_rect(Rect2(148, 248, 5, 3), Color("#657b79"))
@@ -2302,7 +2302,7 @@ func _draw_reed_causeway() -> void:
 func _draw_orchard_sluice(pos: Vector2, name: String, index: int) -> void:
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
 	var orientation := _valve_orientation(valves.get(name, 0))
-	var is_aligned := orientation == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false)
+	var is_aligned: bool = orientation == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false)
 	var body := Color("#77806b") if not is_aligned else Color("#a0aa83")
 	draw_colored_polygon(PackedVector2Array([
 		pos + Vector2(-12, 7), pos + Vector2(0, 0),
@@ -2377,7 +2377,7 @@ func _draw_archive_arrows(pos: Vector2) -> void:
 func _draw_archive_lens(pos: Vector2, name: String) -> void:
 	var lenses: Dictionary = RunState.puzzle_progress.get("archive_lenses", {})
 	var direction := int(lenses.get(name, 0))
-	var aligned := direction == int(ARCHIVE_SOLUTION[name]) or RunState.story_flags.get("archive_puzzle_solved", false)
+	var aligned: bool = direction == int(ARCHIVE_SOLUTION[name]) or RunState.story_flags.get("archive_puzzle_solved", false)
 	_draw_arrow(pos, direction, Color("#e0e0c4") if aligned else Color("#718985"))
 	if aligned:
 		draw_rect(Rect2(pos.x - 8, pos.y + 7, 16, 1), Color("#a9d7cc"))
@@ -2402,7 +2402,7 @@ func _draw_gallery() -> void:
 
 func _draw_gallery_mirror(pos: Vector2, name: String) -> void:
 	var direction := _get_gallery_orientation(name)
-	var aligned := direction == int(GALLERY_SOLUTION[name]) or RunState.story_flags.get("gallery_lights_solved", false)
+	var aligned: bool = direction == int(GALLERY_SOLUTION[name]) or RunState.story_flags.get("gallery_lights_solved", false)
 	var rune_color := Color("#e0e0c4") if aligned else Color("#9cae9f")
 	_draw_arrow(pos, direction, rune_color)
 	if aligned:
@@ -2429,7 +2429,7 @@ func _draw_bell_court() -> void:
 
 func _draw_court_bell(pos: Vector2, index: int) -> void:
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
-	var lit := (index < progress) or RunState.story_flags.get("bell_court_solved", false)
+	var lit: bool = (index < progress) or RunState.story_flags.get("bell_court_solved", false)
 	var bell_color := Color("#e4ead0") if lit else Color("#b6ad87")
 	if RunState.story_flags.get("bell_echo_variant", false) and progress == 4 and index == 1:
 		bell_color = Color("#c693bd")
@@ -2443,7 +2443,7 @@ func _draw_quiet_garden() -> void:
 	var chime_positions := [Vector2(342, 108), Vector2(400, 116), Vector2(448, 132)]
 	for index in range(QUIET_GARDEN_SEQUENCE.size()):
 		var pos: Vector2 = chime_positions[index]
-		var lit := index < int(RunState.puzzle_progress.get("quiet_garden_sequence", 0)) or RunState.story_flags.get("quiet_garden_song_solved", false)
+		var lit: bool = index < int(RunState.puzzle_progress.get("quiet_garden_sequence", 0)) or RunState.story_flags.get("quiet_garden_song_solved", false)
 		_draw_symbol(pos, QUIET_GARDEN_SEQUENCE[index], Color("#e4ead0") if lit else Color("#b6ad87"))
 		if lit:
 			draw_rect(Rect2(pos.x - 5, pos.y + 7, 10, 1), Color("#a8d3c7"))
@@ -2465,7 +2465,7 @@ func _draw_high_steps() -> void:
 	for index in range(vane_positions.size()):
 		var name: String = ["west", "center", "east"][index]
 		var direction := _get_steps_vane_orientation(name)
-		var aligned := direction == int(_high_steps_solution()[name]) or RunState.story_flags.get("high_steps_aligned", false)
+		var aligned: bool = direction == int(_high_steps_solution()[name]) or RunState.story_flags.get("high_steps_aligned", false)
 		_draw_arrow(vane_positions[index], direction, Color("#eadbb1") if aligned else Color("#b5aa89"))
 		if aligned:
 			draw_rect(Rect2(vane_positions[index].x - 6, vane_positions[index].y + 7, 12, 1), Color("#b1d0c4"))
@@ -2560,7 +2560,7 @@ func _draw_mosaic(pos: Vector2) -> void:
 
 func _draw_resonator(pos: Vector2, symbol: String, index: int) -> void:
 	var progress := int(RunState.puzzle_progress.get("first_gate", 0))
-	var activated := RunState.story_flags.get("first_gate_open", false) or index < progress
+	var activated: bool = RunState.story_flags.get("first_gate_open", false) or index < progress
 	var base := Color("#647168") if not activated else Color("#839487")
 	draw_colored_polygon(PackedVector2Array([
 		pos + Vector2(-13, 8), pos + Vector2(0, 0),

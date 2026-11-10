@@ -9,6 +9,7 @@
 - `first_ruins.png` — original generated ruin court background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `quiet_orchard_dry.png` — original generated dry orchard background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `reed_causeway.png` — original generated pixel-art background for the optional causeway, generated on 2026-11-10 from a text prompt; no supplied reference image was used.
+- `beth_expressions.png` — original four-pose expression sheet generated on 2026-11-11 from the existing Beth orb sprite as a visual reference; transparent background, no other source art.
 - `empty_quarter.png` — original generated abandoned village square, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `under_archive.png` — original generated archive background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `gallery_reflection_hall.png` — original generated reflection gallery background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.

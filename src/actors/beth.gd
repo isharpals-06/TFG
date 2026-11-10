@@ -1,7 +1,13 @@
 extends Node2D
 class_name Beth
 
-const BETH_SPRITE: Texture2D = preload("res://design/assets/beth_sprite.png")
+const BETH_EXPRESSIONS: Texture2D = preload("res://design/assets/beth_expressions.png")
+const EXPRESSION_SOURCE_RECTS := [
+	Rect2(75, 167, 390, 390),
+	Rect2(619, 167, 390, 390),
+	Rect2(1163, 167, 390, 390),
+	Rect2(1707, 167, 390, 390),
+]
 
 var follow_target: Node2D
 var awake := false
@@ -10,6 +16,7 @@ var _time := 0.0
 var _reaction_time := 0.0
 var _investigation_time := 0.0
 var _investigation_target := Vector2.ZERO
+var _expression := 0
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -32,9 +39,11 @@ func wake() -> void:
 
 func react_to_hint(points: int) -> void:
 	hint_mood = clampi(hint_mood + points, 0, 12)
+	_expression = 3
 	_reaction_time = 0.7
 
 func react_to_discovery() -> void:
+	_expression = 2
 	_reaction_time = 0.7
 
 func investigate(world_position: Vector2) -> void:
@@ -50,13 +59,18 @@ func _draw() -> void:
 	var reaction_bloom := 0.08 if _reaction_time > 0.0 and not RunState.settings.get("reduced_motion", false) else 0.0
 	var bloom := 1.0 + breath + reaction_bloom
 	var hint_tint := Color.WHITE.lerp(Color("#dfb6cb"), clampf(float(hint_mood) / 12.0, 0.0, 0.55))
+	var frame := 0
+	if not awake:
+		frame = 1
+	elif _reaction_time > 0.0:
+		frame = _expression
+	elif _investigation_time > 0.0:
+		frame = 3
+	elif not RunState.settings.get("reduced_motion", false) and fposmod(_time, 4.7) > 4.56:
+		frame = 1
 	draw_texture_rect_region(
-		BETH_SPRITE,
+		BETH_EXPRESSIONS,
 		Rect2(-10.0 * bloom, -10.0 + hover, 20.0 * bloom, 20.0 * bloom),
-		Rect2(510, 250, 520, 520),
+		EXPRESSION_SOURCE_RECTS[frame],
 		hint_tint
 	)
-	if not awake:
-		var sleeping_eye := Color("#badfe9")
-		draw_rect(Rect2(-4, -1 + hover, 3, 1), sleeping_eye)
-		draw_rect(Rect2(2, -1 + hover, 3, 1), sleeping_eye)

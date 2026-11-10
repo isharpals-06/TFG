@@ -14,6 +14,7 @@
 - [x] Add generated backgrounds for the title and all nine main locations plus the optional garden, with asset credits.
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or into the village.
 - [x] Add a two-pose traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
+- [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 
 ## Core-system work in progress
 
@@ -35,7 +36,7 @@
 - [x] Add a fair hint-dependent Bell Court variant: eight prior hints add a visible, clued fifth note.
 - [x] Add a fair hint-dependent High Steps variant: twelve prior hints change the middle vane and its visible clue.
 - [ ] Balance both hint-dependent variants in a full runtime playthrough and add further variations if needed.
-- [ ] Refine generated environment art into the final consistent visual treatment; produce and animate the traveler and Beth sprites.
+- [ ] Refine generated environment art into the final consistent visual treatment; expand the traveler walk cycle and review Beth's new expression animation in runtime.
 - [ ] Refine ambient music and area-specific effects.
 - [ ] Complete a full beginning-to-cliffhanger playthrough and accessibility review.
 - [x] Produce a local Windows x86_64 release build with an embedded PCK.
