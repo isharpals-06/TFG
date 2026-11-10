@@ -23,6 +23,7 @@
 - As a player, I want Beth to react to places, objects, and hints.
 - As a player, I want three hint levels so I can choose how much help I receive.
 - As a player, I want repeated hint use to leave a meaningful in-world trace.
+- As a player, I want a heavy history of hint use to alter later puzzle details in a way I can observe and solve.
 - As a player, I want clues to enter a journal without the game connecting them for me.
 
 ## Comfort and continuity

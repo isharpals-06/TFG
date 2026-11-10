@@ -31,6 +31,8 @@ $previousHash = ''
 $previousLength = -1L
 $stableReadCount = 0
 $hash = ''
+# Let Godot finish replacing the exported PE/PCK before taking the checksum.
+Start-Sleep -Milliseconds 2500
 for ($attempt = 0; $attempt -lt 24; $attempt++) {
 	$file = Get-Item -LiteralPath $outputFile
 	$currentHash = (Get-FileHash -LiteralPath $outputFile -Algorithm SHA256).Hash.ToLowerInvariant()

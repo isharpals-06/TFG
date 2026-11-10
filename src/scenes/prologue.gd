@@ -667,7 +667,10 @@ func _examine_target() -> void:
 		"gallery_stair":
 			_set_status("The reflected path continues downward, though the water above it stays still.")
 		"bell_mural":
-			_set_status("Four marks are cut into the garden wall: crescent, rain-line, seed, crescent.")
+			if RunState.story_flags.get("bell_echo_variant", false):
+				_set_status("Five marks cross the garden wall. The last rain-line is pale, like an echo left by too many whispers.")
+			else:
+				_set_status("Four marks are cut into the garden wall: crescent, rain-line, seed, crescent.")
 			RunState.set_story_flag("bell_mural_seen")
 			_record_clue_animated("bell_garden_pattern")
 		"bell_bench":
@@ -993,20 +996,21 @@ func _ring_court_bell(index: int) -> void:
 		_set_status("The bell answers with a low note, but the old carving may tell you what to listen for.")
 		Soundscape.play_event("resonance")
 		return
+	var sequence := _current_bell_sequence()
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
 	var note: String = BELL_SEQUENCE[index]
-	if progress < BELL_SEQUENCE.size() and note == BELL_SEQUENCE[progress]:
+	if progress < sequence.size() and note == sequence[progress]:
 		progress += 1
 		RunState.puzzle_progress["bell_sequence"] = progress
 		RunState.save_game()
 		Soundscape.play_event("resonance")
-		if progress == BELL_SEQUENCE.size():
+		if progress == sequence.size():
 			RunState.set_story_flag("bell_court_solved")
 			RunState.reset_local_hint_echo()
 			beth.react_to_discovery()
 			_record_clue_animated("bell_garden_answer")
 			Soundscape.play_event("complete")
-			_set_status("The four notes settle over the garden. Somewhere above, a stone door begins to open.")
+			_set_status("The five notes, including the borrowed echo, settle over the garden. Somewhere above, a stone door begins to open." if sequence.size() == 5 else "The four notes settle over the garden. Somewhere above, a stone door begins to open.")
 			_update_objective()
 		else:
 			_set_status("A clear note hangs in the air. Beth listens for the next one.")
@@ -1017,6 +1021,12 @@ func _ring_court_bell(index: int) -> void:
 		Soundscape.play_event("soft_fade")
 		_set_status("The notes drift apart. The garden grows quiet again.")
 	queue_redraw()
+
+func _current_bell_sequence() -> Array[String]:
+	var sequence: Array[String] = ["moon", "water", "seed", "moon"]
+	if RunState.story_flags.get("bell_echo_variant", false):
+		sequence.append("water")
+	return sequence
 
 func _ring_garden_chime(index: int) -> void:
 	if not RunState.story_flags.get("garden_carving_seen", false):
@@ -1213,6 +1223,7 @@ func _enter_bell_court() -> void:
 	traveler.global_position = Vector2(320, 250)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_bell_court")
+	RunState.set_story_flag("bell_echo_variant", RunState.hint_uses >= 8)
 	beth.global_position = Vector2(337, 234)
 	beth.visible = true
 	beth.awake = true
@@ -1686,13 +1697,19 @@ func _give_hint(level: int) -> void:
 			3:
 				hint_text = "Point west north, center south, and east west."
 	elif phase == "bell_court":
-		match level:
-			1:
-				hint_text = "Beth's light rises and falls with the marks on the garden wall."
-			2:
-				hint_text = "The carving gives four notes. Ring them from left to right, including the repeated mark."
-			3:
-				hint_text = "Ring crescent, rain-line, seed, then crescent."
+		if RunState.story_flags.get("bell_echo_variant", false):
+			match level:
+				1: hint_text = "Beth's light lingers on a fifth, fainter mark at the end of the carving."
+				2: hint_text = "Follow the first four notes, then ring the pale rain-line once more."
+				3: hint_text = "Ring crescent, rain-line, seed, crescent, then rain-line."
+		else:
+			match level:
+				1:
+					hint_text = "Beth's light rises and falls with the marks on the garden wall."
+				2:
+					hint_text = "The carving gives four notes. Ring them from left to right, including the repeated mark."
+				3:
+					hint_text = "Ring crescent, rain-line, seed, then crescent."
 	elif phase == "high_steps":
 		match level:
 			1:
@@ -1844,7 +1861,7 @@ func _clue_text(clue_id: String) -> String:
 		"gallery_hidden_stair":
 			return "Three aligned reflections reveal a stair beneath the starless pool."
 		"bell_garden_pattern":
-			return "The bell garden's carving repeats four marks: crescent, rain-line, seed, crescent."
+			return "The bell garden's carving repeats five marks: crescent, rain-line, seed, crescent, then a pale rain-line echo." if RunState.story_flags.get("bell_echo_variant", false) else "The bell garden's carving repeats four marks: crescent, rain-line, seed, crescent."
 		"bell_bench_memory":
 			return "Beth rested on the old garden bench as if she had sat there many times before."
 		"bell_garden_answer":
@@ -1910,7 +1927,7 @@ func _update_objective() -> void:
 		"gallery":
 			objective_label.text = "Read the pool mural" if not RunState.story_flags.get("gallery_mural_seen", false) else ("Align the reflected stones" if not RunState.story_flags.get("gallery_lights_solved", false) else "Follow the stair below")
 		"bell_court":
-			objective_label.text = "Listen to the bell garden" if not RunState.story_flags.get("bell_mural_seen", false) else ("Return the four-note pattern" if not RunState.story_flags.get("bell_court_solved", false) else "Approach the roofless observatory")
+			objective_label.text = "Listen to the bell garden" if not RunState.story_flags.get("bell_mural_seen", false) else (("Return the five-note echo" if RunState.story_flags.get("bell_echo_variant", false) else "Return the four-note pattern") if not RunState.story_flags.get("bell_court_solved", false) else "Approach the roofless observatory")
 		"high_steps":
 			objective_label.text = "Study the wind-worn map" if not RunState.story_flags.get("high_steps_map_seen", false) else ("Align the three wind vanes" if not RunState.story_flags.get("high_steps_aligned", false) else "Enter the upper door")
 		"quiet_garden":
@@ -2216,11 +2233,14 @@ func _draw_bell_court() -> void:
 		_draw_court_bell(bell_positions[index], index)
 	draw_rect(Rect2(300, 145, 40, 18), Color("#5d695f"))
 	draw_rect(Rect2(304, 148, 32, 12), Color("#3e4c49"))
-	_draw_symbol(Vector2(312, 154), "moon", Color("#c8c4a7"))
-	_draw_symbol(Vector2(320, 154), "water", Color("#a7c4bc"))
-	_draw_symbol(Vector2(328, 154), "seed", Color("#aeb98e"))
+	_draw_symbol(Vector2(304, 154), "moon", Color("#c8c4a7"))
+	_draw_symbol(Vector2(312, 154), "water", Color("#a7c4bc"))
+	_draw_symbol(Vector2(320, 154), "seed", Color("#aeb98e"))
+	_draw_symbol(Vector2(328, 154), "moon", Color("#c8c4a7"))
+	if RunState.story_flags.get("bell_echo_variant", false):
+		_draw_symbol(Vector2(336, 154), "water", Color("#c693bd"))
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
-	for index in range(mini(progress, BELL_SEQUENCE.size())):
+	for index in range(mini(progress, _current_bell_sequence().size())):
 		draw_rect(Rect2(290 + index * 15, 218, 5, 2), Color("#b8d2c6"))
 	if RunState.story_flags.get("bell_court_solved", false):
 		_draw_arch(Vector2(582, 174), true)
@@ -2229,7 +2249,10 @@ func _draw_bell_court() -> void:
 func _draw_court_bell(pos: Vector2, index: int) -> void:
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
 	var lit := (index < progress) or RunState.story_flags.get("bell_court_solved", false)
-	_draw_symbol(pos, BELL_SEQUENCE[index], Color("#e4ead0") if lit else Color("#b6ad87"))
+	var bell_color := Color("#e4ead0") if lit else Color("#b6ad87")
+	if RunState.story_flags.get("bell_echo_variant", false) and progress == 4 and index == 1:
+		bell_color = Color("#c693bd")
+	_draw_symbol(pos, BELL_SEQUENCE[index], bell_color)
 	if lit:
 		draw_rect(Rect2(pos.x - 7, pos.y + 11, 14, 1), Color("#a8d3c7"))
 

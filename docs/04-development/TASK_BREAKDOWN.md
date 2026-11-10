@@ -30,7 +30,8 @@
 - [ ] Design and implement enough exploration and puzzle content for a 2–3 hour first playthrough; the current route is not yet long enough.
 - [x] Add optional history records across the route without revealing the traveler's past.
 - [ ] Deepen area exploration and multi-step puzzles to meet the 2–3 hour target.
-- [ ] Add hint-dependent later variants while preserving a completable main route.
+- [x] Add a fair hint-dependent Bell Court variant: eight prior hints add a visible, clued fifth note.
+- [ ] Add and balance further hint-dependent variants while preserving a completable main route.
 - [ ] Refine generated environment art into the final consistent visual treatment; produce and animate the traveler and Beth sprites.
 - [ ] Refine ambient music and area-specific effects.
 - [ ] Complete a full beginning-to-cliffhanger playthrough and accessibility review.

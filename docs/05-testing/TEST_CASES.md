@@ -9,6 +9,7 @@ Planned runtime checks; none executed:
 - Select and inspect items; use each authored item/target combination; try a mismatched item.
 - Solve the ruins sequence, orchard sluices, empty-quarter household niches, and archive lenses; confirm safe wrong attempts and saved progress.
 - Use each hint level repeatedly; confirm later requests leave stronger traces, local echo recedes after a solved puzzle, and main progress remains possible.
+- Compare Bell Court with fewer than eight and at least eight earlier hints; confirm the extra note is visible in the carving, appears in the journal and hints, saves across Continue, and does not depend on color alone.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.
 - Save, leave to title, continue, and confirm area/puzzles/clues/inventory/settings load.
