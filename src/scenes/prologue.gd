@@ -2,10 +2,27 @@ extends Node2D
 
 const TRAVELER_SCENE := preload("res://src/scenes/traveler.tscn")
 const BETH_SCENE := preload("res://src/scenes/beth.tscn")
+const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_clearing.png")
+const RUINS_BACKGROUND: Texture2D = preload("res://design/assets/first_ruins.png")
+const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard_dry.png")
+const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")
+const ARCHIVE_BACKGROUND: Texture2D = preload("res://design/assets/under_archive.png")
+const GALLERY_BACKGROUND: Texture2D = preload("res://design/assets/gallery_reflection_hall.png")
+const BELL_COURT_BACKGROUND: Texture2D = preload("res://design/assets/bell_garden.png")
+const QUIET_GARDEN_BACKGROUND: Texture2D = preload("res://design/assets/quiet_garden.png")
+const HIGHLAND_STEPS_BACKGROUND: Texture2D = preload("res://design/assets/highland_steps.png")
+const OBSERVATORY_BACKGROUND: Texture2D = preload("res://design/assets/roofless_observatory.png")
 const WORLD_SIZE := Vector2(640, 360)
 const PUZZLE_ORDER := ["moon", "water", "seed"]
 const ARCHIVE_SOLUTION := {"west": 1, "center": 2, "east": 3}
 const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
+const GALLERY_SOLUTION := {"west": 0, "center": 2, "east": 3}
+const HIGH_STEPS_SOLUTION := {"west": 3, "center": 0, "east": 1}
+const BELL_SEQUENCE := ["moon", "water", "seed", "moon"]
+const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
+const QUARTER_OBJECTS := ["book", "bowl", "seed", "lamp"]
+const QUARTER_START := {"west": 2, "north": 0, "east": 3, "south": 1}
+const QUARTER_SOLUTION := {"west": 0, "north": 1, "east": 2, "south": 3}
 
 var traveler: Traveler
 var beth: Beth
@@ -35,17 +52,29 @@ var transitioning := false
 
 func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
-	if RunState.story_flags.get("reached_orchard", false):
-		if RunState.story_flags.get("reached_observatory", false):
-			phase = "observatory"
-		elif RunState.story_flags.get("reached_archive", false):
-			phase = "archive"
-		else:
-			phase = "orchard"
+	if RunState.story_flags.get("in_quiet_garden", false):
+		phase = "quiet_garden"
+	elif RunState.story_flags.get("reached_observatory", false):
+		phase = "observatory"
+	elif RunState.story_flags.get("reached_high_steps", false):
+		phase = "high_steps"
+	elif RunState.story_flags.get("reached_bell_court", false):
+		phase = "bell_court"
+	elif RunState.story_flags.get("reached_gallery", false):
+		phase = "gallery"
+	elif RunState.story_flags.get("reached_archive", false):
+		phase = "archive"
+	elif RunState.story_flags.get("reached_quarter", false):
+		phase = "empty_quarter"
+	elif RunState.story_flags.get("reached_orchard", false):
+		phase = "orchard"
 	elif RunState.story_flags.get("crossed_into_world", false):
 		phase = "ruins"
 	else:
 		phase = "crossing"
+	if RunState.checkpoint_valid and _checkpoint_matches_progress(RunState.checkpoint_phase):
+		phase = RunState.checkpoint_phase
+	RunState.set_journey_active(true)
 	Soundscape.set_area(phase)
 	_create_traveler()
 	_create_camera()
@@ -58,6 +87,8 @@ func _ready() -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	if is_instance_valid(traveler):
+		RunState.update_checkpoint(phase, traveler.global_position)
 	if is_instance_valid(camera):
 		camera.global_position = traveler.global_position
 		if camera_snap:
@@ -123,16 +154,36 @@ func _unhandled_input(_event: InputEvent) -> void:
 
 func _create_traveler() -> void:
 	traveler = TRAVELER_SCENE.instantiate() as Traveler
-	match phase:
-		"crossing":
-			traveler.position = Vector2(205, 226)
-		"ruins":
-			traveler.position = Vector2(285, 248)
-		_:
-			traveler.position = Vector2(320, 248)
+	if RunState.checkpoint_valid and RunState.checkpoint_phase == phase:
+		traveler.position = RunState.checkpoint_position
+	else:
+		match phase:
+			"crossing":
+				traveler.position = Vector2(205, 226)
+			"ruins":
+				traveler.position = Vector2(285, 248)
+			"empty_quarter":
+				traveler.position = Vector2(320, 286)
+			_:
+				traveler.position = Vector2(320, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
 	traveler.z_index = 10
 	add_child(traveler)
+	RunState.update_checkpoint(phase, traveler.global_position)
+
+func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
+	match checkpoint_name:
+		"crossing": return not RunState.story_flags.get("crossed_into_world", false)
+		"ruins": return RunState.story_flags.get("crossed_into_world", false) and not RunState.story_flags.get("reached_orchard", false)
+		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
+		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
+		"bell_court": return RunState.story_flags.get("reached_bell_court", false) and not RunState.story_flags.get("reached_high_steps", false)
+		"high_steps": return RunState.story_flags.get("reached_high_steps", false) and not RunState.story_flags.get("reached_observatory", false)
+		"observatory": return RunState.story_flags.get("reached_observatory", false)
+		"quiet_garden": return RunState.story_flags.get("in_quiet_garden", false)
+		_: return false
 
 func _create_camera() -> void:
 	camera = Camera2D.new()
@@ -151,7 +202,7 @@ func _create_camera() -> void:
 
 func _create_beth() -> void:
 	beth = BETH_SCENE.instantiate() as Beth
-	beth.position = Vector2(344, 214) if phase == "ruins" else Vector2(337, 232)
+	beth.position = Vector2(48, 230) if phase == "ruins" else Vector2(337, 232)
 	beth.follow_target = traveler
 	beth.awake = RunState.story_flags.get("beth_awake", false)
 	beth.react_to_hint(RunState.total_hint_points)
@@ -167,7 +218,7 @@ func _create_hud() -> void:
 	hud.add_child(frame)
 	objective_label = _new_label("", 8, Color("#e5e1cf"), Vector2(8, 5), Vector2(214, 16))
 	frame.add_child(objective_label)
-	var journal_hint := _new_label("J  JOURNAL     H  HINTS", 6, Color("#b7c4bc"), Vector2(224, 7), Vector2(88, 12))
+	var journal_hint := _new_label("%s  NOTES  %s  HINTS" % [_action_mark("journal"), _action_mark("hints")], 6, Color("#b7c4bc"), Vector2(224, 7), Vector2(88, 12))
 	journal_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	frame.add_child(journal_hint)
 	inventory_label = _new_label("", 6, Color("#bdc8bb"), Vector2(8, 22), Vector2(230, 12))
@@ -193,7 +244,7 @@ func _create_hud() -> void:
 	icon_center.size = Vector2(3, 3)
 	icon_center.color = Color("#52685e")
 	target_icon.add_child(icon_center)
-	var controls := _new_label("WASD Move   Shift Run   E Look   F Take   U Use   I Bag   Space Act   J Notes   H Hints", 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
+	var controls := _new_label("Move %s/%s/%s/%s   %s Run   %s Look   %s Bag   %s Pause" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("inventory"), _action_mark("pause")], 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
 	frame.add_child(controls)
 	transition_cover = ColorRect.new()
 	transition_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -215,69 +266,155 @@ func _new_label(text: String, size: int, color: Color, pos: Vector2, dimensions:
 	label.add_theme_constant_override("shadow_offset_y", 1)
 	return label
 
+func _action_mark(action_name: String) -> String:
+	var bindings := RunState.get_binding_text(action_name).split(" / ")
+	return str(bindings[0]) if not bindings.is_empty() else "?"
+
 func _get_targets() -> Array[Dictionary]:
 	if phase == "crossing":
 		var crossing_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("medallion_found", false):
-			crossing_targets.append({"id": "medallion", "name": "the medallion", "position": Vector2(302, 222)})
+			crossing_targets.append({"id": "medallion", "name": "the medallion", "position": Vector2(278, 170)})
 		if not RunState.story_flags.get("moss_button_found", false):
 			crossing_targets.append({"id": "moss_button", "name": "the green brass button", "position": Vector2(190, 250)})
 		if RunState.story_flags.get("medallion_found", false):
-			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(420, 184)})
+			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(336, 145)})
+		if not RunState.story_flags.get("crossing_stone_seen", false):
+			crossing_targets.append({"id": "crossing_stone", "name": "the old roadstone", "position": Vector2(103, 194)})
 		return crossing_targets
 	if phase == "orchard":
 		var orchard_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("orchard_mural_seen", false):
-			orchard_targets.append({"id": "orchard_mural", "name": "the orchard mural", "position": Vector2(245, 174)})
+			orchard_targets.append({"id": "orchard_mural", "name": "the orchard mural", "position": Vector2(83, 151)})
 		if not RunState.story_flags.get("orchard_memory_seen", false):
-			orchard_targets.append({"id": "memory_bloom", "name": "the pale bloom", "position": Vector2(430, 196)})
+			orchard_targets.append({"id": "memory_bloom", "name": "the pale bloom", "position": Vector2(563, 151)})
 		if not RunState.story_flags.get("orchard_water_restored", false):
-			orchard_targets.append({"id": "sluice_west", "name": "the western sluice", "position": Vector2(260, 226)})
-			orchard_targets.append({"id": "sluice_north", "name": "the northern sluice", "position": Vector2(320, 198)})
-			orchard_targets.append({"id": "sluice_east", "name": "the eastern sluice", "position": Vector2(380, 226)})
+			orchard_targets.append({"id": "sluice_west", "name": "the western sluice", "position": Vector2(228, 158)})
+			orchard_targets.append({"id": "sluice_north", "name": "the northern sluice", "position": Vector2(320, 130)})
+			orchard_targets.append({"id": "sluice_east", "name": "the eastern sluice", "position": Vector2(422, 158)})
 		else:
-			orchard_targets.append({"id": "archive_gate", "name": "the archive gate", "position": Vector2(320, 145)})
+			orchard_targets.append({"id": "archive_gate", "name": "the village arch", "position": Vector2(320, 87)})
 		if RunState.story_flags.get("orchard_memory_seen", false) and not RunState.story_flags.get("seed_pod_found", false):
-			orchard_targets.append({"id": "seed_pod", "name": "the pale seed pod", "position": Vector2(430, 196)})
+			orchard_targets.append({"id": "seed_pod", "name": "the pale seed pod", "position": Vector2(563, 160)})
 		if RunState.story_flags.get("orchard_water_restored", false) and not RunState.story_flags.get("river_glass_found", false):
-			orchard_targets.append({"id": "river_glass", "name": "a piece of river glass", "position": Vector2(460, 262)})
+			orchard_targets.append({"id": "river_glass", "name": "a piece of river glass", "position": Vector2(339, 215)})
 		if RunState.story_flags.get("orchard_water_restored", false) and not RunState.story_flags.get("quiet_garden_restored", false):
-			orchard_targets.append({"id": "seed_bed", "name": "the empty garden bed", "position": Vector2(215, 266)})
+			orchard_targets.append({"id": "seed_bed", "name": "the empty garden bed", "position": Vector2(182, 271)})
+		if RunState.story_flags.get("quiet_garden_restored", false):
+			orchard_targets.append({"id": "garden_gate", "name": "the hidden garden arch", "position": Vector2(182, 242)})
+		if not RunState.story_flags.get("orchard_rope_seen", false):
+			orchard_targets.append({"id": "orchard_rope", "name": "the old grafting stand", "position": Vector2(84, 222)})
 		return orchard_targets
+	if phase == "empty_quarter":
+		var quarter_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("quarter_mural_seen", false):
+			quarter_targets.append({"id": "quarter_mural", "name": "the well's worn carving", "position": Vector2(320, 200)})
+		if not RunState.story_flags.get("quarter_household_restored", false):
+			quarter_targets.append({"id": "quarter_slot_west", "name": "the west-house niche", "position": Vector2(137, 222)})
+			quarter_targets.append({"id": "quarter_slot_north", "name": "the north-house niche", "position": Vector2(224, 152)})
+			quarter_targets.append({"id": "quarter_slot_east", "name": "the east-house niche", "position": Vector2(438, 152)})
+			quarter_targets.append({"id": "quarter_slot_south", "name": "the south-house niche", "position": Vector2(566, 210)})
+		else:
+			quarter_targets.append({"id": "quarter_well_stair", "name": "the opened well stair", "position": Vector2(320, 184)})
+		if not RunState.story_flags.get("quarter_register_seen", false):
+			quarter_targets.append({"id": "quarter_register", "name": "the stone register", "position": Vector2(572, 232)})
+		return quarter_targets
 	if phase == "archive":
 		var archive_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("archive_mural_seen", false) or (RunState.inventory.has("mirror_shard") and not RunState.journal_entries.has("archive_second_image")):
-			archive_targets.append({"id": "archive_mural", "name": "the ceiling mural", "position": Vector2(250, 154)})
+			archive_targets.append({"id": "archive_mural", "name": "the ceiling mural", "position": Vector2(320, 84)})
 		if not RunState.story_flags.get("archive_memory_seen", false) or (RunState.inventory.has("river_glass") and not RunState.journal_entries.has("river_glass_memory")):
-			archive_targets.append({"id": "archive_memory", "name": "the reflecting pool", "position": Vector2(434, 188)})
+			archive_targets.append({"id": "archive_memory", "name": "the reflecting pool", "position": Vector2(434, 192)})
 		if not RunState.story_flags.get("archive_puzzle_solved", false):
-			archive_targets.append({"id": "lens_west", "name": "the western lens", "position": Vector2(264, 220)})
-			archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 194)})
-			archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(376, 220)})
+			archive_targets.append({"id": "lens_west", "name": "the western lens", "position": Vector2(145, 220)})
+			archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 220)})
+			archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(525, 220)})
 		else:
 			archive_targets.append({"id": "archive_stair", "name": "the revealed stair", "position": Vector2(320, 142)})
 		if not RunState.story_flags.get("mirror_shard_found", false):
-			archive_targets.append({"id": "mirror_shard", "name": "a silvered glass shard", "position": Vector2(474, 255)})
+			archive_targets.append({"id": "mirror_shard", "name": "a silvered glass shard", "position": Vector2(566, 264)})
+		if not RunState.story_flags.get("archive_last_entry_seen", false):
+			archive_targets.append({"id": "archive_last_entry", "name": "the last catalogue entry", "position": Vector2(76, 270)})
 		return archive_targets
+	if phase == "gallery":
+		var gallery_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("gallery_mural_seen", false):
+			gallery_targets.append({"id": "gallery_mural", "name": "the pool-side mural", "position": Vector2(246, 154)})
+		if not RunState.story_flags.get("gallery_memory_seen", false) or (RunState.inventory.has("mirror_shard") and not RunState.journal_entries.has("gallery_second_sky")):
+			gallery_targets.append({"id": "gallery_pool", "name": "the starless pool", "position": Vector2(320, 184)})
+		if not RunState.story_flags.get("gallery_lights_solved", false):
+			gallery_targets.append({"id": "gallery_mirror_west", "name": "the western mirror stone", "position": Vector2(160, 190)})
+			gallery_targets.append({"id": "gallery_mirror_center", "name": "the central mirror stone", "position": Vector2(320, 190)})
+			gallery_targets.append({"id": "gallery_mirror_east", "name": "the eastern mirror stone", "position": Vector2(464, 190)})
+		else:
+			gallery_targets.append({"id": "gallery_stair", "name": "the stair beneath the pool", "position": Vector2(320, 140)})
+		if not RunState.story_flags.get("gallery_figures_seen", false):
+			gallery_targets.append({"id": "gallery_figures", "name": "the worn procession", "position": Vector2(88, 252)})
+		return gallery_targets
+	if phase == "bell_court":
+		var bell_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("bell_mural_seen", false):
+			bell_targets.append({"id": "bell_mural", "name": "the bell-garden carving", "position": Vector2(320, 157)})
+		if not RunState.story_flags.get("bell_bench_seen", false):
+			bell_targets.append({"id": "bell_bench", "name": "the little stone bench", "position": Vector2(88, 270)})
+		if not RunState.story_flags.get("bell_court_solved", false):
+			bell_targets.append({"id": "court_bell_0", "name": "the first hanging bell", "position": Vector2(148, 166)})
+			bell_targets.append({"id": "court_bell_1", "name": "the second hanging bell", "position": Vector2(267, 166)})
+			bell_targets.append({"id": "court_bell_2", "name": "the third hanging bell", "position": Vector2(395, 166)})
+			bell_targets.append({"id": "court_bell_3", "name": "the last hanging bell", "position": Vector2(520, 166)})
+		else:
+			bell_targets.append({"id": "bell_door", "name": "the opening under the observatory", "position": Vector2(582, 173)})
+		if not RunState.story_flags.get("bell_keeper_names_seen", false):
+			bell_targets.append({"id": "bell_keeper_names", "name": "the bell keeper's list", "position": Vector2(548, 264)})
+		return bell_targets
+	if phase == "high_steps":
+		var steps_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("high_steps_map_seen", false):
+			steps_targets.append({"id": "high_steps_map", "name": "the wind-worn map", "position": Vector2(310, 111)})
+		if not RunState.story_flags.get("high_steps_aligned", false):
+			steps_targets.append({"id": "steps_vane_west", "name": "the western wind vane", "position": Vector2(118, 175)})
+			steps_targets.append({"id": "steps_vane_center", "name": "the middle wind vane", "position": Vector2(268, 146)})
+			steps_targets.append({"id": "steps_vane_east", "name": "the eastern wind vane", "position": Vector2(423, 126)})
+		else:
+			steps_targets.append({"id": "steps_door", "name": "the observatory door", "position": Vector2(560, 110)})
+		if not RunState.story_flags.get("high_steps_lantern_seen", false):
+			steps_targets.append({"id": "high_steps_lantern", "name": "the last trail lantern", "position": Vector2(205, 262)})
+		return steps_targets
+	if phase == "quiet_garden":
+		var garden_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("garden_carving_seen", false):
+			garden_targets.append({"id": "garden_carving", "name": "the small wall carving", "position": Vector2(218, 104)})
+		if not RunState.story_flags.get("garden_bench_seen", false):
+			garden_targets.append({"id": "garden_bench", "name": "the old garden bench", "position": Vector2(548, 174)})
+		if not RunState.story_flags.get("garden_cup_seen", false):
+			garden_targets.append({"id": "garden_cup", "name": "the covered clay cup", "position": Vector2(80, 246)})
+		if not RunState.story_flags.get("quiet_garden_song_solved", false):
+			garden_targets.append({"id": "garden_chime_0", "name": "the first glass chime", "position": Vector2(342, 124)})
+			garden_targets.append({"id": "garden_chime_1", "name": "the second glass chime", "position": Vector2(400, 132)})
+			garden_targets.append({"id": "garden_chime_2", "name": "the last glass chime", "position": Vector2(448, 148)})
+		garden_targets.append({"id": "garden_return", "name": "the arch back to the orchard", "position": Vector2(58, 190)})
+		return garden_targets
 	if phase == "observatory":
 		if not RunState.story_flags.get("ending_revealed", false):
-			return [{"id": "final_inscription", "name": "the old inscription", "position": Vector2(320, 164)}]
+			return [{"id": "final_inscription", "name": "the old inscription", "position": Vector2(320, 101)}]
 		return []
 	var targets: Array[Dictionary] = []
+	if phase == "ruins" and not RunState.story_flags.get("ruins_kiln_tag_seen", false):
+		targets.append({"id": "ruins_kiln_tag", "name": "the kiln's last clay tag", "position": Vector2(500, 255)})
 	if not RunState.story_flags.get("beth_awake", false):
-		targets.append({"id": "beth", "name": "Beth", "position": Vector2(344, 214)})
+		targets.append({"id": "beth", "name": "Beth", "position": Vector2(48, 230)})
 	if not RunState.story_flags.get("inscription_seen", false) or (RunState.inventory.has("stone_chip") and not RunState.journal_entries.has("matching_stone_cuts")):
-		targets.append({"id": "inscription", "name": "the inscription", "position": Vector2(232, 177)})
+		targets.append({"id": "inscription", "name": "the inscription", "position": Vector2(72, 150)})
 	if RunState.story_flags.get("inscription_seen", false) and not RunState.story_flags.get("stone_chip_found", false):
-		targets.append({"id": "stone_chip", "name": "a loose inscription chip", "position": Vector2(232, 202)})
+		targets.append({"id": "stone_chip", "name": "a loose inscription chip", "position": Vector2(77, 178)})
 	if not RunState.story_flags.get("old_bead_found", false):
-		targets.append({"id": "old_bead", "name": "a cloudy bead", "position": Vector2(180, 250)})
+		targets.append({"id": "old_bead", "name": "a cloudy bead", "position": Vector2(150, 251)})
 	if not RunState.story_flags.get("resonance_clue_seen", false):
-		targets.append({"id": "mosaic", "name": "the faded mosaic", "position": Vector2(276, 165)})
+		targets.append({"id": "mosaic", "name": "the faded mosaic", "position": Vector2(205, 111)})
 	if not RunState.story_flags.get("first_gate_open", false):
-		targets.append({"id": "resonator_moon", "name": "the crescent resonator", "position": Vector2(272, 226)})
-		targets.append({"id": "resonator_water", "name": "the rain-line resonator", "position": Vector2(320, 199)})
-		targets.append({"id": "resonator_seed", "name": "the seed resonator", "position": Vector2(368, 226)})
+		targets.append({"id": "resonator_moon", "name": "the crescent resonator", "position": Vector2(230, 215)})
+		targets.append({"id": "resonator_water", "name": "the rain-line resonator", "position": Vector2(320, 204)})
+		targets.append({"id": "resonator_seed", "name": "the seed resonator", "position": Vector2(420, 215)})
 	else:
 		targets.append({"id": "gate", "name": "the opened gate", "position": Vector2(320, 155)})
 	return targets
@@ -310,60 +447,85 @@ func _update_prompt() -> void:
 	var id: String = target.id
 	match id:
 		"medallion":
-			prompt_label.text = "E  examine     F  take"
+			prompt_label.text = "%s  examine     %s  take" % [_action_mark("examine"), _action_mark("pick_up")]
 		"moss_button", "stone_chip", "old_bead", "seed_pod", "river_glass", "mirror_shard":
-			prompt_label.text = "E  examine     F  take"
+			prompt_label.text = "%s  examine     %s  take" % [_action_mark("examine"), _action_mark("pick_up")]
 		"arch":
-			prompt_label.text = "E  examine     Space  cross"
+			prompt_label.text = "%s  examine     %s  cross" % [_action_mark("examine"), _action_mark("activate")]
 		"beth":
-			prompt_label.text = "E  wake the small light"
+			prompt_label.text = "%s  wake the small light" % _action_mark("examine")
 		"inscription":
-			prompt_label.text = "E  examine inscription"
+			prompt_label.text = "%s  examine inscription" % _action_mark("examine")
 			if RunState.selected_item_id == "stone_chip":
-				prompt_label.text += "     U  fit chip"
+				prompt_label.text += "     %s  fit chip" % _action_mark("use_item")
 		"mosaic":
-			prompt_label.text = "E  study the worn symbols"
+			prompt_label.text = "%s  study the worn symbols" % _action_mark("examine")
 		"resonator_moon", "resonator_water", "resonator_seed":
-			prompt_label.text = "Space  attune"
+			prompt_label.text = "%s  attune" % _action_mark("activate")
 		"gate":
-			prompt_label.text = "E  look beyond"
+			prompt_label.text = "%s  look beyond" % _action_mark("examine")
 			if traveler.position.distance_to(Vector2(320, 155)) < 28:
-				prompt_label.text = "E  look beyond     Space  enter the orchard"
+				prompt_label.text = "%s  look beyond     %s  enter the orchard" % [_action_mark("examine"), _action_mark("activate")]
 		"orchard_mural":
-			prompt_label.text = "E  study the water channels"
+			prompt_label.text = "%s  study the water channels" % _action_mark("examine")
 		"memory_bloom":
-			prompt_label.text = "E  listen to the pale bloom"
+			prompt_label.text = "%s  listen to the pale bloom" % _action_mark("examine")
 		"sluice_west", "sluice_north", "sluice_east":
-			prompt_label.text = "Space  turn the sluice"
+			prompt_label.text = "%s  turn the sluice" % _action_mark("activate")
 		"archive_gate":
-			prompt_label.text = "E  examine     Space  enter the archive"
+			prompt_label.text = "%s  examine     %s  enter the empty quarter" % [_action_mark("examine"), _action_mark("activate")]
+		"quarter_mural", "quarter_register":
+			prompt_label.text = "%s  study the old record" % _action_mark("examine")
+		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
+			prompt_label.text = "%s  examine     %s  turn the niche" % [_action_mark("examine"), _action_mark("activate")]
+		"quarter_well_stair":
+			prompt_label.text = "%s  look into the well     %s  descend" % [_action_mark("examine"), _action_mark("activate")]
 		"archive_mural":
-			prompt_label.text = "E  study the reflected shapes"
+			prompt_label.text = "%s  study the reflected shapes" % _action_mark("examine")
 		"archive_memory":
-			prompt_label.text = "E  listen to the reflecting pool"
+			prompt_label.text = "%s  listen to the reflecting pool" % _action_mark("examine")
 		"lens_west", "lens_center", "lens_east":
-			prompt_label.text = "Space  turn the lens"
+			prompt_label.text = "%s  turn the lens" % _action_mark("activate")
 		"archive_stair":
-			prompt_label.text = "E  look into the light     Space  climb"
+			prompt_label.text = "%s  look into the light     %s  climb" % [_action_mark("examine"), _action_mark("activate")]
 		"seed_bed":
-			prompt_label.text = "E  examine     U  plant the pale seed"
+			prompt_label.text = "%s  examine     %s  plant the pale seed" % [_action_mark("examine"), _action_mark("use_item")]
 		"final_inscription":
-			prompt_label.text = "E  examine     U  use the selected keepsake"
-	var item_hint := ""
-	if id == "arch" and RunState.selected_item_id == "moss_button":
-		item_hint = "fit the brass button"
-	elif id == "arch" and RunState.selected_item_id == "medallion":
-		item_hint = "use the medallion"
-	elif id == "inscription" and RunState.selected_item_id == "stone_chip":
-		item_hint = "fit the chip"
-	elif id == "resonator_water" and RunState.selected_item_id == "old_bead":
-		item_hint = "listen with the bead"
-	elif id == "archive_mural" and RunState.selected_item_id == "mirror_shard":
-		item_hint = "look through the shard"
-	elif id == "archive_memory" and RunState.selected_item_id == "river_glass":
-		item_hint = "hold up the glass"
-	if not item_hint.is_empty() and not prompt_label.text.contains("U  "):
-		prompt_label.text += "     U  " + item_hint
+			prompt_label.text = "%s  examine     %s  use the selected keepsake" % [_action_mark("examine"), _action_mark("use_item")]
+		"gallery_mirror_west", "gallery_mirror_center", "gallery_mirror_east":
+			prompt_label.text = "%s  examine     %s  turn the mirror" % [_action_mark("examine"), _action_mark("activate")]
+		"gallery_stair":
+			prompt_label.text = "%s  listen below     %s  descend" % [_action_mark("examine"), _action_mark("activate")]
+		"court_bell_0", "court_bell_1", "court_bell_2", "court_bell_3":
+			prompt_label.text = "%s  examine     %s  ring the bell" % [_action_mark("examine"), _action_mark("activate")]
+		"bell_door":
+			prompt_label.text = "%s  look through the arch     %s  enter" % [_action_mark("examine"), _action_mark("activate")]
+		"high_steps_map":
+			prompt_label.text = "%s  study the wind-worn map" % _action_mark("examine")
+		"steps_vane_west", "steps_vane_center", "steps_vane_east":
+			prompt_label.text = "%s  examine     %s  turn the vane" % [_action_mark("examine"), _action_mark("activate")]
+		"steps_door":
+			prompt_label.text = "%s  approach the observatory     %s  enter" % [_action_mark("examine"), _action_mark("activate")]
+		"garden_gate":
+			prompt_label.text = "%s  look into the sheltered garden     %s  enter" % [_action_mark("examine"), _action_mark("activate")]
+		"garden_return":
+			prompt_label.text = "%s  look back to the orchard     %s  return" % [_action_mark("examine"), _action_mark("activate")]
+		"garden_carving":
+			prompt_label.text = "%s  study the small wall carving" % _action_mark("examine")
+		"garden_bench":
+			prompt_label.text = "%s  rest on the old bench" % _action_mark("examine")
+		"garden_chime_0", "garden_chime_1", "garden_chime_2":
+			prompt_label.text = "%s  examine     %s  ring the chime" % [_action_mark("examine"), _action_mark("activate")]
+		"bell_mural":
+			prompt_label.text = "%s  study the bell-garden carving" % _action_mark("examine")
+		"bell_bench":
+			prompt_label.text = "%s  sit beside Beth" % _action_mark("examine")
+		"gallery_mural":
+			prompt_label.text = "%s  study the pool-side mural" % _action_mark("examine")
+		"gallery_pool":
+			prompt_label.text = "%s  listen to the starless pool" % _action_mark("examine")
+		"crossing_stone", "ruins_kiln_tag", "orchard_rope", "archive_last_entry", "gallery_figures", "bell_keeper_names", "high_steps_lantern", "garden_cup":
+			prompt_label.text = "%s  study the old record" % _action_mark("examine")
 	var item_hint := ""
 	match [id, RunState.selected_item_id]:
 		["arch", "moss_button"]: item_hint = "fit the brass button"
@@ -372,28 +534,35 @@ func _update_prompt() -> void:
 		["resonator_water", "old_bead"]: item_hint = "listen with the bead"
 		["archive_mural", "mirror_shard"]: item_hint = "look through the shard"
 		["archive_memory", "river_glass"]: item_hint = "hold up the glass"
-	if not item_hint.is_empty() and not prompt_label.text.contains("U  "):
-		prompt_label.text += "     U  " + item_hint
+		["gallery_pool", "mirror_shard"]: item_hint = "look through the shard"
+	if not item_hint.is_empty() and not prompt_label.text.contains(_action_mark("use_item") + "  "):
+		prompt_label.text += "     %s  %s" % [_action_mark("use_item"), item_hint]
 
 func _examine_target() -> void:
 	var target := _nearest_target()
 	if target.is_empty():
 		_set_status("The quiet gives you time to look around.")
 		return
+	if target.id != "beth" and is_instance_valid(beth):
+		beth.investigate(target.position)
 	match target.id:
 		"medallion":
 			_set_status("A cool medallion rests in the dust. Its worn marks catch the light.")
 		"moss_button":
 			_set_status("A green brass button, polished by someone's thumb long ago.")
+		"crossing_stone":
+			_reveal_world_memory("crossing_stone_seen", "crossing_floodlines", "Three floodlines climb the roadstone. Beyond the highest, someone carved a row of little boats.")
 		"arch":
 			_set_status("The buried arch is older than the path around it. The medallion stirs in your hand.")
 		"beth":
 			_wake_beth()
 		"inscription":
 			_set_status("The inscription shifts at the edge of sight, but the marks remain unreadable.")
-			if RunState.record_clue("gibberish_inscription"):
+			var inscription_is_new := RunState.record_clue("gibberish_inscription")
+			RunState.set_story_flag("inscription_seen")
+			_update_objective()
+			if inscription_is_new:
 				Soundscape.play_event("journal")
-				RunState.set_story_flag("inscription_seen")
 				_animate_journal_signal()
 		"stone_chip":
 			_set_status("A broken chip fits the blank at the edge of the unreadable line.")
@@ -411,6 +580,8 @@ func _examine_target() -> void:
 			_set_status("A line of falling rain marks the second resonator.")
 		"resonator_seed":
 			_set_status("A small seed mark rests on the third resonator.")
+		"ruins_kiln_tag":
+			_reveal_world_memory("ruins_kiln_tag_seen", "ruins_kiln_tag", "The kiln's last clay tag reads: bowls packed first; bells left to dry.")
 		"gate":
 			_set_status("Beyond the open arch, pale grasses move under a vast unfamiliar sky.")
 		"orchard_mural":
@@ -428,6 +599,8 @@ func _examine_target() -> void:
 			_set_status("A smooth green shard rests where the restored stream bends around a stone.")
 		"seed_bed":
 			_set_status("An empty bed waits beside the old channel. A shallow hollow remains in the soil.")
+		"orchard_rope":
+			_reveal_world_memory("orchard_rope_seen", "orchard_grafts_uphill", "A tied label lists grafts sent uphill when the river failed. Every old tree began as a cutting.")
 		"sluice_west":
 			_set_status("The western sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("west")))
 		"sluice_north":
@@ -435,7 +608,22 @@ func _examine_target() -> void:
 		"sluice_east":
 			_set_status("The eastern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("east")))
 		"archive_gate":
-			_set_status("The stone lintel is marked with the same three shapes as the mural.")
+			_set_status("The stone lintel is marked with the same three shapes as the mural. The open road leads into the empty quarter.")
+		"quarter_mural":
+			_set_status("Four house marks circle the well: book, bowl, seed, lamp. Each belongs to one doorway.")
+			RunState.set_story_flag("quarter_mural_seen")
+			_record_clue_animated("quarter_household_map")
+			_update_objective()
+		"quarter_register":
+			_reveal_world_memory("quarter_register_seen", "quarter_register", "A stone register lists the village trades: readers, potters, growers, lamplighters. The last column is worn blank.")
+		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
+			var quarter_side: String = target.id.trim_prefix("quarter_slot_")
+			var quarter_room := {"west": "reading room", "north": "kitchen", "east": "seed room", "south": "entry hall"}
+			var quarter_slots := _get_quarter_slots()
+			var quarter_object: String = QUARTER_OBJECTS[int(quarter_slots.get(quarter_side, 0))]
+			_set_status("The %s doorway opens to a %s. Its niche currently holds the %s." % [quarter_side, quarter_room[quarter_side], quarter_object])
+		"quarter_well_stair":
+			_set_status("Four warm reflections meet in the well. A stone stair descends through the water without wetting it.")
 		"archive_mural":
 			_set_status("Three reflected paths are carved overhead: turn right, then down, then left.")
 			RunState.set_story_flag("archive_mural_seen")
@@ -450,6 +638,8 @@ func _examine_target() -> void:
 				_animate_journal_signal()
 		"mirror_shard":
 			_set_status("A silvered shard reflects the room as it might have looked before the roof fell.")
+		"archive_last_entry":
+			_reveal_world_memory("archive_last_entry_seen", "archive_last_entry", "The last catalogue line says: carry the books east; leave one lamp in the doorway.")
 		"lens_west":
 			_set_status("The western lens can turn through four resting positions.")
 		"lens_center":
@@ -457,7 +647,65 @@ func _examine_target() -> void:
 		"lens_east":
 			_set_status("The eastern lens points toward the sealed stair.")
 		"archive_stair":
-			_set_status("A narrow stair descends toward a pale, starless glow.")
+			_set_status("A narrow stair descends toward a pale, starless glow. Another room waits below.")
+		"gallery_mural":
+			_set_status("The mural shows three reflections: west points north, the center points south, and east turns west.")
+			RunState.set_story_flag("gallery_mural_seen")
+			_record_clue_animated("gallery_reflection_map")
+		"gallery_pool":
+			_set_status("The pool holds no star except the one Beth's light seems to make.")
+			RunState.set_story_flag("gallery_memory_seen")
+			_record_clue_animated("gallery_memory")
+		"gallery_figures":
+			_reveal_world_memory("gallery_figures_seen", "gallery_procession", "Three faceless figures carry bowls and lanterns toward a path cut into the mountain.")
+		"gallery_mirror_west", "gallery_mirror_center", "gallery_mirror_east":
+			var mirror_name: String = target.id.trim_prefix("gallery_mirror_")
+			_set_status("The %s mirror points %s." % [mirror_name, _direction_name(_get_gallery_orientation(mirror_name))])
+		"gallery_stair":
+			_set_status("The reflected path continues downward, though the water above it stays still.")
+		"bell_mural":
+			_set_status("Four marks are cut into the garden wall: crescent, rain-line, seed, crescent.")
+			RunState.set_story_flag("bell_mural_seen")
+			_record_clue_animated("bell_garden_pattern")
+		"bell_bench":
+			_set_status("Beth settles on the warm stone. For a moment, the empty garden feels almost occupied.")
+			RunState.set_story_flag("bell_bench_seen")
+			_record_clue_animated("bell_bench_memory")
+		"bell_keeper_names":
+			_reveal_world_memory("bell_keeper_names_seen", "bell_keeper_list", "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest.")
+		"court_bell_0", "court_bell_1", "court_bell_2", "court_bell_3":
+			var bell_index := int(target.id.trim_prefix("court_bell_"))
+			_set_status("A small bell bears the %s mark." % ["crescent", "rain-line", "seed", "crescent"][bell_index])
+		"bell_door":
+			_set_status("The arch opens onto the roofless room above. A pale inscription waits in the dark.")
+		"high_steps_map":
+			_set_status("A wind-worn map shows the three vanes pointing west, north, and east along the rising path.")
+			RunState.set_story_flag("high_steps_map_seen")
+			_record_clue_animated("high_steps_wind_map")
+		"steps_vane_west", "steps_vane_center", "steps_vane_east":
+			var vane_name: String = target.id.trim_prefix("steps_vane_")
+			_set_status("The %s vane points %s." % [vane_name, _direction_name(_get_steps_vane_orientation(vane_name))])
+		"steps_door":
+			_set_status("The upper door stands open. Beyond it, the night sky presses close to the stone.")
+		"high_steps_lantern":
+			_reveal_world_memory("high_steps_lantern_seen", "high_steps_last_lantern", "The wick is neatly trimmed. Its note asks the last keeper to extinguish it after the descent.")
+		"garden_gate":
+			_set_status("The planted seed has opened a narrow arch beneath the old tree.")
+		"garden_return":
+			_set_status("The arch leads back to the orchard path whenever you are ready.")
+		"garden_carving":
+			_set_status("Three small marks hang above the seed bed: rain-line, seed, crescent.")
+			RunState.set_story_flag("garden_carving_seen")
+			_record_clue_animated("quiet_garden_order")
+		"garden_bench":
+			_set_status("The stone holds the last warmth of the day. Beth settles beside you, quiet and still.")
+			RunState.set_story_flag("garden_bench_seen")
+			_record_clue_animated("quiet_garden_bench")
+		"garden_cup":
+			_reveal_world_memory("garden_cup_seen", "quiet_garden_cup", "A clay cup sits upside down over a seed hollow, sheltering it from the rain.")
+		"garden_chime_0", "garden_chime_1", "garden_chime_2":
+			var chime_index := int(target.id.trim_prefix("garden_chime_"))
+			_set_status("A small glass chime bears the %s mark." % ["rain-line", "seed", "crescent"][chime_index])
 		"final_inscription":
 			_set_status("The same unreadable marks from the first ruin. The medallion warms in your hand.")
 
@@ -492,7 +740,7 @@ func _on_item_collected(item_id: String) -> void:
 	if item_id == "medallion":
 		_set_status("The medallion warms in your palm. The buried arch answers with a low vibration.")
 	else:
-		_set_status("You tuck away %s. Press I to choose or inspect keepsakes." % _item_name(item_id))
+		_set_status("You tuck away %s. Press %s to choose or inspect keepsakes." % [_item_name(item_id), _action_mark("inventory")])
 	_update_hud()
 	_update_objective()
 	queue_redraw()
@@ -533,11 +781,33 @@ func _activate_target() -> void:
 	elif target.id.begins_with("sluice_"):
 		_toggle_sluice(target.id.trim_prefix("sluice_"))
 	elif target.id == "archive_gate" and RunState.story_flags.get("orchard_water_restored", false):
+		_enter_empty_quarter()
+	elif target.id.begins_with("quarter_slot_"):
+		_rotate_quarter_slot(target.id.trim_prefix("quarter_slot_"))
+	elif target.id == "quarter_well_stair" and RunState.story_flags.get("quarter_household_restored", false):
 		_enter_archive()
 	elif target.id.begins_with("lens_"):
 		_rotate_archive_lens(target.id.trim_prefix("lens_"))
 	elif target.id == "archive_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
+		_enter_gallery()
+	elif target.id.begins_with("gallery_mirror_"):
+		_rotate_gallery_mirror(target.id.trim_prefix("gallery_mirror_"))
+	elif target.id == "gallery_stair" and RunState.story_flags.get("gallery_lights_solved", false):
+		_enter_bell_court()
+	elif target.id.begins_with("court_bell_"):
+		_ring_court_bell(int(target.id.trim_prefix("court_bell_")))
+	elif target.id == "bell_door" and RunState.story_flags.get("bell_court_solved", false):
+		_enter_high_steps()
+	elif target.id.begins_with("steps_vane_"):
+		_rotate_steps_vane(target.id.trim_prefix("steps_vane_"))
+	elif target.id == "steps_door" and RunState.story_flags.get("high_steps_aligned", false):
 		_enter_observatory()
+	elif target.id == "garden_gate" and RunState.story_flags.get("quiet_garden_restored", false):
+		_enter_quiet_garden()
+	elif target.id.begins_with("garden_chime_"):
+		_ring_garden_chime(int(target.id.trim_prefix("garden_chime_")))
+	elif target.id == "garden_return":
+		_return_to_orchard()
 	elif target.id == "seed_bed" or target.id == "final_inscription":
 		_use_selected_item()
 	else:
@@ -583,6 +853,10 @@ func _use_selected_item() -> void:
 		_record_clue_animated("river_glass_memory")
 		_set_status("The green glass catches a thread of reflected water beneath the false sky.")
 		return
+	if target.id == "gallery_pool" and item_id == "mirror_shard":
+		_record_clue_animated("gallery_second_sky")
+		_set_status("The shard catches a second sky in the water: the same stars, but arranged around a missing place.")
+		return
 	if target.id == "resonator_water" and item_id == "old_bead":
 		_record_clue_animated("bead_resonance")
 		Soundscape.play_event("resonance")
@@ -603,6 +877,7 @@ func _toggle_sluice(which: String) -> void:
 		Soundscape.play_event("complete")
 		RunState.set_story_flag("orchard_water_restored")
 		RunState.reset_local_hint_echo()
+		beth.react_to_discovery()
 		if RunState.record_clue("orchard_water_memory"):
 			_animate_journal_signal()
 		_set_status("Water threads through the channels and gathers in the basin. Hidden stones rise from the earth.")
@@ -610,6 +885,40 @@ func _toggle_sluice(which: String) -> void:
 	else:
 		Soundscape.play_event("resonance")
 		_set_status("Stone turns beneath your hand. %d of 3 channels now point toward the basin." % opened)
+	queue_redraw()
+
+func _get_quarter_slots() -> Dictionary:
+	var value: Variant = RunState.puzzle_progress.get("quarter_slots", {})
+	var slots: Dictionary = value.duplicate(true) if value is Dictionary else {}
+	for side in QUARTER_START:
+		if not slots.has(side):
+			slots[side] = QUARTER_START[side]
+	return slots
+
+func _rotate_quarter_slot(side: String) -> void:
+	if not RunState.story_flags.get("quarter_mural_seen", false):
+		_set_status("The worn carving around the well may explain these empty niches.")
+		return
+	var slots := _get_quarter_slots()
+	slots[side] = (int(slots[side]) + 1) % QUARTER_OBJECTS.size()
+	RunState.puzzle_progress["quarter_slots"] = slots
+	RunState.save_game()
+	var solved := true
+	for house in QUARTER_SOLUTION:
+		if int(slots[house]) != int(QUARTER_SOLUTION[house]):
+			solved = false
+			break
+	if solved:
+		RunState.set_story_flag("quarter_household_restored")
+		RunState.reset_local_hint_echo()
+		RunState.record_clue("quarter_household_restored")
+		Soundscape.play_event("complete")
+		beth.react_to_discovery()
+		_set_status("The four small rooms seem to remember their shape. A stair appears beneath the well's reflection.")
+		_update_objective()
+	else:
+		Soundscape.play_event("resonance")
+		_set_status("The niche turns with a soft stone click. The other doorways remain dark.")
 	queue_redraw()
 
 func _get_valve_orientation(which: String) -> int:
@@ -624,6 +933,118 @@ func _valve_orientation(value: Variant) -> int:
 func _direction_name(direction: int) -> String:
 	return ["north", "east", "south", "west"][posmod(direction, 4)]
 
+func _get_gallery_orientation(which: String) -> int:
+	var mirrors: Dictionary = RunState.puzzle_progress.get("gallery_mirrors", {})
+	return posmod(int(mirrors.get(which, 0)), 4)
+
+func _get_steps_vane_orientation(which: String) -> int:
+	var vanes: Dictionary = RunState.puzzle_progress.get("high_steps_vanes", {})
+	return posmod(int(vanes.get(which, 0)), 4)
+
+func _rotate_steps_vane(which: String) -> void:
+	var vanes: Dictionary = RunState.puzzle_progress.get("high_steps_vanes", {"west": 0, "center": 0, "east": 0})
+	vanes[which] = (int(vanes.get(which, 0)) + 1) % 4
+	RunState.puzzle_progress["high_steps_vanes"] = vanes
+	RunState.save_game()
+	var aligned := true
+	for name in ["west", "center", "east"]:
+		if int(vanes.get(name, 0)) != int(HIGH_STEPS_SOLUTION[name]):
+			aligned = false
+	if aligned:
+		RunState.set_story_flag("high_steps_aligned")
+		RunState.reset_local_hint_echo()
+		beth.react_to_discovery()
+		_record_clue_animated("high_steps_open_door")
+		Soundscape.play_event("complete")
+		_set_status("The wind moves through the three vanes at once. A lantern appears beside the upper door.")
+		_update_objective()
+	else:
+		Soundscape.play_event("resonance")
+		_set_status("The vane catches the wind, then turns away from the rising path.")
+	queue_redraw()
+
+func _rotate_gallery_mirror(which: String) -> void:
+	var mirrors: Dictionary = RunState.puzzle_progress.get("gallery_mirrors", {"west": 0, "center": 0, "east": 0})
+	mirrors[which] = (int(mirrors.get(which, 0)) + 1) % 4
+	RunState.puzzle_progress["gallery_mirrors"] = mirrors
+	RunState.save_game()
+	var aligned := true
+	for name in ["west", "center", "east"]:
+		if int(mirrors.get(name, 0)) != int(GALLERY_SOLUTION[name]):
+			aligned = false
+	if aligned:
+		RunState.set_story_flag("gallery_lights_solved")
+		RunState.reset_local_hint_echo()
+		beth.react_to_discovery()
+		_record_clue_animated("gallery_hidden_stair")
+		Soundscape.play_event("complete")
+		_set_status("Three reflections meet beneath the pool. A stair appears inside the water's shadow.")
+		_update_objective()
+	else:
+		Soundscape.play_event("resonance")
+		_set_status("The reflected light shifts, then settles against the stone.")
+	queue_redraw()
+
+func _ring_court_bell(index: int) -> void:
+	if not RunState.story_flags.get("bell_mural_seen", false):
+		_set_status("The bell answers with a low note, but the old carving may tell you what to listen for.")
+		Soundscape.play_event("resonance")
+		return
+	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
+	var note: String = BELL_SEQUENCE[index]
+	if progress < BELL_SEQUENCE.size() and note == BELL_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["bell_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("resonance")
+		if progress == BELL_SEQUENCE.size():
+			RunState.set_story_flag("bell_court_solved")
+			RunState.reset_local_hint_echo()
+			beth.react_to_discovery()
+			_record_clue_animated("bell_garden_answer")
+			Soundscape.play_event("complete")
+			_set_status("The four notes settle over the garden. Somewhere above, a stone door begins to open.")
+			_update_objective()
+		else:
+			_set_status("A clear note hangs in the air. Beth listens for the next one.")
+	else:
+		progress = 1 if note == BELL_SEQUENCE[0] else 0
+		RunState.puzzle_progress["bell_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("soft_fade")
+		_set_status("The notes drift apart. The garden grows quiet again.")
+	queue_redraw()
+
+func _ring_garden_chime(index: int) -> void:
+	if not RunState.story_flags.get("garden_carving_seen", false):
+		_set_status("The glass answers softly. The little carving may tell you how the notes belong together.")
+		Soundscape.play_event("resonance")
+		return
+	var progress := int(RunState.puzzle_progress.get("quiet_garden_sequence", 0))
+	var note: String = QUIET_GARDEN_SEQUENCE[index]
+	if progress < QUIET_GARDEN_SEQUENCE.size() and note == QUIET_GARDEN_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["quiet_garden_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("resonance")
+		if progress == QUIET_GARDEN_SEQUENCE.size():
+			RunState.set_story_flag("quiet_garden_song_solved")
+			RunState.reset_local_hint_echo()
+			beth.react_to_discovery()
+			_record_clue_animated("quiet_garden_song")
+			Soundscape.play_event("complete")
+			_set_status("A low chord passes through the basin. One white flower opens beside the new seedling.")
+			_update_objective()
+		else:
+			_set_status("A clear note hangs among the leaves. Beth waits for the next one.")
+	else:
+		progress = 1 if note == QUIET_GARDEN_SEQUENCE[0] else 0
+		RunState.puzzle_progress["quiet_garden_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("soft_fade")
+		_set_status("The notes drift apart in the leaves. The garden grows quiet again.")
+	queue_redraw()
+
 func _enter_orchard() -> void:
 	if transitioning:
 		return
@@ -634,8 +1055,9 @@ func _enter_orchard() -> void:
 	await fade_out.finished
 	phase = "orchard"
 	Soundscape.set_area(phase)
-	RunState.set_story_flag("reached_orchard")
 	traveler.global_position = Vector2(320, 248)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_orchard")
 	beth.global_position = Vector2(337, 232)
 	beth.visible = true
 	beth.awake = true
@@ -645,6 +1067,81 @@ func _enter_orchard() -> void:
 	queue_redraw()
 	var fade_in := create_tween()
 	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_quiet_garden() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	await fade_out.finished
+	phase = "quiet_garden"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 250)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("in_quiet_garden")
+	beth.global_position = Vector2(337, 232)
+	beth.visible = true
+	beth.awake = true
+	_set_status("The arch opens onto a little garden protected from the wind. Three glass chimes stir above the new seedling.")
+	Soundscape.play_event("complete")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _return_to_orchard() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.35)
+	await fade_out.finished
+	phase = "orchard"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(182, 242)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("in_quiet_garden", false)
+	beth.global_position = Vector2(196, 225)
+	_set_status("The orchard path is just as you left it. The hidden garden remains open behind you.")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.5)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_empty_quarter() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	await fade_out.finished
+	phase = "empty_quarter"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 286)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_quarter")
+	beth.global_position = Vector2(337, 270)
+	beth.visible = true
+	beth.awake = true
+	Soundscape.play_event("soft_fade")
+	_set_status("An empty village square gathers around a well. Four dark doorways face the water.")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -659,8 +1156,9 @@ func _enter_archive() -> void:
 	await fade_out.finished
 	phase = "archive"
 	Soundscape.set_area(phase)
-	RunState.set_story_flag("reached_archive")
 	traveler.global_position = Vector2(320, 248)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_archive")
 	camera_target_rotation = 0.0
 	_set_status("The archive holds its breath beneath the orchard. Beth's light doubles in the still water.")
 	Soundscape.play_event("complete")
@@ -668,6 +1166,86 @@ func _enter_archive() -> void:
 	queue_redraw()
 	var fade_in := create_tween()
 	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_gallery() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	await fade_out.finished
+	phase = "gallery"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 248)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_gallery")
+	beth.global_position = Vector2(337, 232)
+	beth.visible = true
+	beth.awake = true
+	camera_target_rotation = 0.0
+	_set_status("Beneath the archive, a second room opens around a still, starless pool.")
+	Soundscape.play_event("complete")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_bell_court() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	await fade_out.finished
+	phase = "bell_court"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 250)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_bell_court")
+	beth.global_position = Vector2(337, 234)
+	beth.visible = true
+	beth.awake = true
+	camera_target_rotation = 0.0
+	_set_status("The stair ends in a small garden where four bells hang beneath an open sky.")
+	Soundscape.play_event("complete")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_high_steps() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	await fade_out.finished
+	phase = "high_steps"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 252)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_high_steps")
+	beth.global_position = Vector2(337, 234)
+	beth.visible = true
+	beth.awake = true
+	_set_status("The bell notes carry you up a narrow hill path. Three vanes turn above the valley.")
+	Soundscape.play_event("complete")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -682,8 +1260,9 @@ func _enter_observatory() -> void:
 	await fade_out.finished
 	phase = "observatory"
 	Soundscape.set_area(phase)
-	RunState.set_story_flag("reached_observatory")
 	traveler.global_position = Vector2(320, 250)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_observatory")
 	camera_target_rotation = 0.0
 	_set_status("The stair opens beneath a roofless observatory. The old inscription waits in the starlight.")
 	Soundscape.play_event("complete")
@@ -699,6 +1278,7 @@ func _begin_inscription_reveal() -> void:
 	if transitioning:
 		return
 	transitioning = true
+	RunState.set_journey_active(false)
 	traveler.set_movement_enabled(false)
 	RunState.save_game()
 	inscription_panel = PanelContainer.new()
@@ -738,8 +1318,10 @@ func _show_inscription_reveal(revealed_count: int) -> void:
 	inscription_label.text = displayed
 
 func _finish_inscription_reveal() -> void:
+	RunState.set_journey_active(false)
 	RunState.set_story_flag("ending_revealed")
 	RunState.record_clue("message_from_past")
+	beth.react_to_discovery()
 	Soundscape.play_event("complete")
 	_set_status("Beth turns toward the medallion. The last mark gives a faint pulse beneath your hand.")
 	queue_redraw()
@@ -763,6 +1345,7 @@ func _rotate_archive_lens(which: String) -> void:
 		RunState.set_story_flag("archive_puzzle_solved")
 		RunState.record_clue("archive_hidden_stair")
 		RunState.reset_local_hint_echo()
+		beth.react_to_discovery()
 		Soundscape.play_event("complete")
 		_set_status("The reflections meet. A stair appears where the light touches the floor.")
 		_update_objective()
@@ -773,6 +1356,9 @@ func _rotate_archive_lens(which: String) -> void:
 func _activate_resonator(symbol: String) -> void:
 	if not RunState.story_flags.get("beth_awake", false):
 		_set_status("A soft pulse travels through the stone, then fades. Something is still asleep nearby.")
+		return
+	if not RunState.story_flags.get("inscription_seen", false):
+		_set_status("The old line shifts without becoming readable. Study the wall before attuning the stones.")
 		return
 	if not RunState.story_flags.get("resonance_clue_seen", false):
 		_set_status("The marks answer, but their order is unclear. Look around the old wall.")
@@ -787,6 +1373,7 @@ func _activate_resonator(symbol: String) -> void:
 			Soundscape.play_event("complete")
 			RunState.set_story_flag("first_gate_open")
 			RunState.reset_local_hint_echo()
+			beth.react_to_discovery()
 			_set_status("The three notes join. Stone eases aside, revealing a path beneath the gate.")
 			_update_objective()
 			queue_redraw()
@@ -803,6 +1390,8 @@ func _activate_resonator(symbol: String) -> void:
 func _wake_beth() -> void:
 	RunState.set_story_flag("beth_awake")
 	beth.wake()
+	beth.react_to_discovery()
+	beth.global_position = Vector2(48, 230)
 	Soundscape.play_event("wake")
 	_set_status("The little orb blinks awake, circles your shoulder, and answers with a curious chime.")
 	_update_objective()
@@ -819,11 +1408,12 @@ func _cross_into_world() -> void:
 	await fade_out.finished
 	phase = "ruins"
 	Soundscape.set_area(phase)
-	RunState.set_story_flag("crossed_into_world")
 	traveler.global_position = Vector2(285, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("crossed_into_world")
 	beth.visible = true
-	beth.global_position = Vector2(344, 214)
+	beth.global_position = Vector2(48, 230)
 	beth.awake = false
 	_set_status("On the other side, a small blue-white light sleeps among the ruins.")
 	_update_objective()
@@ -835,9 +1425,11 @@ func _cross_into_world() -> void:
 	transitioning = false
 
 func _open_journal() -> void:
+	traveler.set_movement_enabled(false)
+	RunState.set_journey_active(false)
 	journal_panel = PanelContainer.new()
 	journal_panel.position = Vector2(36, 180)
-	journal_panel.size = Vector2(248, 112)
+	journal_panel.size = Vector2(248, 138)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("#17252a")
 	style.border_color = Color("#728781")
@@ -853,30 +1445,46 @@ func _open_journal() -> void:
 	column.add_child(hint)
 	var divider := HSeparator.new()
 	column.add_child(divider)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(224, 74)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	var entries := VBoxContainer.new()
+	entries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	entries.add_theme_constant_override("separation", 4)
+	scroll.add_child(entries)
 	if RunState.journal_entries.is_empty():
-		column.add_child(_new_label("No clues recorded yet.", 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO))
+		entries.add_child(_new_label("No clues recorded yet.", 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO))
 	else:
-		for clue_id in RunState.journal_entries:
-			var entry := _new_label(_clue_text(clue_id), 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO)
+		for entry_index in range(RunState.journal_entries.size() - 1, -1, -1):
+			var clue_id: String = RunState.journal_entries[entry_index]
+			var entry := _new_label("•  " + _clue_text(clue_id), 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO)
 			entry.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			column.add_child(entry)
-	var close_hint := _new_label("J / Esc  close", 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
+			entries.add_child(entry)
+	var close_hint := _new_label("%s / %s  close" % [_action_mark("journal"), _action_mark("pause")], 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
 	column.add_child(close_hint)
 	hud.add_child(journal_panel)
 	var tween := create_tween()
-	tween.tween_property(journal_panel, "position:y", 34.0, 0.28).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(journal_panel, "position:y", 20.0, 0.28).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _close_journal() -> void:
 	var panel := journal_panel
 	journal_panel = null
 	var tween := create_tween()
 	tween.tween_property(panel, "position:y", 180.0, 0.2)
-	tween.tween_callback(panel.queue_free)
+	tween.tween_callback(func() -> void:
+		panel.queue_free()
+		if is_instance_valid(traveler) and not transitioning:
+			traveler.set_movement_enabled(true)
+			RunState.set_journey_active(true)
+	)
 
 func _open_inventory() -> void:
 	if inventory_panel != null or transitioning:
 		return
 	traveler.set_movement_enabled(false)
+	RunState.set_journey_active(false)
 	inventory_panel = PanelContainer.new()
 	inventory_panel.position = Vector2(34, 180)
 	inventory_panel.size = Vector2(252, 136)
@@ -922,7 +1530,7 @@ func _open_inventory() -> void:
 			row.add_child(item_action)
 			column.add_child(row)
 	var close := Button.new()
-	close.text = "I / Esc  close"
+	close.text = "%s / %s  close" % [_action_mark("inventory"), _action_mark("pause")]
 	close.custom_minimum_size = Vector2(224, 15)
 	close.add_theme_font_size_override("font_size", 6)
 	close.pressed.connect(_close_inventory)
@@ -947,6 +1555,7 @@ func _close_inventory() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
 			traveler.set_movement_enabled(true)
+			RunState.set_journey_active(true)
 	)
 
 func _select_inventory_item(item_id: String) -> void:
@@ -977,6 +1586,10 @@ func _swap_pending_item(old_item_id: String) -> void:
 		_close_inventory()
 
 func _open_hint_panel() -> void:
+	if hint_panel != null or transitioning:
+		return
+	traveler.set_movement_enabled(false)
+	RunState.set_journey_active(false)
 	hint_panel = PanelContainer.new()
 	hint_panel.position = Vector2(45, 180)
 	hint_panel.size = Vector2(230, 104)
@@ -994,7 +1607,7 @@ func _open_hint_panel() -> void:
 	_add_hint_button(column, "1  A gentle nudge", 1)
 	_add_hint_button(column, "2  A clearer clue", 2)
 	_add_hint_button(column, "3  Nearly the answer", 3)
-	var close_hint := _new_label("H / Esc  close", 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
+	var close_hint := _new_label("%s / %s  close" % [_action_mark("hints"), _action_mark("pause")], 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
 	column.add_child(close_hint)
 	hud.add_child(hint_panel)
 	var tween := create_tween()
@@ -1015,13 +1628,23 @@ func _close_hint_panel() -> void:
 	hint_panel = null
 	var tween := create_tween()
 	tween.tween_property(panel, "position:y", 180.0, 0.18)
-	tween.tween_callback(panel.queue_free)
+	tween.tween_callback(func() -> void:
+		panel.queue_free()
+		if is_instance_valid(traveler) and not transitioning:
+			traveler.set_movement_enabled(true)
+			RunState.set_journey_active(true)
+	)
 
 func _give_hint(level: int) -> void:
 	var echo_cost := RunState.add_hint(level)
 	beth.react_to_hint(echo_cost)
 	var hint_text := ""
-	if phase == "orchard":
+	if phase == "empty_quarter":
+		match level:
+			1: hint_text = "Beth watches the four doorways around the well."
+			2: hint_text = "The carving pairs a household symbol with each side of the square."
+			3: hint_text = "West holds the book, north the bowl, east the seed, and south the lamp."
+	elif phase == "orchard":
 		match level:
 			1:
 				hint_text = "Beth listens along the three dry channels."
@@ -1037,6 +1660,38 @@ func _give_hint(level: int) -> void:
 				hint_text = "The ceiling shows right, down, then left."
 			3:
 				hint_text = "Point west right, center down, and east left."
+	elif phase == "gallery":
+		match level:
+			1:
+				hint_text = "Beth watches the quiet water beneath the three mirror stones."
+			2:
+				hint_text = "Read the mural from west to east, then turn each stone to match the direction shown."
+			3:
+				hint_text = "Point west north, center south, and east west."
+	elif phase == "bell_court":
+		match level:
+			1:
+				hint_text = "Beth's light rises and falls with the marks on the garden wall."
+			2:
+				hint_text = "The carving gives four notes. Ring them from left to right, including the repeated mark."
+			3:
+				hint_text = "Ring crescent, rain-line, seed, then crescent."
+	elif phase == "high_steps":
+		match level:
+			1:
+				hint_text = "Beth watches the three vanes turn over the valley."
+			2:
+				hint_text = "The map gives one direction for each vane, from west to east."
+			3:
+				hint_text = "Point the western vane west, the middle vane north, and the eastern vane east."
+	elif phase == "quiet_garden":
+		match level:
+			1:
+				hint_text = "Beth listens to the glass chimes above the seedling."
+			2:
+				hint_text = "The wall carving gives three marks from left to right."
+			3:
+				hint_text = "Ring rain-line, seed, then crescent."
 	else:
 		match level:
 			1:
@@ -1054,6 +1709,7 @@ func _open_pause_menu() -> void:
 	if pause_panel != null or transitioning:
 		return
 	traveler.set_movement_enabled(false)
+	RunState.set_journey_active(false)
 	pause_panel = PanelContainer.new()
 	pause_panel.position = Vector2(55, 180)
 	pause_panel.size = Vector2(210, 84)
@@ -1094,9 +1750,11 @@ func _close_pause_menu() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
 			traveler.set_movement_enabled(true)
+			RunState.set_journey_active(true)
 	)
 
 func _save_and_return_to_title() -> void:
+	RunState.set_journey_active(false)
 	RunState.save_game()
 	get_tree().change_scene_to_file("res://src/scenes/main_menu.tscn")
 
@@ -1109,16 +1767,44 @@ func _animate_journal_signal() -> void:
 func _record_clue_animated(clue_id: String) -> void:
 	if RunState.record_clue(clue_id):
 		Soundscape.play_event("journal")
+		beth.react_to_discovery()
 		_animate_journal_signal()
+
+func _reveal_world_memory(flag_name: String, clue_id: String, message: String) -> void:
+	RunState.set_story_flag(flag_name)
+	_record_clue_animated(clue_id)
+	_set_status(message)
 
 func _clue_text(clue_id: String) -> String:
 	match clue_id:
+		"crossing_floodlines":
+			return "Three floodlines climb the roadstone. Beyond the highest, someone carved a row of little boats."
+		"ruins_kiln_tag":
+			return "The kiln's last clay tag says: bowls packed first; bells left to dry."
+		"orchard_grafts_uphill":
+			return "A grafting label lists trees sent uphill when the river failed. Each orchard tree began as a cutting."
+		"archive_last_entry":
+			return "The last catalogue line says: carry the books east; leave one lamp in the doorway."
+		"gallery_procession":
+			return "Three faceless figures carry bowls and lanterns toward a path cut into the mountain."
+		"bell_keeper_list":
+			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
+		"high_steps_last_lantern":
+			return "A neatly trimmed wick waits beside a note: extinguish the last lantern after the descent."
+		"quiet_garden_cup":
+			return "An upside-down clay cup shelters a seed hollow from the rain."
 		"gibberish_inscription":
 			return "At the ruin wall: a line of marks, still unreadable."
 		"resonance_mosaic":
 			return "A worn mosaic repeats three shapes: crescent, rain-line, seed."
 		"orchard_memory":
 			return "A pale flower chimed as the orchard water returned."
+		"quarter_household_map":
+			return "A carving pairs the west doorway with a book, north with a bowl, east with a seed, and south with a lamp."
+		"quarter_register":
+			return "The village register remembers readers, potters, growers, and lamplighters. Its last column is worn blank."
+		"quarter_household_restored":
+			return "Four household objects sit once more in the doorways around the well. A stair appears in its reflection."
 		"orchard_water_memory":
 			return "Three sluices feed the same basin; water returns to the garden."
 		"archive_reflection_map":
@@ -1127,6 +1813,30 @@ func _clue_text(clue_id: String) -> String:
 			return "The reflecting pool holds a sky that is absent above the ruins."
 		"archive_hidden_stair":
 			return "Aligned lenses reveal a stair below the archive."
+		"gallery_reflection_map":
+			return "The pool-side mural shows west pointing north, center pointing south, and east turning west."
+		"gallery_memory":
+			return "Beth's light is the only star reflected in the lower pool."
+		"gallery_second_sky":
+			return "The mirror shard catches the same stars around a missing place in the reflected sky."
+		"gallery_hidden_stair":
+			return "Three aligned reflections reveal a stair beneath the starless pool."
+		"bell_garden_pattern":
+			return "The bell garden's carving repeats four marks: crescent, rain-line, seed, crescent."
+		"bell_bench_memory":
+			return "Beth rested on the old garden bench as if she had sat there many times before."
+		"bell_garden_answer":
+			return "The bells answered in the order of the four marks carved into the garden wall."
+		"high_steps_wind_map":
+			return "The wind-worn map marks west, north, and east across the three vanes."
+		"high_steps_open_door":
+			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
+		"quiet_garden_order":
+			return "The small garden carving gives three marks: rain-line, seed, crescent."
+		"quiet_garden_bench":
+			return "The old stone bench holds the warmth of a place where someone once waited."
+		"quiet_garden_song":
+			return "Three glass chimes answered above the seedling; one white flower opened by the basin."
 		"matching_stone_cuts":
 			return "A broken chip fits a narrow break at the observatory inscription."
 		"crossing_sun_mark":
@@ -1158,14 +1868,31 @@ func _update_objective() -> void:
 		"ruins":
 			if not RunState.story_flags.get("beth_awake", false):
 				objective_label.text = "Follow the small light"
+			elif not RunState.story_flags.get("inscription_seen", false):
+				objective_label.text = "Study the unreadable inscription"
 			elif not RunState.story_flags.get("first_gate_open", false):
 				objective_label.text = "Listen for the old stones"
 			else:
 				objective_label.text = "Pass through the opened gate"
 		"orchard":
-			objective_label.text = "Bring water back to the orchard" if not RunState.story_flags.get("orchard_water_restored", false) else "Find a way into the archive"
+			objective_label.text = "Bring water back to the orchard" if not RunState.story_flags.get("orchard_water_restored", false) else "Enter the empty quarter"
+		"empty_quarter":
+			if not RunState.story_flags.get("quarter_mural_seen", false):
+				objective_label.text = "Read the well carving"
+			elif not RunState.story_flags.get("quarter_household_restored", false):
+				objective_label.text = "Return each household object to its doorway"
+			else:
+				objective_label.text = "Descend into the archive"
 		"archive":
 			objective_label.text = "Study the ceiling mural" if not RunState.story_flags.get("archive_mural_seen", false) else ("Align the three lenses" if not RunState.story_flags.get("archive_puzzle_solved", false) else "Follow the reflected light")
+		"gallery":
+			objective_label.text = "Read the pool mural" if not RunState.story_flags.get("gallery_mural_seen", false) else ("Align the reflected stones" if not RunState.story_flags.get("gallery_lights_solved", false) else "Follow the stair below")
+		"bell_court":
+			objective_label.text = "Listen to the bell garden" if not RunState.story_flags.get("bell_mural_seen", false) else ("Return the four-note pattern" if not RunState.story_flags.get("bell_court_solved", false) else "Approach the roofless observatory")
+		"high_steps":
+			objective_label.text = "Study the wind-worn map" if not RunState.story_flags.get("high_steps_map_seen", false) else ("Align the three wind vanes" if not RunState.story_flags.get("high_steps_aligned", false) else "Enter the upper door")
+		"quiet_garden":
+			objective_label.text = "Listen for the garden's three notes" if not RunState.story_flags.get("quiet_garden_song_solved", false) else "Return to the orchard when you are ready"
 		"observatory":
 			objective_label.text = "Approach the old inscription" if not RunState.story_flags.get("ending_revealed", false) else "The world remembers"
 
@@ -1173,27 +1900,92 @@ func _update_hud(_items: Array[String] = []) -> void:
 	if inventory_label == null:
 		return
 	if RunState.selected_item_id.is_empty():
-		inventory_label.text = "I  Keepsakes %d / %d" % [RunState.inventory.size(), RunState.INVENTORY_LIMIT]
+		inventory_label.text = "%s  Keepsakes %d / %d" % [_action_mark("inventory"), RunState.inventory.size(), RunState.INVENTORY_LIMIT]
 	else:
-		inventory_label.text = "I  Active: %s   (%d / %d)" % [_item_name(RunState.selected_item_id), RunState.inventory.size(), RunState.INVENTORY_LIMIT]
+		inventory_label.text = "%s  Active: %s   (%d / %d)" % [_action_mark("inventory"), _item_name(RunState.selected_item_id), RunState.inventory.size(), RunState.INVENTORY_LIMIT]
 
 func _on_hint_echo_changed(_value: int) -> void:
 	queue_redraw()
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, WORLD_SIZE), Color("#18282b"))
-	_draw_ground()
-	if phase == "crossing":
-		_draw_threshold()
-	elif phase == "orchard":
-		_draw_orchard()
-	elif phase == "archive":
-		_draw_archive()
-	elif phase == "observatory":
-		_draw_observatory()
-	else:
-		_draw_ruins()
+	match phase:
+		"crossing": draw_texture_rect(CROSSING_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"ruins": draw_texture_rect(RUINS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"orchard": draw_texture_rect(ORCHARD_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"archive": draw_texture_rect(ARCHIVE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"gallery":
+		draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"bell_court":
+		draw_texture_rect(BELL_COURT_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"quiet_garden":
+			draw_texture_rect(QUIET_GARDEN_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"high_steps":
+			draw_texture_rect(HIGHLAND_STEPS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"observatory": draw_texture_rect(OBSERVATORY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+	_draw_scene_overlays()
 	_draw_hint_echo()
+
+func _draw_scene_overlays() -> void:
+	match phase:
+		"crossing": _draw_threshold()
+		"ruins": _draw_ruins()
+		"orchard": _draw_orchard()
+		"empty_quarter": _draw_empty_quarter()
+		"archive": _draw_archive()
+		"gallery": _draw_gallery()
+		"bell_court": _draw_bell_court()
+		"quiet_garden": _draw_quiet_garden()
+		"high_steps": _draw_high_steps()
+		"observatory": _draw_observatory()
+	_draw_memory_prop()
+
+func _draw_memory_prop() -> void:
+	var stone := Color("#777b68")
+	var shadow := Color("#394a45")
+	var mark := Color("#c0bd9b")
+	match phase:
+		"crossing":
+			draw_rect(Rect2(96, 184, 16, 15), shadow)
+			draw_rect(Rect2(98, 181, 12, 14), stone)
+			for index in range(3):
+				draw_line(Vector2(100, 185 + index * 3), Vector2(108, 185 + index * 3), mark.darkened(0.2), 1.0)
+		"ruins":
+			draw_rect(Rect2(493, 249, 18, 9), shadow)
+			draw_rect(Rect2(496, 242, 12, 10), Color("#8c7964"))
+			draw_rect(Rect2(497, 244, 10, 4), Color("#3a4543"))
+			draw_line(Vector2(499, 252), Vector2(506, 252), mark, 1.0)
+		"orchard":
+			draw_rect(Rect2(77, 216, 15, 7), shadow)
+			draw_rect(Rect2(80, 207, 2, 12), stone)
+			draw_rect(Rect2(87, 210, 2, 9), stone)
+			draw_line(Vector2(80, 211), Vector2(88, 214), Color("#a59b76"), 1.0)
+		"archive":
+			draw_rect(Rect2(68, 263, 18, 8), shadow)
+			draw_rect(Rect2(70, 258, 15, 8), Color("#998d72"))
+			draw_line(Vector2(73, 260), Vector2(82, 260), Color("#d3c79c"), 1.0)
+			draw_line(Vector2(73, 263), Vector2(80, 263), Color("#665f50"), 1.0)
+		"gallery":
+			for index in range(3):
+				var x := 80 + index * 9
+				draw_rect(Rect2(x, 244, 5, 9), shadow)
+				draw_rect(Rect2(x + 1, 241, 3, 6), stone)
+				draw_rect(Rect2(x + 1, 243, 3, 1), mark.darkened(0.3))
+		"bell_court":
+			draw_rect(Rect2(539, 258, 19, 10), shadow)
+			draw_rect(Rect2(541, 254, 15, 7), Color("#998d72"))
+			for index in range(4):
+				draw_rect(Rect2(543 + index * 3, 256, 1, 2), mark.darkened(0.25))
+		"high_steps":
+			draw_rect(Rect2(199, 250, 12, 14), shadow)
+			draw_rect(Rect2(202, 246, 7, 14), stone)
+			draw_rect(Rect2(204, 248, 3, 6), Color("#d5b985"))
+			draw_rect(Rect2(203, 247, 5, 2), Color("#e7d6a8"))
+		"quiet_garden":
+			draw_rect(Rect2(74, 245, 11, 8), shadow)
+			draw_rect(Rect2(76, 240, 7, 6), Color("#987d64"))
+			draw_rect(Rect2(77, 241, 5, 3), Color("#46534b"))
 
 func _draw_ground() -> void:
 	var echo_tint := _ambient_echo()
@@ -1227,82 +2019,65 @@ func _draw_ground() -> void:
 				draw_rect(Rect2(center.x + 3, center.y - 1, 1, 2), Color("#728d68"))
 
 func _draw_threshold() -> void:
-	_draw_tree(Vector2(126, 163), Color("#253c39"))
-	_draw_tree(Vector2(536, 184), Color("#2a4038"))
-	_draw_altar(Vector2(302, 222))
+	# The gold fleck is the only detail that moves against the painted crossing.
+	if not RunState.story_flags.get("medallion_found", false):
+		draw_rect(Rect2(275, 167, 6, 2), Color("#b9aa74"))
+		draw_rect(Rect2(277, 165, 3, 6), Color("#d8ca91"))
 	if RunState.journal_entries.has("crossing_sun_mark"):
-		_draw_symbol(Vector2(420, 132), "seed", Color("#d6c995"))
+		_draw_symbol(Vector2(336, 123), "seed", Color("#d6c995"))
 	if not RunState.story_flags.get("moss_button_found", false):
 		draw_rect(Rect2(188, 248, 4, 3), Color("#788c70"))
 		draw_rect(Rect2(189, 247, 2, 1), Color("#b8aa76"))
-	_draw_arch(Vector2(420, 170), false)
-	_draw_stone(Vector2(365, 218), 8, Color("#69756b"))
-	_draw_stone(Vector2(468, 204), 11, Color("#58685f"))
-	_draw_stone(Vector2(204, 187), 6, Color("#78816e"))
-	draw_rect(Rect2(120, 286, 86, 2), Color("#283b35"))
-	draw_rect(Rect2(448, 288, 70, 2), Color("#273a35"))
+	if RunState.story_flags.get("medallion_found", false):
+		draw_rect(Rect2(330, 136, 12, 2), Color("#9dc2b9"))
 
 func _draw_ruins() -> void:
-	_draw_tree(Vector2(116, 156), Color("#263a38"))
-	_draw_tree(Vector2(540, 190), Color("#2b4039"))
-	_draw_arch(Vector2(320, 152), RunState.story_flags.get("first_gate_open", false))
-	_draw_inscription(Vector2(232, 177))
-	_draw_mosaic(Vector2(276, 165))
-	_draw_resonator(Vector2(272, 226), "moon", 0)
-	_draw_resonator(Vector2(320, 199), "water", 1)
-	_draw_resonator(Vector2(368, 226), "seed", 2)
-	_draw_stone(Vector2(180, 224), 9, Color("#65756b"))
-	_draw_stone(Vector2(448, 240), 12, Color("#5f7068"))
-	_draw_stone(Vector2(215, 255), 6, Color("#707a68"))
+	_draw_inscription(Vector2(72, 150))
+	_draw_mosaic(Vector2(205, 111))
+	var progress := int(RunState.puzzle_progress.get("first_gate", 0))
+	var resonators := [Vector2(230, 208), Vector2(320, 197), Vector2(420, 208)]
+	for index in range(resonators.size()):
+		var lit := index < progress or RunState.story_flags.get("first_gate_open", false)
+		_draw_symbol(resonators[index], PUZZLE_ORDER[index], Color("#d5e8d5") if lit else Color("#a9a58a"))
 	if not RunState.story_flags.get("old_bead_found", false):
-		draw_rect(Rect2(178, 248, 5, 3), Color("#657b79"))
-		draw_rect(Rect2(179, 249, 2, 2), Color("#9acbd2"))
+		draw_rect(Rect2(148, 248, 5, 3), Color("#657b79"))
+		draw_rect(Rect2(149, 249, 2, 2), Color("#9acbd2"))
 	if RunState.story_flags.get("inscription_seen", false) and not RunState.story_flags.get("stone_chip_found", false):
-		draw_rect(Rect2(229, 200, 5, 3), Color("#aaa18a"))
+		draw_rect(Rect2(74, 176, 5, 3), Color("#aaa18a"))
+	if not RunState.story_flags.get("first_gate_open", false):
+		draw_rect(Rect2(287, 72, 66, 57), Color("#27343a"))
+		draw_rect(Rect2(296, 81, 48, 40), Color("#202d33"))
+		draw_rect(Rect2(319, 82, 2, 37), Color("#586966"))
+	else:
+		draw_rect(Rect2(311, 119, 18, 2), Color("#a9d7cc"))
 	if RunState.story_flags.get("first_gate_open", false):
 		draw_rect(Rect2(312, 163, 16, 2), Color("#a9d7cc"))
 
 func _draw_orchard() -> void:
-	_draw_tree(Vector2(126, 156), Color("#34483d"))
-	_draw_tree(Vector2(516, 160), Color("#354b3f"))
-	_draw_tree(Vector2(468, 282), Color("#30453a"))
-	_draw_tree(Vector2(174, 286), Color("#344a3d"))
-	draw_rect(Rect2(185, 211, 270, 3), Color("#34483f"))
-	draw_rect(Rect2(188, 215, 262, 4), Color("#53685a"))
-	draw_rect(Rect2(312, 176, 16, 112), Color("#354a41"))
-	draw_rect(Rect2(315, 178, 10, 110), Color("#61766a"))
-	draw_rect(Rect2(221, 182, 48, 28), Color("#786f5d"))
-	draw_rect(Rect2(225, 186, 40, 20), Color("#4f5b53"))
-	for index in range(4):
-		draw_rect(Rect2(230 + index * 9, 191 + (index % 2) * 4, 4, 3), Color("#a7aa85"))
-	_draw_arrow(Vector2(232, 193), 1, Color("#c2c09c"))
-	_draw_arrow(Vector2(245, 193), 2, Color("#a5c3bc"))
-	_draw_arrow(Vector2(258, 193), 3, Color("#b0bd99"))
-	_draw_orchard_sluice(Vector2(260, 226), "west", 0)
-	_draw_orchard_sluice(Vector2(320, 198), "north", 1)
-	_draw_orchard_sluice(Vector2(380, 226), "east", 2)
+	_draw_orchard_sluice(Vector2(228, 151), "west", 0)
+	_draw_orchard_sluice(Vector2(320, 124), "north", 1)
+	_draw_orchard_sluice(Vector2(422, 151), "east", 2)
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
 	for name in ["west", "north", "east"]:
 		if _valve_orientation(valves.get(name, 0)) == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false):
 			_draw_water_channel(name)
-	_draw_tree(Vector2(430, 196), Color("#526652"))
-	draw_rect(Rect2(426, 186, 8, 7), Color("#c3d7bf"))
-	draw_rect(Rect2(428, 184, 4, 2), Color("#e0e9d2"))
+	_draw_arrow(Vector2(81, 152), 1, Color("#c2c09c"))
+	_draw_arrow(Vector2(93, 152), 2, Color("#a5c3bc"))
+	_draw_arrow(Vector2(105, 152), 3, Color("#b0bd99"))
+	draw_rect(Rect2(561, 151, 5, 3), Color("#c3d7bf"))
+	draw_rect(Rect2(562, 149, 3, 2), Color("#e0e9d2"))
 	if RunState.story_flags.get("orchard_water_restored", false):
-		_draw_arch(Vector2(320, 145), true)
-		draw_rect(Rect2(306, 209, 28, 2), Color("#9fc9be"))
-		for index in range(3):
-			draw_rect(Rect2(306 + index * 5, 205 - index % 2, 3, 2), Color("#badbd0"))
+		_draw_arch(Vector2(320, 87), true)
 		if not RunState.story_flags.get("river_glass_found", false):
-			draw_rect(Rect2(458, 260, 5, 2), Color("#84b6ad"))
-			draw_rect(Rect2(460, 259, 3, 1), Color("#c0d6bc"))
+			draw_rect(Rect2(337, 213, 5, 2), Color("#84b6ad"))
+			draw_rect(Rect2(339, 212, 3, 1), Color("#c0d6bc"))
 	if RunState.story_flags.get("quiet_garden_restored", false):
-		_draw_tree(Vector2(215, 261), Color("#68785b"))
-		draw_rect(Rect2(212, 238, 6, 4), Color("#bcc99a"))
-		draw_rect(Rect2(213, 236, 4, 2), Color("#e0dfb6"))
+		_draw_arch(Vector2(182, 243), true)
+		draw_rect(Rect2(179, 268, 6, 4), Color("#bcc99a"))
+		draw_rect(Rect2(180, 266, 4, 2), Color("#e0dfb6"))
 	elif RunState.story_flags.get("orchard_water_restored", false):
-		draw_rect(Rect2(199, 260, 32, 8), Color("#645d49"))
-		draw_rect(Rect2(203, 258, 24, 2), Color("#7b7255"))
+		draw_rect(Rect2(166, 267, 31, 6), Color("#7b7155"))
+		draw_rect(Rect2(171, 264, 21, 3), Color("#645b48"))
 
 func _draw_orchard_sluice(pos: Vector2, name: String, index: int) -> void:
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
@@ -1317,91 +2092,164 @@ func _draw_orchard_sluice(pos: Vector2, name: String, index: int) -> void:
 	draw_rect(Rect2(pos.x - 8, pos.y - 10, 16, 3), Color("#9b9c7a"))
 	_draw_arrow(pos + Vector2(0, -1), orientation, Color("#8bc2c0") if is_aligned else Color("#4f6159"))
 
+func _draw_empty_quarter() -> void:
+	var slots := _get_quarter_slots()
+	var positions := {"west": Vector2(137, 222), "north": Vector2(224, 152), "east": Vector2(438, 152), "south": Vector2(566, 210)}
+	for side in positions:
+		var point: Vector2 = positions[side]
+		var object_name: String = QUARTER_OBJECTS[int(slots[side])]
+		var correct := int(slots[side]) == int(QUARTER_SOLUTION[side])
+		var tint := Color("#cfcea3") if correct or RunState.story_flags.get("quarter_household_restored", false) else Color("#6b7468")
+		_draw_quarter_object(point, object_name, tint)
+	if RunState.story_flags.get("quarter_household_restored", false):
+		draw_circle(Vector2(320, 166), 12.0, Color("#d8e6d0", 0.28))
+		draw_circle(Vector2(320, 166), 5.0, Color("#d6e2c7", 0.72))
+
+func _draw_quarter_object(point: Vector2, object_name: String, tint: Color) -> void:
+	match object_name:
+		"book":
+			draw_rect(Rect2(point + Vector2(-7, -4), Vector2(6, 9)), tint)
+			draw_rect(Rect2(point + Vector2(1, -4), Vector2(6, 9)), tint.lightened(0.12))
+			draw_line(point + Vector2(0, -4), point + Vector2(0, 5), Color("#4a5148"), 1.0)
+		"bowl":
+			draw_rect(Rect2(point + Vector2(-7, -3), Vector2(14, 2)), tint)
+			draw_colored_polygon(PackedVector2Array([point + Vector2(-6, -1), point + Vector2(6, -1), point + Vector2(3, 5), point + Vector2(-3, 5)]), tint)
+		"seed":
+			draw_circle(point, 5.0, tint)
+			draw_line(point + Vector2(0, -3), point + Vector2(4, -7), Color("#9aa584"), 1.0)
+		"lamp":
+			draw_rect(Rect2(point + Vector2(-4, -5), Vector2(8, 8)), tint)
+			draw_rect(Rect2(point + Vector2(-2, -3), Vector2(4, 4)), Color("#e4c78a"))
+			draw_line(point + Vector2(0, 3), point + Vector2(0, 7), tint, 1.0)
+
 func _draw_water_channel(name: String) -> void:
 	var water := Color("#6eaaa8")
 	match name:
 		"west":
-			draw_rect(Rect2(268, 223, 42, 2), water)
+			draw_line(Vector2(235, 155), Vector2(303, 185), water, 2.0)
 		"north":
-			draw_rect(Rect2(318, 204, 3, 18), water)
+			draw_line(Vector2(320, 130), Vector2(320, 179), water, 2.0)
 		"east":
-			draw_rect(Rect2(330, 223, 42, 2), water)
+			draw_line(Vector2(415, 155), Vector2(337, 185), water, 2.0)
 
 func _draw_archive() -> void:
-	draw_rect(Rect2(76, 88, 22, 147), Color("#3b4546"))
-	draw_rect(Rect2(542, 88, 22, 147), Color("#3b4546"))
-	for row in range(7):
-		for shelf in range(2):
-			var sx := 81 if shelf == 0 else 547
-			var sy := 95 + row * 18
-			draw_rect(Rect2(sx, sy, 12, 2), Color("#738078"))
-			for book in range(4):
-				var color := [Color("#817568"), Color("#5e7370"), Color("#8a8165"), Color("#4f6470")][(row + book) % 4]
-				draw_rect(Rect2(sx + 1 + book * 3, sy - 5, 2, 5), color)
-	draw_rect(Rect2(197, 206, 247, 44), Color("#344545"))
-	draw_rect(Rect2(203, 211, 235, 33), Color("#567172"))
-	draw_rect(Rect2(220, 219, 201, 15), Color("#79918c"))
-	draw_rect(Rect2(250, 156, 39, 24), Color("#6d756a"))
-	draw_rect(Rect2(254, 160, 31, 16), Color("#4d5c57"))
-	_draw_archive_arrows(Vector2(270, 168))
-	_draw_archive_lens(Vector2(264, 220), "west")
-	_draw_archive_lens(Vector2(320, 194), "center")
-	_draw_archive_lens(Vector2(376, 220), "east")
-	draw_rect(Rect2(430, 183, 9, 8), Color("#bacdc0"))
-	draw_rect(Rect2(432, 180, 5, 3), Color("#e1e5d0"))
+	_draw_archive_arrows(Vector2(320, 85))
+	_draw_archive_lens(Vector2(145, 213), "west")
+	_draw_archive_lens(Vector2(320, 213), "center")
+	_draw_archive_lens(Vector2(525, 213), "east")
 	if RunState.story_flags.get("archive_puzzle_solved", false):
-		draw_line(Vector2(264, 214), Vector2(320, 190), Color("#a9d7cc"), 1.0)
-		draw_line(Vector2(320, 190), Vector2(376, 214), Color("#a9d7cc"), 1.0)
-		draw_rect(Rect2(309, 147, 22, 4), Color("#9ebbb2"))
-		draw_rect(Rect2(313, 139, 14, 9), Color("#657c73"))
-		draw_rect(Rect2(316, 133, 8, 7), Color("#bfd7c7"))
+		draw_line(Vector2(145, 220), Vector2(320, 211), Color("#a9d7cc"), 1.0)
+		draw_line(Vector2(320, 211), Vector2(525, 220), Color("#a9d7cc"), 1.0)
+		draw_rect(Rect2(304, 94, 32, 31), Color("#526966"))
+		draw_rect(Rect2(310, 99, 20, 22), Color("#9fc1b5"))
+	else:
+		draw_rect(Rect2(302, 94, 36, 31), Color("#27343a"))
+		draw_rect(Rect2(311, 101, 18, 19), Color("#202d33"))
 	if not RunState.story_flags.get("mirror_shard_found", false):
-		draw_rect(Rect2(472, 253, 5, 3), Color("#97babb"))
-		draw_rect(Rect2(473, 252, 2, 1), Color("#d6e4da"))
+		draw_rect(Rect2(564, 263, 5, 3), Color("#97babb"))
+		draw_rect(Rect2(565, 262, 2, 1), Color("#d6e4da"))
 
 func _draw_archive_arrows(pos: Vector2) -> void:
-	_draw_arrow(pos + Vector2(-9, 0), 1, Color("#c2c09c"))
+	_draw_arrow(pos + Vector2(-12, 0), 1, Color("#c2c09c"))
 	_draw_arrow(pos, 2, Color("#a5c3bc"))
-	_draw_arrow(pos + Vector2(9, 0), 3, Color("#b0bd99"))
+	_draw_arrow(pos + Vector2(12, 0), 3, Color("#b0bd99"))
 
 func _draw_archive_lens(pos: Vector2, name: String) -> void:
 	var lenses: Dictionary = RunState.puzzle_progress.get("archive_lenses", {})
 	var direction := int(lenses.get(name, 0))
-	draw_colored_polygon(PackedVector2Array([
-		pos + Vector2(-14, 7), pos + Vector2(0, 0),
-		pos + Vector2(14, 7), pos + Vector2(0, 14)
-	]), Color("#2e3c3d"))
-	draw_rect(Rect2(pos.x - 9, pos.y - 7, 18, 13), Color("#596a66"))
-	draw_rect(Rect2(pos.x - 7, pos.y - 9, 14, 3), Color("#89978a"))
-	draw_rect(Rect2(pos.x - 4, pos.y - 5, 8, 8), Color("#b5c8b8"))
-	_draw_arrow(pos + Vector2(0, -1), direction, Color("#607d7d"))
+	var aligned := direction == int(ARCHIVE_SOLUTION[name]) or RunState.story_flags.get("archive_puzzle_solved", false)
+	_draw_arrow(pos, direction, Color("#e0e0c4") if aligned else Color("#718985"))
+	if aligned:
+		draw_rect(Rect2(pos.x - 8, pos.y + 7, 16, 1), Color("#a9d7cc"))
+
+func _draw_gallery() -> void:
+	# Small runes sit on the three mirror faces painted into the background.
+	draw_rect(Rect2(239, 141, 34, 18), Color("#626c62"))
+	draw_rect(Rect2(242, 144, 28, 12), Color("#414e4b"))
+	_draw_symbol(Vector2(248, 150), "moon", Color("#c7bd9b"))
+	_draw_symbol(Vector2(256, 150), "water", Color("#9cbcb8"))
+	_draw_symbol(Vector2(264, 150), "seed", Color("#abb98f"))
+	_draw_gallery_mirror(Vector2(160, 158), "west")
+	_draw_gallery_mirror(Vector2(320, 158), "center")
+	_draw_gallery_mirror(Vector2(464, 158), "east")
+	if RunState.story_flags.get("gallery_lights_solved", false):
+		draw_line(Vector2(160, 169), Vector2(320, 177), Color("#9ecbc4"), 1.0)
+		draw_line(Vector2(320, 177), Vector2(464, 169), Color("#9ecbc4"), 1.0)
+	if RunState.story_flags.get("gallery_lights_solved", false):
+		draw_rect(Rect2(308, 143, 24, 3), Color("#afd3cc"))
+		draw_rect(Rect2(312, 134, 16, 10), Color("#60756f"))
+		draw_rect(Rect2(315, 128, 10, 7), Color("#d1ddc7"))
+
+func _draw_gallery_mirror(pos: Vector2, name: String) -> void:
+	var direction := _get_gallery_orientation(name)
+	var aligned := direction == int(GALLERY_SOLUTION[name]) or RunState.story_flags.get("gallery_lights_solved", false)
+	var rune_color := Color("#e0e0c4") if aligned else Color("#9cae9f")
+	_draw_arrow(pos, direction, rune_color)
+	if aligned:
+		draw_rect(Rect2(pos.x - 5, pos.y + 7, 10, 1), Color("#a6d0c6"))
+
+func _draw_bell_court() -> void:
+	var bell_positions := [Vector2(148, 112), Vector2(267, 112), Vector2(395, 112), Vector2(520, 112)]
+	for index in range(bell_positions.size()):
+		_draw_court_bell(bell_positions[index], index)
+	draw_rect(Rect2(300, 145, 40, 18), Color("#5d695f"))
+	draw_rect(Rect2(304, 148, 32, 12), Color("#3e4c49"))
+	_draw_symbol(Vector2(312, 154), "moon", Color("#c8c4a7"))
+	_draw_symbol(Vector2(320, 154), "water", Color("#a7c4bc"))
+	_draw_symbol(Vector2(328, 154), "seed", Color("#aeb98e"))
+	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
+	for index in range(mini(progress, BELL_SEQUENCE.size())):
+		draw_rect(Rect2(290 + index * 15, 218, 5, 2), Color("#b8d2c6"))
+	if RunState.story_flags.get("bell_court_solved", false):
+		_draw_arch(Vector2(582, 174), true)
+		draw_line(Vector2(535, 174), Vector2(550, 174), Color("#aed4c8"), 1.0)
+
+func _draw_court_bell(pos: Vector2, index: int) -> void:
+	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
+	var lit := (index < progress) or RunState.story_flags.get("bell_court_solved", false)
+	_draw_symbol(pos, BELL_SEQUENCE[index], Color("#e4ead0") if lit else Color("#b6ad87"))
+	if lit:
+		draw_rect(Rect2(pos.x - 7, pos.y + 11, 14, 1), Color("#a8d3c7"))
+
+func _draw_quiet_garden() -> void:
+	draw_rect(Rect2(204, 93, 30, 16), Color("#687266"))
+	draw_rect(Rect2(208, 96, 22, 10), Color("#3f5049"))
+	var chime_positions := [Vector2(342, 108), Vector2(400, 116), Vector2(448, 132)]
+	for index in range(QUIET_GARDEN_SEQUENCE.size()):
+		var pos: Vector2 = chime_positions[index]
+		var lit := index < int(RunState.puzzle_progress.get("quiet_garden_sequence", 0)) or RunState.story_flags.get("quiet_garden_song_solved", false)
+		_draw_symbol(pos, QUIET_GARDEN_SEQUENCE[index], Color("#e4ead0") if lit else Color("#b6ad87"))
+		if lit:
+			draw_rect(Rect2(pos.x - 5, pos.y + 7, 10, 1), Color("#a8d3c7"))
+	if RunState.story_flags.get("quiet_garden_song_solved", false):
+		draw_rect(Rect2(318, 151, 5, 3), Color("#cad8a6"))
+		draw_rect(Rect2(316, 149, 3, 2), Color("#e5e7c8"))
+
+func _draw_high_steps() -> void:
+	draw_rect(Rect2(294, 96, 32, 18), Color("#606d63"))
+	draw_rect(Rect2(298, 99, 24, 12), Color("#3d4a47"))
+	_draw_arrow(Vector2(302, 105), 3, Color("#c2c09c"))
+	_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc"))
+	_draw_arrow(Vector2(318, 105), 1, Color("#b0bd99"))
+	var vane_positions := [Vector2(118, 137), Vector2(268, 119), Vector2(423, 109)]
+	for index in range(vane_positions.size()):
+		var name: String = ["west", "center", "east"][index]
+		var direction := _get_steps_vane_orientation(name)
+		var aligned := direction == int(HIGH_STEPS_SOLUTION[name]) or RunState.story_flags.get("high_steps_aligned", false)
+		_draw_arrow(vane_positions[index], direction, Color("#eadbb1") if aligned else Color("#b5aa89"))
+		if aligned:
+			draw_rect(Rect2(vane_positions[index].x - 6, vane_positions[index].y + 7, 12, 1), Color("#b1d0c4"))
+	if RunState.story_flags.get("high_steps_aligned", false):
+		draw_line(Vector2(423, 126), Vector2(535, 114), Color("#acd1c7"), 1.0)
+		draw_rect(Rect2(552, 105, 4, 7), Color("#f1d89b"))
+	else:
+		draw_rect(Rect2(536, 51, 57, 66), Color("#27343a"))
+		draw_rect(Rect2(546, 61, 38, 45), Color("#1e2a31"))
 
 func _draw_observatory() -> void:
-	draw_rect(Rect2(0, 0, 640, 360), Color("#15232e"))
-	for index in range(55):
-		var x := (index * 79 + 23) % 640
-		var y := (index * 37 + 11) % 170
-		var star := Color("#a8bec4")
-		star.a = 0.45 if index % 4 == 0 else 0.78
-		draw_rect(Rect2(x, y, 1, 1), star)
-	draw_rect(Rect2(0, 174, 640, 186), Color("#243339"))
-	for index in range(18):
-		var x := index * 38
-		draw_rect(Rect2(x, 250 + index % 3 * 4, 24, 2), Color("#34464a"))
-	draw_rect(Rect2(104, 96, 13, 93), Color("#3d4b4c"))
-	draw_rect(Rect2(523, 88, 14, 101), Color("#3b484a"))
-	draw_rect(Rect2(93, 91, 36, 8), Color("#58675f"))
-	draw_rect(Rect2(513, 83, 34, 8), Color("#59675e"))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(260, 286), Vector2(320, 254), Vector2(380, 286), Vector2(320, 319)
-	]), Color("#495c59"))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(274, 286), Vector2(320, 262), Vector2(366, 286), Vector2(320, 309)
-	]), Color("#61716a"))
-	_draw_final_inscription(Vector2(320, 164))
-	_draw_altar(Vector2(320, 238))
-	for index in range(4):
-		draw_rect(Rect2(304 + index * 10, 241 + (index % 2), 3, 2), Color("#a4c8bf"))
+	_draw_final_inscription(Vector2(320, 101))
+	if RunState.story_flags.get("ending_revealed", false):
+		draw_rect(Rect2(315, 143, 10, 2), Color("#e0d29d"))
 
 func _draw_final_inscription(pos: Vector2) -> void:
 	draw_rect(Rect2(pos.x - 30, pos.y - 38, 60, 48), Color("#66736a"))

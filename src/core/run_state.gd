@@ -6,9 +6,27 @@ signal hint_echo_changed(value: int)
 signal setting_changed(setting_name: String, value: Variant)
 
 const SAVE_PATH := "user://forgotten_world_save.json"
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const INVENTORY_LIMIT := 4
-const REBINDABLE_ACTIONS := ["run", "examine", "pick_up", "activate", "journal", "hints"]
+const SAVE_COUNTER_LIMIT := 1000000
+const HINT_USE_LIMIT := 100000
+const PLAYTIME_LIMIT_SECONDS := 315360000.0
+const ITEM_IDS := ["medallion", "moss_button", "stone_chip", "old_bead", "seed_pod", "river_glass", "mirror_shard"]
+const PUZZLE_SLOT_KEYS := {
+	"orchard_valves": ["west", "north", "east"],
+	"quarter_slots": ["west", "north", "east", "south"],
+	"archive_lenses": ["west", "center", "east"],
+	"gallery_mirrors": ["west", "center", "east"],
+	"high_steps_vanes": ["west", "center", "east"]
+}
+const PUZZLE_COUNTER_LIMITS := {"first_gate": 3, "bell_sequence": 4, "quiet_garden_sequence": 3}
+const SAVE_PHASES := ["crossing", "ruins", "orchard", "empty_quarter", "archive", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
+const REBINDABLE_ACTIONS := [
+	"move_left", "move_right", "move_up", "move_down", "run",
+	"examine", "pick_up", "activate", "use_item", "inventory",
+	"journal", "hints", "pause", "camera_left", "camera_right",
+	"zoom_in", "zoom_out", "camera_snap_toggle"
+]
 
 var presentation: int = 0
 var inventory: Array[String] = []
@@ -21,6 +39,10 @@ var total_hint_points: int = 0
 var local_hint_points: int = 0
 var hint_uses: int = 0
 var journey_started: bool = false
+var journey_active: bool = false
+var checkpoint_valid: bool = false
+var checkpoint_phase := "crossing"
+var checkpoint_position := Vector2(205, 226)
 var seconds_played: float = 0.0
 var seconds_since_autosave: float = 0.0
 var settings: Dictionary = {
@@ -41,12 +63,16 @@ func _ready() -> void:
 	set_process(true)
 
 func _process(delta: float) -> void:
-	if not journey_started:
+	if not journey_started or not journey_active:
 		return
 	seconds_played += delta
 	seconds_since_autosave += delta
 	if seconds_since_autosave >= 30.0:
 		seconds_since_autosave = 0.0
+		save_game()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and journey_started:
 		save_game()
 
 func _install_default_input_actions() -> void:
@@ -79,11 +105,11 @@ func _load_saved_preferences() -> void:
 	var saved_settings: Variant = parsed.get("settings", {})
 	if saved_settings is Dictionary:
 		for setting_name in settings:
-			if saved_settings.has(setting_name):
+			if saved_settings.has(setting_name) and typeof(saved_settings[setting_name]) == TYPE_BOOL:
 				settings[setting_name] = saved_settings[setting_name]
 	var saved_bindings: Variant = parsed.get("input_bindings", {})
 	if saved_bindings is Dictionary:
-		input_bindings = saved_bindings.duplicate(true)
+		input_bindings = _sanitize_bindings(saved_bindings)
 		_apply_saved_bindings()
 	if not settings.get("ambient_audio", true):
 		Soundscape.set_ambience_enabled(false)
@@ -207,6 +233,10 @@ func _add_action(action_name: String, key_codes: Array, axes: Array = [], button
 func start_new_journey(selected_presentation: int = 0) -> void:
 	presentation = selected_presentation
 	journey_started = true
+	journey_active = false
+	checkpoint_valid = true
+	checkpoint_phase = "crossing"
+	checkpoint_position = Vector2(205, 226)
 	inventory.clear()
 	selected_item_id = ""
 	journal_entries.clear()
@@ -298,14 +328,27 @@ func record_clue(clue_id: String) -> bool:
 func add_hint(level: int) -> int:
 	var base_points := clampi(level, 1, 3)
 	# Every second request makes the old stones carry a stronger echo.
-	var points := base_points + int(hint_uses / 2)
-	hint_uses += 1
-	hint_echo += points
-	total_hint_points += points
-	local_hint_points += points
+	var points := mini(base_points + int(hint_uses / 2), SAVE_COUNTER_LIMIT)
+	hint_uses = mini(hint_uses + 1, HINT_USE_LIMIT)
+	hint_echo = mini(hint_echo + points, SAVE_COUNTER_LIMIT)
+	total_hint_points = mini(total_hint_points + points, SAVE_COUNTER_LIMIT)
+	local_hint_points = mini(local_hint_points + points, SAVE_COUNTER_LIMIT)
 	hint_echo_changed.emit(hint_echo)
 	save_game()
 	return points
+
+func set_journey_active(active: bool) -> void:
+	journey_active = active
+
+func update_checkpoint(phase_name: String, position: Vector2) -> void:
+	if not SAVE_PHASES.has(phase_name):
+		return
+	checkpoint_phase = phase_name
+	checkpoint_position = Vector2(
+		clampf(position.x, 22.0, 618.0),
+		clampf(position.y, 40.0, 340.0)
+	)
+	checkpoint_valid = true
 
 func reset_local_hint_echo() -> void:
 	local_hint_points = 0
@@ -321,6 +364,12 @@ func set_setting(setting_name: String, value: Variant) -> void:
 	save_game()
 
 func save_game() -> void:
+	var checkpoint_data: Dictionary = {}
+	if checkpoint_valid and SAVE_PHASES.has(checkpoint_phase):
+		checkpoint_data = {
+			"phase": checkpoint_phase,
+			"position": [checkpoint_position.x, checkpoint_position.y]
+		}
 	var data := {
 		"version": SAVE_VERSION,
 		"presentation": presentation,
@@ -335,6 +384,7 @@ func save_game() -> void:
 		"hint_uses": hint_uses,
 		"journey_started": journey_started,
 		"seconds_played": seconds_played,
+		"checkpoint": checkpoint_data,
 		"settings": settings,
 		"input_bindings": input_bindings
 	}
@@ -374,12 +424,12 @@ func load_game() -> bool:
 	var version := int(parsed.get("version", 0))
 	if version < 1 or version > SAVE_VERSION:
 		return false
-	presentation = int(parsed.get("presentation", 0))
+	presentation = clampi(int(parsed.get("presentation", 0)), 0, 1)
 	inventory.clear()
 	var loaded_inventory: Variant = parsed.get("inventory", [])
 	if loaded_inventory is Array:
 		for item_id in loaded_inventory:
-			if item_id is String and inventory.size() < INVENTORY_LIMIT and not inventory.has(item_id):
+			if item_id is String and ITEM_IDS.has(item_id) and inventory.size() < INVENTORY_LIMIT and not inventory.has(item_id):
 				inventory.append(item_id)
 	selected_item_id = str(parsed.get("selected_item_id", inventory[0] if not inventory.is_empty() else ""))
 	if not inventory.has(selected_item_id):
@@ -388,18 +438,33 @@ func load_game() -> bool:
 	var loaded_clues: Variant = parsed.get("journal_entries", [])
 	if loaded_clues is Array:
 		for clue_id in loaded_clues:
-			if clue_id is String and not journal_entries.has(clue_id):
+			if clue_id is String and clue_id.length() <= 64 and clue_id.is_valid_identifier() and journal_entries.size() < 128 and not journal_entries.has(clue_id):
 				journal_entries.append(clue_id)
 	var loaded_puzzles: Variant = parsed.get("puzzle_progress", {})
-	puzzle_progress = loaded_puzzles if loaded_puzzles is Dictionary else {}
+	puzzle_progress = _sanitize_puzzle_progress(loaded_puzzles)
 	var loaded_flags: Variant = parsed.get("story_flags", {})
-	story_flags = loaded_flags if loaded_flags is Dictionary else {}
-	hint_echo = maxi(0, int(parsed.get("hint_echo", 0)))
-	total_hint_points = maxi(0, int(parsed.get("total_hint_points", hint_echo)))
-	local_hint_points = maxi(0, int(parsed.get("local_hint_points", 0)))
-	hint_uses = maxi(0, int(parsed.get("hint_uses", 0)))
+	story_flags = _sanitize_story_flags(loaded_flags)
+	hint_echo = clampi(int(parsed.get("hint_echo", 0)), 0, SAVE_COUNTER_LIMIT)
+	total_hint_points = clampi(int(parsed.get("total_hint_points", hint_echo)), 0, SAVE_COUNTER_LIMIT)
+	local_hint_points = clampi(int(parsed.get("local_hint_points", 0)), 0, SAVE_COUNTER_LIMIT)
+	hint_uses = clampi(int(parsed.get("hint_uses", 0)), 0, HINT_USE_LIMIT)
 	journey_started = bool(parsed.get("journey_started", false))
-	seconds_played = maxf(0.0, float(parsed.get("seconds_played", 0.0)))
+	journey_active = false
+	seconds_played = clampf(float(parsed.get("seconds_played", 0.0)), 0.0, PLAYTIME_LIMIT_SECONDS)
+	checkpoint_valid = false
+	var loaded_checkpoint: Variant = parsed.get("checkpoint", {})
+	if loaded_checkpoint is Dictionary:
+		var loaded_phase := str(loaded_checkpoint.get("phase", ""))
+		var loaded_position: Variant = loaded_checkpoint.get("position", [])
+		if SAVE_PHASES.has(loaded_phase) and loaded_position is Array and loaded_position.size() >= 2:
+			var x_value: Variant = loaded_position[0]
+			var y_value: Variant = loaded_position[1]
+			if (x_value is int or x_value is float) and (y_value is int or y_value is float):
+				var candidate := Vector2(float(x_value), float(y_value))
+				if candidate.x >= 22.0 and candidate.x <= 618.0 and candidate.y >= 40.0 and candidate.y <= 340.0:
+					checkpoint_phase = loaded_phase
+					checkpoint_position = candidate
+					checkpoint_valid = true
 	var loaded_settings: Variant = parsed.get("settings", {})
 	if loaded_settings is Dictionary:
 		for setting_name in settings:
@@ -407,7 +472,7 @@ func load_game() -> bool:
 				settings[setting_name] = loaded_settings[setting_name]
 	var loaded_bindings: Variant = parsed.get("input_bindings", {})
 	if loaded_bindings is Dictionary:
-		input_bindings = loaded_bindings.duplicate(true)
+		input_bindings = _sanitize_bindings(loaded_bindings)
 		_apply_saved_bindings()
 	# Older saves predate the explicit request count. Preserve the existing echo
 	# and estimate enough uses that later hints do not reset its consequence.
@@ -419,3 +484,58 @@ func load_game() -> bool:
 	if not settings.get("ambient_audio", true):
 		Soundscape.set_ambience_enabled(false)
 	return true
+
+func _sanitize_story_flags(value: Variant) -> Dictionary:
+	var result: Dictionary = {}
+	if not value is Dictionary:
+		return result
+	for flag_name in value:
+		if flag_name is String and flag_name.length() <= 48 and flag_name.is_valid_identifier() and typeof(value[flag_name]) == TYPE_BOOL:
+			result[flag_name] = value[flag_name]
+	return result
+
+func _sanitize_puzzle_progress(value: Variant) -> Dictionary:
+	var result: Dictionary = {}
+	if not value is Dictionary:
+		return result
+	for puzzle_name in PUZZLE_SLOT_KEYS:
+		var saved_slots: Variant = value.get(puzzle_name, {})
+		if not saved_slots is Dictionary:
+			continue
+		var slots: Dictionary = {}
+		for slot_name in PUZZLE_SLOT_KEYS[puzzle_name]:
+			var orientation: Variant = saved_slots.get(slot_name, 0)
+			if orientation is int or orientation is float:
+				slots[slot_name] = clampi(int(orientation), 0, 3)
+		result[puzzle_name] = slots
+	for puzzle_name in PUZZLE_COUNTER_LIMITS:
+		var counter: Variant = value.get(puzzle_name, 0)
+		if counter is int or counter is float:
+			result[puzzle_name] = clampi(int(counter), 0, int(PUZZLE_COUNTER_LIMITS[puzzle_name]))
+	return result
+
+func _sanitize_bindings(value: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for action_name in REBINDABLE_ACTIONS:
+		var binding: Variant = value.get(action_name, {})
+		if not binding is Dictionary:
+			continue
+		var sanitized: Dictionary = {}
+		if binding.has("kind") and binding.get("code", null) is int:
+			var legacy_kind := str(binding.get("kind", ""))
+			var legacy_code := int(binding["code"])
+			if legacy_kind == "key" and legacy_code > 0 and legacy_code <= KEY_MAX:
+				sanitized["key"] = legacy_code
+			elif legacy_kind == "joy_button" and legacy_code >= 0 and legacy_code < JOY_BUTTON_MAX:
+				sanitized["joy_button"] = legacy_code
+		for kind in ["key", "joy_button"]:
+			var code: Variant = binding.get(kind, null)
+			if code is int or code is float:
+				var numeric_code := int(code)
+				if kind == "key" and numeric_code > 0 and numeric_code <= KEY_MAX:
+					sanitized[kind] = numeric_code
+				elif kind == "joy_button" and numeric_code >= 0 and numeric_code < JOY_BUTTON_MAX:
+					sanitized[kind] = numeric_code
+		if not sanitized.is_empty():
+			result[action_name] = sanitized
+	return result

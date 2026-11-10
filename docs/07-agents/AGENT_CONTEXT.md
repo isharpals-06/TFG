@@ -18,8 +18,8 @@ Exploration, fair observation-led puzzles, safe experimentation, occasional mult
 
 ## Technical baseline
 
-Godot 4.7.2 stable, GDScript, Windows PC, keyboard/controller, provisional 320×180 canvas and 32×16 isometric tile, local JSON save, Git repository supplied by creator. Figma/Canva are optional. Only the title illustration is generated art at this stage; in-game shapes remain placeholders.
+Godot 4.7.2 stable, GDScript, Windows PC, keyboard/controller, 320×180 logical canvas, local JSON save, Git repository supplied by creator. Figma/Canva are optional. Original generated backgrounds cover the title and current route; traveler and Beth have generated sprite assets with simple in-engine motion. Puzzle marks and interface pieces are drawn in GDScript. No third-party game assets are included.
 
 ## Status
 
-The first route and core prototypes are in the workspace. The 2–3 hour content target, full art/audio, runtime review, and Windows release remain incomplete.
+The nine-location route, optional garden, seven main puzzle mechanisms, optional chime puzzle, keepsakes, field journal, companion hints, and local save/settings systems are in the workspace. Optional environmental records now trace the valley's evacuation without explaining the traveler's past. The 2–3 hour content target, full animation, final audio, runtime review, accessibility review, and Windows release remain incomplete. Do not claim release readiness until those gaps are closed.

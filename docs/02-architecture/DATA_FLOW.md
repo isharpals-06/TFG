@@ -18,6 +18,6 @@ Take item → add if a slot is free → otherwise open the exchange panel → pr
 
 ## Save
 
-Persistent state → JSON version 2 in Godot's per-user data directory. Writes use a temporary file and a `.bak` fallback. Autosave runs every 30 seconds during a journey and state-changing interactions save immediately. Continue loads the data before resuming the route.
+Persistent state → JSON version 3 in Godot's per-user data directory. Writes use a temporary file and a `.bak` fallback. Autosave runs every 30 seconds during active play and state-changing interactions save immediately. Continue restores the current area and bounded player position, falling back to story progress for invalid checkpoints.
 
-The current save does not store an exact player position; resuming returns the player to the current area's safe entry point.
+Playtime pauses while journal, inventory, hints, pause, and ending overlays are open.

@@ -1,6 +1,9 @@
 extends CharacterBody2D
 class_name Traveler
 
+const TRAVELER_SPRITE: Texture2D = preload("res://design/assets/traveler_sprite.png")
+const TRAVELER_WALK_SPRITE: Texture2D = preload("res://design/assets/traveler_walk.png")
+
 signal moved(direction: Vector2)
 
 @export var walk_speed: float = 48.0
@@ -41,20 +44,13 @@ func set_movement_enabled(value: bool) -> void:
 	movement_enabled = value
 
 func _draw() -> void:
-	var bob := 1 if velocity.length() > 2.0 and int(_anim_time) % 2 == 0 else 0
-	var cloak := Color("#5a6a5b") if RunState.presentation == 0 else Color("#52637b")
-	var cloak_light := Color("#829079") if RunState.presentation == 0 else Color("#7c91b4")
-	var shadow := Color(0.04, 0.07, 0.075, 0.52)
-	draw_rect(Rect2(-7, -2, 14, 4), shadow)
-	draw_rect(Rect2(-5, -15 + bob, 10, 7), Color("#202b32"))
-	draw_rect(Rect2(-4, -14 + bob, 8, 6), Color("#d4b38d"))
-	draw_rect(Rect2(-5, -15 + bob, 10, 3), Color("#303c46"))
-	draw_rect(Rect2(-6, -9 + bob, 12, 9), cloak)
-	draw_rect(Rect2(-5, -8 + bob, 3, 7), cloak_light)
-	draw_rect(Rect2(-4, -1, 3, 4), Color("#292e35"))
-	draw_rect(Rect2(1, -1, 3, 4), Color("#292e35"))
-	draw_rect(Rect2(-3, -13 + bob, 1, 1), Color("#3a302c"))
-	draw_rect(Rect2(2, -13 + bob, 1, 1), Color("#3a302c"))
-	if velocity.length() > 2.0 and int(_anim_time) % 2 == 0:
-		draw_rect(Rect2(-5, 2, 3, 2), Color("#292e35"))
-		draw_rect(Rect2(2, 1, 3, 2), Color("#292e35"))
+	var reduced_motion := bool(RunState.settings.get("reduced_motion", false))
+	var walking := velocity.length() > 2.0
+	var step_pose := walking and int(_anim_time * 0.5) % 2 == 0 and not reduced_motion
+	var bob := 1.0 if step_pose else 0.0
+	var tint := Color.WHITE if RunState.presentation == 0 else Color("#c7d4ed")
+	draw_rect(Rect2(-8, -2, 16, 4), Color(0.04, 0.07, 0.075, 0.42))
+	if step_pose:
+		draw_texture_rect_region(TRAVELER_WALK_SPRITE, Rect2(-9, -29 + bob, 18, 32), Rect2(205, 305, 535, 1000), tint)
+	else:
+		draw_texture_rect_region(TRAVELER_SPRITE, Rect2(-9, -29, 18, 32), Rect2(235, 245, 555, 1120), tint)

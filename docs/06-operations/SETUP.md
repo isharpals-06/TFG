@@ -15,7 +15,7 @@
 4. Open the project and press **F5** to start at the title screen.
 5. To run an individual scene from the editor, select it and press **F6**.
 
-The creator's workspace contains an extracted Godot 4.7.2 editor folder at the project root. It is ignored by Git and is not part of the source distribution.
+The creator's workspace contains an extracted Godot 4.7.2 editor folder at the project root. It is ignored by Git and is not part of the source distribution. A local Windows x86_64 build can be exported with the preset and command in [Deployment](DEPLOYMENT.md); the current build has not been runtime-reviewed.
 
 ## Local data
 

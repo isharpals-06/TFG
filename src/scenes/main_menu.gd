@@ -105,38 +105,74 @@ func _show_identity_choice() -> void:
 	note.size = Vector2(272, 18)
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_view_root.add_child(note)
-	_add_button("Moss mantle", Vector2(72, 82), _begin_journey.bind(0))
-	_add_button("Mist mantle", Vector2(72, 105), _begin_journey.bind(1))
+	_add_button("Moss mantle", Vector2(72, 82), _select_identity.bind(0))
+	_add_button("Mist mantle", Vector2(72, 105), _select_identity.bind(1))
 	_add_button("Back", Vector2(72, 132), _show_main_menu)
+
+func _select_identity(choice: int) -> void:
+	if RunState.has_save():
+		_show_new_journey_confirmation(choice)
+	else:
+		_begin_journey(choice)
+
+func _show_new_journey_confirmation(choice: int) -> void:
+	_clear_view()
+	_add_centered_title("Begin again?", 30)
+	var warning := _label("This will replace the saved journey on this device.", 7, Color("#d5bd97"))
+	warning.position = Vector2(27, 54)
+	warning.size = Vector2(266, 24)
+	warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_view_root.add_child(warning)
+	_add_button("Replace save and begin", Vector2(84, 91), _begin_journey.bind(choice))
+	_add_button("Keep saved journey", Vector2(84, 116), _show_identity_choice)
 
 func _show_controls() -> void:
 	_clear_view()
 	_add_centered_title("Controls", 26)
-	var movement := _label("Move: WASD / arrows / stick   Camera: Z/C, +/-", 6, Color("#bdc9c0"))
-	movement.position = Vector2(19, 43)
+	var movement := _label("Left stick works by default. Select a row to remap keys or buttons.", 6, Color("#bdc9c0"))
+	movement.position = Vector2(19, 41)
 	movement.size = Vector2(282, 12)
 	_view_root.add_child(movement)
 	var remappable := [
-		["run", "Run"], ["examine", "Examine"], ["pick_up", "Take"],
-		["activate", "Activate"], ["journal", "Journal"], ["hints", "Beth's hints"]
+		["move_left", "Move left"], ["move_right", "Move right"],
+		["move_up", "Move up"], ["move_down", "Move down"], ["run", "Run"],
+		["examine", "Examine"], ["pick_up", "Take"], ["activate", "Activate"],
+		["use_item", "Use keepsake"], ["inventory", "Keepsakes"],
+		["journal", "Journal"], ["hints", "Beth's hints"], ["pause", "Pause"],
+		["camera_left", "Turn camera left"], ["camera_right", "Turn camera right"],
+		["zoom_in", "Zoom in"], ["zoom_out", "Zoom out"],
+		["camera_snap_toggle", "Snap camera turns"]
 	]
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(18, 55)
+	scroll.size = Vector2(284, 95)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	_view_root.add_child(scroll)
+	var rows := VBoxContainer.new()
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rows.add_theme_constant_override("separation", 1)
+	scroll.add_child(rows)
 	for index in range(remappable.size()):
 		var action_name: String = remappable[index][0]
 		var display_name: String = remappable[index][1]
-		var row_y := 56.0 + index * 13.0
-		var row := _label("%s   %s" % [display_name, RunState.get_binding_text(action_name)], 7, Color("#d4d7cc"))
-		row.position = Vector2(35, row_y + 2)
-		row.size = Vector2(150, 12)
-		_view_root.add_child(row)
+		var row := HBoxContainer.new()
+		row.custom_minimum_size = Vector2(260, 13 + (2 if RunState.settings.get("large_text", false) else 0))
+		row.add_theme_constant_override("separation", 3)
+		rows.add_child(row)
+		var label := _label("%s   %s" % [display_name, RunState.get_binding_text(action_name)], 7, Color("#d4d7cc"))
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(label)
 		var change := Button.new()
 		change.text = "Change"
-		change.position = Vector2(210, row_y)
-		change.size = Vector2(76, 15)
+		change.custom_minimum_size = Vector2(68, 13 + (2 if RunState.settings.get("large_text", false) else 0))
 		change.focus_mode = Control.FOCUS_ALL
-		change.add_theme_font_size_override("font_size", 7)
+		change.add_theme_font_size_override("font_size", 7 if not RunState.settings.get("large_text", false) else 9)
 		change.pressed.connect(_begin_rebind.bind(action_name))
-		_view_root.add_child(change)
-	_add_button("Back", Vector2(116, 158), _show_main_menu)
+		row.add_child(change)
+	_add_button("Back", Vector2(116, 153), _show_main_menu)
 
 func _begin_rebind(action_name: String) -> void:
 	waiting_for_action = action_name
@@ -148,8 +184,8 @@ func _set_rebind_status(message: String) -> void:
 		old_message.queue_free()
 	var label := _label(message, 6, Color("#d5c59a"))
 	label.name = "RebindStatus"
-	label.position = Vector2(18, 139)
-	label.size = Vector2(284, 12)
+	label.position = Vector2(18, 41)
+	label.size = Vector2(284, 12 + (2 if RunState.settings.get("large_text", false) else 0))
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_view_root.add_child(label)
 

@@ -7,7 +7,7 @@ Planned runtime checks; none executed:
 - Examine clues and confirm journal IDs are recorded once.
 - Take each keepsake; fill the four slots; exchange a non-story item; verify the medallion cannot be dropped.
 - Select and inspect items; use each authored item/target combination; try a mismatched item.
-- Solve the ruins sequence, orchard sluices, and archive lenses; confirm safe wrong attempts and saved progress.
+- Solve the ruins sequence, orchard sluices, empty-quarter household niches, and archive lenses; confirm safe wrong attempts and saved progress.
 - Use each hint level repeatedly; confirm later requests leave stronger traces, local echo recedes after a solved puzzle, and main progress remains possible.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.

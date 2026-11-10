@@ -4,9 +4,9 @@ An isometric exploration and puzzle adventure about a silent traveler, a sleepin
 
 ## Project status
 
-The project is in active development. A first end-to-end route connects the crossing, ruins, orchard, archive, and observatory and reaches the planned inscription cliffhanger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented in the prototype.
+The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Planting the orchard seed also opens an optional hidden garden. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
 
-The intended 2–3 hour experience, full art and audio pass, complete puzzle set, and release build are still outstanding. The current route has not been timed or reviewed in a runtime playthrough; it is not a finished release.
+The current route is shorter than the intended 2–3 hour experience. Character animation and audio still need production passes, and no runtime playthrough or release review has been completed. An initial local Windows export exists under `build/`; it has not been runtime-reviewed and is not a finished release.
 
 ## Creative direction
 
@@ -22,11 +22,14 @@ The intended 2–3 hour experience, full art and audio pass, complete puzzle set
 - Eight-direction isometric movement, running, camera follow, quarter turns, zoom, and optional snap turns.
 - Separate examine, take, activate, and use-keepsake actions with nearby prompts.
 - Four-slot keepsake inventory, item notes, selection, safe swapping, and a protected story medallion.
-- Persistent first-gate sequence, orchard water puzzle, and archive lens puzzle.
+- Persistent first-gate sequence, orchard water puzzle, four-household empty-quarter puzzle, archive lens puzzle, reflection alignment, four-note bell sequence, and highland vane alignment.
+- Optional restored garden with its own short chime puzzle and memory clues.
+- Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
-- Local clue journal, save/resume, playtime tracking, and autosave.
-- Reduced camera motion, larger text, ambient-audio toggle, and remappable core actions.
-- Procedural ambient layers and event chimes; generated title-screen artwork.
+- A two-pose traveler walk animation, plus Beth's subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
+- Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
+- Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
+- Procedural ambient layers and event chimes; original generated backgrounds for the title, nine main locations, and optional garden.
 
 ## Run the project
 
@@ -34,9 +37,11 @@ The intended 2–3 hour experience, full art and audio pass, complete puzzle set
 2. Open the folder containing `project.godot` in Godot Project Manager.
 3. Press **F6** to run the current scene or **F5** to start from the title screen.
 
-Keyboard defaults: WASD or arrows move; Shift runs; E examines; F takes; Space activates; U uses the selected keepsake; I opens keepsakes; J opens the journal; H opens Beth's hints; Escape pauses. The Controls screen lets you rebind the core actions. Controller defaults are shown there too.
+Keyboard defaults: WASD or arrows move; Shift runs; E examines; F takes; Space activates; U uses the selected keepsake; I opens keepsakes; J opens the journal; H opens Beth's hints; Escape pauses. The Controls screen lets you rebind movement, interaction, menus, and camera actions. Controller defaults are shown there too.
 
 Godot-generated import data is excluded from Git. No external account or network service is needed to run the game.
+
+To rebuild the local Windows x86_64 executable, install the matching Godot export template and run `powershell -ExecutionPolicy Bypass -File scripts/export_windows.ps1`. The output goes to the ignored `build/` folder. See [deployment notes](docs/06-operations/DEPLOYMENT.md).
 
 ## Project map
 
@@ -44,7 +49,7 @@ Godot-generated import data is excluded from Git. No external account or network
 - `src/audio/` generated ambient sound and event chimes.
 - `src/core/` input, settings, save data, inventory, journal IDs, and hint state.
 - `src/scenes/` title, journey, and cliffhanger scenes.
-- `design/assets/` original project artwork and asset notes.
+- `design/assets/` original project backgrounds, import metadata, and asset credits.
 - `design/references/` inspiration links only; these images are not included game assets.
 - `docs/` product, architecture, design, production, QA, operations, and handoff notes.
 

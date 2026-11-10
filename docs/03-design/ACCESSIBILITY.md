@@ -3,7 +3,7 @@
 ## Implemented in the prototype
 
 - Keyboard and controller defaults for movement and core actions.
-- Remapping for Run, Examine, Take, Activate, Journal, and Beth's hints.
+- Remapping for movement, run, examine, take, activate, keepsakes, journal, hints, pause, camera turns, zoom, and camera snap.
 - Larger-text toggle.
 - Reduced-motion option that reduces Beth bobbing and speeds up camera easing.
 - Camera snap option.
@@ -13,7 +13,7 @@
 ## Still required
 
 - Review all menus and the full route with keyboard and controller.
-- Add remapping for movement, camera, inventory, item use, and pause.
+- Review every remappable action and the matching on-screen prompt after a custom binding is chosen.
 - Check text at every supported display scale and prevent clipping with larger text.
 - Keep low-vision puzzle clues legible and distinct without color alone.
 - Add optional UI-scale choice and check controller focus order.

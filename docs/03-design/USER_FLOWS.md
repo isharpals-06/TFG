@@ -2,7 +2,11 @@
 
 ## Start and resume
 
-Title → Begin → choose Moss or Mist mantle → crossing scene. Continue loads local state and returns to the current area's entry point. Pause → Resume or Save and Return to Title.
+Title → Begin → choose Moss or Mist mantle → crossing scene. If a save already exists, the game asks before replacing it. Continue loads local state and restores the latest checkpoint. Pause → Resume or Save and Return to Title.
+
+## Main route and optional branch
+
+Crossing → ruins → orchard → empty quarter → archive → reflection gallery → bell garden → highland steps → observatory. Restore the orchard water, return household objects to their village niches, and descend through the well to continue. Planting the pale seed opens the optional quiet garden; solve its chime puzzle or return to the orchard at any time.
 
 ## Explore
 

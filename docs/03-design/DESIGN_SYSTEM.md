@@ -25,4 +25,4 @@
 
 ## Current state
 
-The current in-world environment, characters, and interface are drawn from simple script shapes. The title image is a generated illustration scaled with nearest filtering. This is a style exploration, not a finished matching asset set; a production sprite/tile pass remains.
+All nine main locations and the optional garden use original generated pixel-art-style backgrounds. Traveler and Beth use original pixel-art sprites; the traveler has a resting pose and an alternate walking pose, and Beth has reduced-motion-aware floating, nearby-object investigation, and discovery movement. Puzzle marks and much of the interface are drawn in GDScript. The game remains a prototype: character frame coverage, tile-level animation, and a final polish pass remain.

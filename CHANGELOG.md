@@ -1,17 +1,24 @@
 # Changelog
 
-Project changes are recorded here. No versioned release has been published.
+No versioned release has been published.
 
 ## Unreleased
 
 ### Added
+
 - Godot 4.7.2 project, title menu, two traveler color choices, movement, camera controls, Beth, journal, and a first puzzle route.
-- Crossing, ruins, orchard, archive, observatory, and the animated inscription cliffhanger.
-- Four-slot keepsake inventory with item descriptions, selection, dropping, safe swaps, and several optional item interactions.
-- Pause menu, saved playtime, 30-second autosave, versioned save loading, and controls rebinding for core actions.
-- Hint consequences that accumulate across the journey and ease locally when a puzzle is solved.
-- Area-specific procedural ambience and generated event chimes.
-- Original generated title-screen background and asset-credit note.
+- Crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and the animated inscription cliffhanger.
+- Seven main puzzle mechanisms and an optional seed-restored garden with a three-note chime puzzle.
+- Four-slot keepsake inventory with item descriptions, selection, dropping, safe swaps, and optional item interactions.
+- Pause, saved playtime, autosave, versioned save loading, hint echoes, and procedural ambient audio and event cues.
+- Original generated title and location backgrounds, including the empty quarter, traveler and Beth sprites, and asset-credit notes.
+- Optional valley-history discoveries across the route and scrollable field notes.
+- Remapping for movement, interaction, inventory, journal, hints, pause, and camera actions; prompts reflect current bindings.
+- Subtle Beth float and discovery reactions, with reduced-motion behavior.
+- Version 3 saves resume at the current room and position; playtime pauses while menus are open.
+- Windows x86_64 export preset and local single-file release build; runtime review remains due.
 
 ### In progress
-- The route, art, audio, puzzles, accessibility, and release process still need content expansion and a full review before the 2–3 hour target or release readiness can be claimed.
+
+- Content and puzzle depth for the 2–3 hour target.
+- Full-duration content, final animation/audio, creator runtime and accessibility review, and release materials.

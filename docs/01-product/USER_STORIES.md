@@ -6,6 +6,8 @@
 - As a player, I want environmental cues to encourage discovery without constant markers.
 - As a player, I want optional branches to reward curiosity without blocking the main route.
 - As a player, I want to revisit nearby details where the route allows.
+- As a player, I want an optional restored place to explore without blocking the main journey.
+- As a player, I want small records of ordinary life to help me picture the valley's past without explaining the traveler.
 
 ## Puzzles and objects
 

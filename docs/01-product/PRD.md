@@ -17,7 +17,7 @@ The Forgotten World is a single-player isometric pixel-art narrative exploration
 For players who enjoy calm exploration, environmental puzzles, atmosphere, and subtle mystery. No combat or time pressure. Players should feel curious, observant, and connected to the world and Beth.
 
 ## Current gameplay baseline
-- One continuous journey; four areas are a planning estimate, not final lore.
+- One continuous journey; the current nine main spaces are an implementation slice, not a fixed limit on the final level plan.
 - Main route leads; optional branches are short. A few return paths permit revisiting discoveries.
 - Direct eight-direction movement mapped to the isometric view; walking and player-controlled running.
 - Low-pressure traversal actions are a future content requirement; they are not in the current route.
@@ -48,4 +48,4 @@ A player can move and interact without unexplained friction; fair clues support 
 
 ## Completion gap
 
-The prototype routes through five named spaces and reaches the planned inscription cliffhanger. It has not been timed or reviewed in a runtime playthrough. Content length, more puzzle depth, consistent production art/audio, complete accessibility review, and a Windows export remain release work.
+The current implementation routes through nine main spaces: crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory, with an optional restored garden. The route has seven main puzzle mechanisms, one optional chime puzzle, optional valley-history records, and generated backgrounds throughout. It has not been timed or reviewed in a runtime playthrough and is shorter than the 2–3 hour target. Character animation, final audio, accessibility review, and runtime review remain release work. An initial local Windows x86_64 export exists but is not runtime-reviewed.

@@ -1,5 +1,10 @@
 ; Engine configuration file.
-; The Forgotten World - first playable project baseline.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -8,6 +13,7 @@ config_version=5
 config/name="The Forgotten World"
 run/main_scene="res://src/scenes/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://design/assets/app_icon.png"
 
 [autoload]
 
@@ -21,16 +27,11 @@ window/size/viewport_height=180
 window/size/window_width_override=960
 window/size/window_height_override=540
 window/stretch/mode="viewport"
-window/stretch/aspect="keep"
 window/stretch/scale_mode="integer"
-
-[physics]
-
-common/physics_ticks_per_second=60
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/canvas_textures/default_texture_filter=0
 environment/defaults/default_clear_color=Color(0.035, 0.047, 0.065, 1)

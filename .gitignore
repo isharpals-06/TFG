@@ -5,7 +5,6 @@ Godot_v4.7.2-stable_win64.exe/
 .godot/
 .import/
 export.cfg
-export_presets.cfg
 
 # Build output
 /build/

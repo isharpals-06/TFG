@@ -17,8 +17,8 @@ This is the working requirements baseline for a Windows-first, offline, single-p
 | FR-09 | Beth offers three optional hint levels and reacts to their use. | Prototype implemented. |
 | FR-10 | Hint echoes build, recede locally after puzzle completion, and affect later content and ending details. | Partly implemented: Beth, environment tint, and ending art change; later puzzle variants remain. |
 | FR-11 | Camera follow, limited zoom, isometric turns, snap option, and occlusion handling. | Follow, zoom, turns, and snap option implemented; reframing and occlusion handling remain. |
-| FR-12 | Keyboard and controller support, with remapping for core actions. | Prototype implemented; movement/camera remapping and device review remain. |
-| FR-13 | Local save/resume preserves progress, clues, inventory, puzzles, hint state, playtime, and settings. | Versioned JSON with periodic autosave and backup fallback; exact-position restore and deeper nested-data validation remain. |
+| FR-12 | Keyboard and controller support, with remapping for movement and core actions. | Remapping is implemented for movement, interaction, inventory, journal, hints, pause, and camera controls; device review remains. |
+| FR-13 | Local save/resume preserves progress, clues, inventory, puzzles, hint state, playtime, settings, and the current checkpoint. | Version 3 JSON stores the room and player position, autosaves during play, falls back to a backup, and validates nested IDs, types, and ranges. Runtime recovery review remains due. |
 
 ## Quality requirements
 
