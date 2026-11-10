@@ -278,7 +278,7 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("moss_button_found", false):
 			crossing_targets.append({"id": "moss_button", "name": "the green brass button", "position": Vector2(190, 250)})
 		if RunState.story_flags.get("medallion_found", false):
-			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(336, 145)})
+			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(490, 123)})
 		if not RunState.story_flags.get("crossing_stone_seen", false):
 			crossing_targets.append({"id": "crossing_stone", "name": "the old roadstone", "position": Vector2(103, 194)})
 		return crossing_targets
@@ -2019,17 +2019,17 @@ func _draw_ground() -> void:
 				draw_rect(Rect2(center.x + 3, center.y - 1, 1, 2), Color("#728d68"))
 
 func _draw_threshold() -> void:
-	# The gold fleck is the only detail that moves against the painted crossing.
+	# Small interactive glints are layered over the crossing background.
 	if not RunState.story_flags.get("medallion_found", false):
 		draw_rect(Rect2(275, 167, 6, 2), Color("#b9aa74"))
 		draw_rect(Rect2(277, 165, 3, 6), Color("#d8ca91"))
 	if RunState.journal_entries.has("crossing_sun_mark"):
-		_draw_symbol(Vector2(336, 123), "seed", Color("#d6c995"))
+		_draw_symbol(Vector2(490, 123), "seed", Color("#d6c995"))
 	if not RunState.story_flags.get("moss_button_found", false):
 		draw_rect(Rect2(188, 248, 4, 3), Color("#788c70"))
 		draw_rect(Rect2(189, 247, 2, 1), Color("#b8aa76"))
 	if RunState.story_flags.get("medallion_found", false):
-		draw_rect(Rect2(330, 136, 12, 2), Color("#9dc2b9"))
+		draw_rect(Rect2(484, 113, 14, 2), Color("#9dc2b9"))
 
 func _draw_ruins() -> void:
 	_draw_inscription(Vector2(72, 150))

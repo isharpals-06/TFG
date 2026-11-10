@@ -14,7 +14,7 @@ Keep the project offline, small, and understandable to a beginner. Prefer Godot'
 
 ## Persistence
 
-Use stable IDs for inventory, clues, puzzles, and story flags. Save locally in versioned JSON. Keep migration behavior when adding or changing data. The current save is schema version 2; safe-position restore and interrupted-write recovery remain outstanding.
+Use stable IDs for inventory, clues, puzzles, and story flags. Save locally in versioned JSON. Keep migration behavior when adding or changing data. The current save is schema version 3, with bounded room/position restore and backup recovery for interrupted writes.
 
 ## Content boundaries
 
