@@ -22,6 +22,7 @@ No versioned release has been published.
 - Mirror shard reveals an optional second archive lens path and hidden keeper's note; the main stair remains open.
 - Traveler's four-frame walk cycle turns left/right with isometric movement and camera turns; Beth has neutral, blink, curious, and happy poses.
 - Larger-text support now applies to journey controls and menu buttons widen to fit longer labels.
+- Area ambience now crossfades between the original procedural loops during room transitions.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress

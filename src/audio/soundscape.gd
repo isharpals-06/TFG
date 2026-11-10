@@ -15,19 +15,20 @@ const AREA_CHORDS := {
 	"observatory": [55.0, 110.0, 164.8, 261.6]
 }
 
-var _ambience_player: AudioStreamPlayer
+var _ambience_players: Array[AudioStreamPlayer] = []
+var _active_ambience_index := 0
+var _ambience_tween: Tween
 var _effect_player: AudioStreamPlayer
 var _effects: Dictionary = {}
 var _area_streams: Dictionary = {}
-var _area_name := "crossing"
+var _area_name := ""
 
 func _ready() -> void:
-	_ambience_player = AudioStreamPlayer.new()
-	_ambience_player.volume_db = -22.0
-	_ambience_player.stream = _get_area_stream(_area_name)
-	add_child(_ambience_player)
-	if RunState.settings.get("ambient_audio", true):
-		_ambience_player.play()
+	for index in range(2):
+		var ambience_player := AudioStreamPlayer.new()
+		ambience_player.volume_db = -60.0
+		_ambience_players.append(ambience_player)
+		add_child(ambience_player)
 	_effect_player = AudioStreamPlayer.new()
 	_effect_player.volume_db = -10.0
 	add_child(_effect_player)
@@ -46,22 +47,57 @@ func play_event(event_name: String) -> void:
 	_effect_player.play()
 
 func set_ambience_enabled(enabled: bool) -> void:
-	if not is_instance_valid(_ambience_player):
+	if _ambience_players.is_empty():
 		return
-	if enabled and not _ambience_player.playing:
-		_ambience_player.play()
-	elif not enabled and _ambience_player.playing:
-		_ambience_player.stop()
+	if not enabled:
+		if is_instance_valid(_ambience_tween) and _ambience_tween.is_running():
+			_ambience_tween.kill()
+		for ambience_player in _ambience_players:
+			ambience_player.stop()
+		return
+	var active_player := _ambience_players[_active_ambience_index]
+	if active_player.stream == null:
+		return
+	active_player.volume_db = -22.0
+	if not active_player.playing:
+		active_player.play()
 
 func set_area(area_name: String) -> void:
 	if not AREA_CHORDS.has(area_name):
 		area_name = "ruins"
-	_area_name = area_name
-	if not is_instance_valid(_ambience_player):
+	if area_name == _area_name:
 		return
-	_ambience_player.stream = _get_area_stream(_area_name)
-	if RunState.settings.get("ambient_audio", true):
-		_ambience_player.play()
+	var previous_area := _area_name
+	_area_name = area_name
+	if _ambience_players.is_empty():
+		return
+	var active_player := _ambience_players[_active_ambience_index]
+	var next_index := 1 - _active_ambience_index
+	var next_player := _ambience_players[next_index]
+	if not RunState.settings.get("ambient_audio", true):
+		active_player.stop()
+		active_player.stream = _get_area_stream(_area_name)
+		active_player.volume_db = -22.0
+		return
+	if previous_area.is_empty() or not active_player.playing or active_player.stream == null:
+		active_player.stream = _get_area_stream(_area_name)
+		active_player.volume_db = -22.0
+		active_player.play()
+		return
+	if is_instance_valid(_ambience_tween) and _ambience_tween.is_running():
+		_ambience_tween.kill()
+	for ambience_player in _ambience_players:
+		if ambience_player != active_player:
+			ambience_player.stop()
+	next_player.stream = _get_area_stream(_area_name)
+	next_player.volume_db = -60.0
+	next_player.play()
+	_ambience_tween = create_tween()
+	_ambience_tween.set_parallel(true)
+	_ambience_tween.tween_property(active_player, "volume_db", -60.0, 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_ambience_tween.tween_property(next_player, "volume_db", -22.0, 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_ambience_tween.chain().tween_callback(func() -> void: active_player.stop())
+	_active_ambience_index = next_index
 
 func _get_area_stream(area_name: String) -> AudioStreamWAV:
 	if not _area_streams.has(area_name):

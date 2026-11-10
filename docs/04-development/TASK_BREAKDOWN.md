@@ -16,6 +16,7 @@
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
+- [x] Crossfade between the existing area ambience loops when the player changes rooms.
 
 ## Core-system work in progress
 
