@@ -2,7 +2,7 @@ extends Node2D
 
 const TRAVELER_SCENE := preload("res://src/scenes/traveler.tscn")
 const BETH_SCENE := preload("res://src/scenes/beth.tscn")
-const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_clearing.png")
+const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_clearing_pixel.png")
 const RUINS_BACKGROUND: Texture2D = preload("res://design/assets/first_ruins.png")
 const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard_dry.png")
 const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")

@@ -4,7 +4,8 @@
 
 - `app_icon.png` — original transparent pixel-art medallion icon generated from a text prompt on 2026-11-10.
 - `title_background.png` — generated with OpenAI image generation on 2026-11-06 and restyled on 2026-11-10 as crisp pixel art from the original generated image; no supplied reference image was used.
-- `crossing_clearing.png` — original generated opening background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
+- `crossing_clearing.png` — earlier generated opening background, retained as an unused comparison draft.
+- `crossing_clearing_pixel.png` — opening background restyled from the crossing draft on 2026-11-10; the arch, altar, path, and forest landmarks are preserved; no supplied reference image was used.
 - `first_ruins.png` — original generated ruin court background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `quiet_orchard_dry.png` — original generated dry orchard background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `empty_quarter.png` — original generated abandoned village square, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
