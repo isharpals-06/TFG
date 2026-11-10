@@ -6,7 +6,7 @@ Movement input → nearest visible target → contextual prompt → examine/take
 
 ## Puzzle
 
-Observe environment → examine a clue → add a clue ID to the journal → experiment without resource loss → update puzzle state → show a visible world response → autosave.
+Observe environment → examine a clue → add a clue ID to the journal → experiment without resource loss → update puzzle state → show a visible world response → autosave. The optional causeway stores progress through its seven-step crossing pattern and supports returning to the orchard mid-puzzle.
 
 ## Hint
 

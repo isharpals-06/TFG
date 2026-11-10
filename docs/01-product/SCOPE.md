@@ -6,7 +6,7 @@ Create a complete beginning, middle, and cliffhanger ending for a calm isometric
 
 ## Current prototype
 
-The current source routes through the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory, with an optional restored garden. It includes seven required puzzle mechanisms, an optional chime puzzle, keepsakes, journal clues, Beth's hints, local saves, original generated location backgrounds, and the inscription cliffhanger. This remains an expanded prototype; the 2–3 hour target and full content scope remain outstanding.
+The current source routes through the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory, with optional restored-garden and reed-causeway branches. The causeway adds a seven-step rhythm crossing and an optional valley-history record before rejoining the village route. The game includes seven required puzzle mechanisms, an optional chime puzzle, keepsakes, journal clues, Beth's hints, local saves, original generated location backgrounds, and the inscription cliffhanger. This remains an expanded prototype; the 2–3 hour target and full content scope remain outstanding.
 
 ## In scope for the full game
 

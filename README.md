@@ -4,7 +4,7 @@ An isometric exploration and puzzle adventure about a silent traveler, a sleepin
 
 ## Project status
 
-The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Planting the orchard seed also opens an optional hidden garden. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
+The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
 
 The current route is shorter than the intended 2–3 hour experience. Character animation and audio still need production passes, and no runtime playthrough or release review has been completed. An initial local Windows export exists under `build/`; it has not been runtime-reviewed and is not a finished release.
 
@@ -24,12 +24,13 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Four-slot keepsake inventory, item notes, selection, safe swapping, and a protected story medallion.
 - Persistent first-gate sequence, orchard water puzzle, four-household empty-quarter puzzle, archive lens puzzle, reflection alignment, four-note bell sequence, and highland vane alignment.
 - Optional restored garden with its own short chime puzzle and memory clues.
+- Optional reed causeway with a seven-step waterline pattern, a return route, a village entrance, and a record about families crossing together.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
 - A two-pose traveler walk animation that turns left/right with movement, plus Beth's subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
 - Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
-- Procedural ambient layers and event chimes; original generated backgrounds for the title, nine main locations, and optional garden.
+- Procedural ambient layers and event chimes; original generated backgrounds for the title, nine main locations, optional garden, and optional causeway.
 
 ## Run the project
 

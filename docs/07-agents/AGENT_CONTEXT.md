@@ -22,4 +22,4 @@ Godot 4.7.2 stable, GDScript, Windows PC, keyboard/controller, 320×180 logical 
 
 ## Status
 
-The nine-location route, optional garden, seven main puzzle mechanisms, optional chime puzzle, keepsakes, field journal, companion hints, and local save/settings systems are in the workspace. Optional environmental records now trace the valley's evacuation without explaining the traveler's past. The 2–3 hour content target, full animation, final audio, runtime review, accessibility review, and Windows release remain incomplete. Do not claim release readiness until those gaps are closed.
+The nine-location route, optional garden, optional reed causeway, seven main puzzle mechanisms, hint-dependent Bell Court and High Steps variants, keepsakes, field journal, companion hints, and local save/settings systems are in the workspace. Optional environmental records now trace the valley's evacuation without explaining the traveler's past. The 2–3 hour content target, full animation, final audio, runtime review, accessibility review, and Windows release remain incomplete. Do not claim release readiness until those gaps are closed.

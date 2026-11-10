@@ -8,6 +8,7 @@
 - `crossing_clearing_pixel.png` — opening background restyled from the crossing draft on 2026-11-10; the arch, altar, path, and forest landmarks are preserved; no supplied reference image was used.
 - `first_ruins.png` — original generated ruin court background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `quiet_orchard_dry.png` — original generated dry orchard background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
+- `reed_causeway.png` — original generated pixel-art background for the optional causeway, generated on 2026-11-10 from a text prompt; no supplied reference image was used.
 - `empty_quarter.png` — original generated abandoned village square, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `under_archive.png` — original generated archive background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `gallery_reflection_hall.png` — original generated reflection gallery background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.

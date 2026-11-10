@@ -12,6 +12,7 @@
 - [x] Add the highland approach and wind-vane alignment before the observatory.
 - [x] Add clue journal, three hint levels, initial escalating hint trace, and generated sound cues.
 - [x] Add generated backgrounds for the title and all nine main locations plus the optional garden, with asset credits.
+- [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or into the village.
 - [x] Add a two-pose traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 
 ## Core-system work in progress
