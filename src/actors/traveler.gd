@@ -27,7 +27,7 @@ func _physics_process(delta: float) -> void:
 	if iso_direction.length() > 1.0:
 		iso_direction = iso_direction.normalized()
 	if input_direction.length() > 0.01:
-		facing = input_direction
+		facing = iso_direction
 		var speed := run_speed if Input.is_action_pressed("run") else walk_speed
 		velocity = iso_direction * speed
 		_anim_time += delta * (12.0 if speed == run_speed else 8.0)
@@ -50,7 +50,9 @@ func _draw() -> void:
 	var bob := 1.0 if step_pose else 0.0
 	var tint := Color.WHITE if RunState.presentation == 0 else Color("#c7d4ed")
 	draw_rect(Rect2(-8, -2, 16, 4), Color(0.04, 0.07, 0.075, 0.42))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < -0.05 else 1.0, 1.0))
 	if step_pose:
 		draw_texture_rect_region(TRAVELER_WALK_SPRITE, Rect2(-9, -29 + bob, 18, 32), Rect2(205, 305, 535, 1000), tint)
 	else:
 		draw_texture_rect_region(TRAVELER_SPRITE, Rect2(-9, -29, 18, 32), Rect2(235, 245, 555, 1120), tint)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
