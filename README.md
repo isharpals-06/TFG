@@ -25,6 +25,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Persistent first-gate sequence, orchard water puzzle, four-household empty-quarter puzzle, archive lens puzzle, reflection alignment, four-note bell sequence, and highland vane alignment.
 - Optional restored garden with its own short chime puzzle and memory clues.
 - Optional reed causeway with a seven-step waterline pattern, a return route, a village entrance, and a record about families crossing together.
+- Optional archive reflection puzzle unlocked by the mirror shard, revealing a hidden keeper's note without touching the main route.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.

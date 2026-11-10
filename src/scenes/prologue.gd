@@ -16,6 +16,7 @@ const OBSERVATORY_BACKGROUND: Texture2D = preload("res://design/assets/roofless_
 const WORLD_SIZE := Vector2(640, 360)
 const PUZZLE_ORDER := ["moon", "water", "seed"]
 const ARCHIVE_SOLUTION := {"west": 1, "center": 2, "east": 3}
+const ARCHIVE_FOURTH_PATH_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
 const GALLERY_SOLUTION := {"west": 0, "center": 2, "east": 3}
 const HIGH_STEPS_SOLUTION := {"west": 3, "center": 0, "east": 1}
@@ -358,7 +359,13 @@ func _get_targets() -> Array[Dictionary]:
 			archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 220)})
 			archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(525, 220)})
 		else:
+			if RunState.journal_entries.has("archive_second_image") and not RunState.story_flags.get("archive_fourth_path_solved", false):
+				archive_targets.append({"id": "lens_west", "name": "the western lens", "position": Vector2(145, 220)})
+				archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 220)})
+				archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(525, 220)})
 			archive_targets.append({"id": "archive_stair", "name": "the revealed stair", "position": Vector2(320, 142)})
+		if RunState.story_flags.get("archive_fourth_path_solved", false) and not RunState.story_flags.get("archive_hidden_ledger_seen", false):
+			archive_targets.append({"id": "archive_hidden_ledger", "name": "a leaf on the low shelf", "position": Vector2(72, 205)})
 		if not RunState.story_flags.get("mirror_shard_found", false):
 			archive_targets.append({"id": "mirror_shard", "name": "a silvered glass shard", "position": Vector2(566, 264)})
 		if not RunState.story_flags.get("archive_last_entry_seen", false):
@@ -522,6 +529,8 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  look into the well     %s  descend" % [_action_mark("examine"), _action_mark("activate")]
 		"archive_mural":
 			prompt_label.text = "%s  study the reflected shapes" % _action_mark("examine")
+		"archive_hidden_ledger":
+			prompt_label.text = "%s  read the loose leaf" % _action_mark("examine")
 		"archive_memory":
 			prompt_label.text = "%s  listen to the reflecting pool" % _action_mark("examine")
 		"lens_west", "lens_center", "lens_east":
@@ -693,6 +702,8 @@ func _examine_target() -> void:
 			_set_status("A silvered shard reflects the room as it might have looked before the roof fell.")
 		"archive_last_entry":
 			_reveal_world_memory("archive_last_entry_seen", "archive_last_entry", "The last catalogue line says: carry the books east; leave one lamp in the doorway.")
+		"archive_hidden_ledger":
+			_reveal_world_memory("archive_hidden_ledger_seen", "archive_hidden_register", "A loose leaf is headed “Borrowed skies.” Its last line asks the keeper to leave the east windows uncovered so the final light has somewhere to go.")
 		"lens_west":
 			_set_status("The western lens can turn through four resting positions.")
 		"lens_center":
@@ -914,7 +925,7 @@ func _use_selected_item() -> void:
 		return
 	if target.id == "archive_mural" and item_id == "mirror_shard":
 		_record_clue_animated("archive_second_image")
-		_set_status("In the shard, a fourth path crosses the ceiling map and ends at the empty pool.")
+		_set_status("In the shard, a fourth path crosses the ceiling map: west points north, center east, and east south.")
 		return
 	if target.id == "archive_memory" and item_id == "river_glass":
 		_record_clue_animated("river_glass_memory")
@@ -1476,20 +1487,34 @@ func _rotate_archive_lens(which: String) -> void:
 	RunState.puzzle_progress["archive_lenses"] = lenses
 	RunState.save_game()
 	Soundscape.play_event("resonance")
-	var aligned := true
-	for name in ["west", "center", "east"]:
-		if int(lenses.get(name, 0)) != int(ARCHIVE_SOLUTION[name]):
-			aligned = false
-	if aligned:
-		RunState.set_story_flag("archive_puzzle_solved")
-		RunState.record_clue("archive_hidden_stair")
-		RunState.reset_local_hint_echo()
-		beth.react_to_discovery()
-		Soundscape.play_event("complete")
-		_set_status("The reflections meet. A stair appears where the light touches the floor.")
-		_update_objective()
+	if not RunState.story_flags.get("archive_puzzle_solved", false):
+		var aligned := true
+		for name in ["west", "center", "east"]:
+			if int(lenses.get(name, 0)) != int(ARCHIVE_SOLUTION[name]):
+				aligned = false
+		if aligned:
+			RunState.set_story_flag("archive_puzzle_solved")
+			RunState.record_clue("archive_hidden_stair")
+			RunState.reset_local_hint_echo()
+			beth.react_to_discovery()
+			Soundscape.play_event("complete")
+			_set_status("The reflections meet. A stair appears where the light touches the floor.")
+			_update_objective()
+		else:
+			_set_status("The light slips across the water and settles into another angle.")
 	else:
-		_set_status("The light slips across the water and settles into another angle.")
+		var fourth_path_aligned := true
+		for name in ["west", "center", "east"]:
+			if int(lenses.get(name, 0)) != int(ARCHIVE_FOURTH_PATH_SOLUTION[name]):
+				fourth_path_aligned = false
+		if fourth_path_aligned:
+			RunState.set_story_flag("archive_fourth_path_solved")
+			_record_clue_animated("archive_fourth_path")
+			beth.react_to_discovery()
+			Soundscape.play_event("complete")
+			_set_status("A narrow beam slips beneath the shelf. Something pale rests in the newly lit space.")
+		else:
+			_set_status("The extra reflection skims the pool and falls away.")
 	queue_redraw()
 
 func _activate_resonator(symbol: String) -> void:
@@ -1811,13 +1836,19 @@ func _give_hint(level: int) -> void:
 			3:
 				hint_text = "Point the western sluice east, the northern sluice south, and the eastern sluice west."
 	elif phase == "archive":
-		match level:
-			1:
-				hint_text = "Beth watches the three lenses without blinking."
-			2:
-				hint_text = "The ceiling shows right, down, then left."
-			3:
-				hint_text = "Point west right, center down, and east left."
+		if RunState.story_flags.get("archive_puzzle_solved", false) and RunState.journal_entries.has("archive_second_image"):
+			match level:
+				1: hint_text = "Beth follows the shard's pale line back over the three lenses."
+				2: hint_text = "The fourth reflection points north from west, east from center, and south from east."
+				3: hint_text = "Turn west north, center east, and east south."
+		else:
+			match level:
+				1:
+					hint_text = "Beth watches the three lenses without blinking."
+				2:
+					hint_text = "The ceiling shows right, down, then left."
+				3:
+					hint_text = "Point west right, center down, and east left."
 	elif phase == "gallery":
 		match level:
 			1:
@@ -1944,6 +1975,7 @@ func _record_clue_animated(clue_id: String) -> void:
 		Soundscape.play_event("journal")
 		beth.react_to_discovery()
 		_animate_journal_signal()
+	queue_redraw()
 
 func _reveal_world_memory(flag_name: String, clue_id: String, message: String) -> void:
 	RunState.set_story_flag(flag_name)
@@ -2025,7 +2057,11 @@ func _clue_text(clue_id: String) -> String:
 		"quiet_garden_memory":
 			return "A small green shoot returned where the orchard channels meet."
 		"archive_second_image":
-			return "A silvered shard shows one more path in the archive ceiling."
+			return "In the silvered shard, a fourth archive path points north from west, east from center, and south from east."
+		"archive_fourth_path":
+			return "A fourth path of reflected light opens a narrow shelf beneath the archive's western wall."
+		"archive_hidden_register":
+			return "A loose leaf is headed “Borrowed skies.” Its final line asks the keeper to leave the east windows uncovered so the last light has somewhere to go."
 		"river_glass_memory":
 			return "Green river glass catches a hidden thread beneath the pool's false sky."
 		"bead_resonance":
@@ -2357,6 +2393,9 @@ func _draw_archive() -> void:
 	_draw_archive_lens(Vector2(145, 213), "west")
 	_draw_archive_lens(Vector2(320, 213), "center")
 	_draw_archive_lens(Vector2(525, 213), "east")
+	if RunState.journal_entries.has("archive_second_image") and not RunState.story_flags.get("archive_fourth_path_solved", false):
+		for name in ["west", "center", "east"]:
+			_draw_arrow(_archive_lens_position(name) + Vector2(0, -13), int(ARCHIVE_FOURTH_PATH_SOLUTION[name]), Color("#91b9bf"))
 	if RunState.story_flags.get("archive_puzzle_solved", false):
 		draw_line(Vector2(145, 220), Vector2(320, 211), Color("#a9d7cc"), 1.0)
 		draw_line(Vector2(320, 211), Vector2(525, 220), Color("#a9d7cc"), 1.0)
@@ -2368,6 +2407,10 @@ func _draw_archive() -> void:
 	if not RunState.story_flags.get("mirror_shard_found", false):
 		draw_rect(Rect2(564, 263, 5, 3), Color("#97babb"))
 		draw_rect(Rect2(565, 262, 2, 1), Color("#d6e4da"))
+	if RunState.story_flags.get("archive_fourth_path_solved", false):
+		draw_line(Vector2(145, 220), Vector2(78, 204), Color("#b0d3cd"), 1.0)
+		draw_rect(Rect2(68, 201, 10, 2), Color("#c9c2a0"))
+		draw_rect(Rect2(70, 199, 5, 2), Color("#e0dcc4"))
 
 func _draw_archive_arrows(pos: Vector2) -> void:
 	_draw_arrow(pos + Vector2(-12, 0), 1, Color("#c2c09c"))
@@ -2377,10 +2420,18 @@ func _draw_archive_arrows(pos: Vector2) -> void:
 func _draw_archive_lens(pos: Vector2, name: String) -> void:
 	var lenses: Dictionary = RunState.puzzle_progress.get("archive_lenses", {})
 	var direction := int(lenses.get(name, 0))
-	var aligned: bool = direction == int(ARCHIVE_SOLUTION[name]) or RunState.story_flags.get("archive_puzzle_solved", false)
+	var aligned: bool = direction == int(ARCHIVE_SOLUTION[name])
+	if RunState.story_flags.get("archive_puzzle_solved", false):
+		aligned = RunState.story_flags.get("archive_fourth_path_solved", false) or not RunState.journal_entries.has("archive_second_image") or direction == int(ARCHIVE_FOURTH_PATH_SOLUTION[name])
 	_draw_arrow(pos, direction, Color("#e0e0c4") if aligned else Color("#718985"))
 	if aligned:
 		draw_rect(Rect2(pos.x - 8, pos.y + 7, 16, 1), Color("#a9d7cc"))
+
+func _archive_lens_position(name: String) -> Vector2:
+	match name:
+		"west": return Vector2(145, 213)
+		"center": return Vector2(320, 213)
+		_: return Vector2(525, 213)
 
 func _draw_gallery() -> void:
 	# Small runes sit on the three mirror faces painted into the background.
