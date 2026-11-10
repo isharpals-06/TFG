@@ -18,7 +18,7 @@ Observe → examine a clue → clue enters the journal → experiment freely →
 
 ## Hints
 
-H → select level 1, 2, or 3 (or press its number while the panel is open) → receive Beth's hint. Every request adds a stronger echo over time. Solving a puzzle clears local intensity; the world-wide trace remains.
+After Beth wakes, H → select level 1, 2, or 3 (or press its number while the panel is open) → receive Beth's hint. Before then, the quiet gives no answer and adds no penalty. Every request adds a stronger echo over time. Solving a puzzle clears local intensity; the world-wide trace remains.
 
 ## Keepsakes
 

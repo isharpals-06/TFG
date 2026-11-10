@@ -524,7 +524,7 @@ func _sanitize_bindings(value: Dictionary) -> Dictionary:
 		if binding.has("kind") and binding.get("code", null) is int:
 			var legacy_kind := str(binding.get("kind", ""))
 			var legacy_code := int(binding["code"])
-			if legacy_kind == "key" and legacy_code > 0 and legacy_code <= KEY_MAX:
+			if legacy_kind == "key" and legacy_code > 0 and legacy_code <= KEY_CODE_MASK:
 				sanitized["key"] = legacy_code
 			elif legacy_kind == "joy_button" and legacy_code >= 0 and legacy_code < JOY_BUTTON_MAX:
 				sanitized["joy_button"] = legacy_code
@@ -532,7 +532,7 @@ func _sanitize_bindings(value: Dictionary) -> Dictionary:
 			var code: Variant = binding.get(kind, null)
 			if code is int or code is float:
 				var numeric_code := int(code)
-				if kind == "key" and numeric_code > 0 and numeric_code <= KEY_MAX:
+				if kind == "key" and numeric_code > 0 and numeric_code <= KEY_CODE_MASK:
 					sanitized[kind] = numeric_code
 				elif kind == "joy_button" and numeric_code >= 0 and numeric_code < JOY_BUTTON_MAX:
 					sanitized[kind] = numeric_code

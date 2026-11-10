@@ -1591,6 +1591,9 @@ func _swap_pending_item(old_item_id: String) -> void:
 func _open_hint_panel() -> void:
 	if hint_panel != null or transitioning:
 		return
+	if not RunState.story_flags.get("beth_awake", false):
+		_set_status("The quiet offers no reply yet.")
+		return
 	traveler.set_movement_enabled(false)
 	RunState.set_journey_active(false)
 	hint_panel = PanelContainer.new()
