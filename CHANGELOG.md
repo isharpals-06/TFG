@@ -18,8 +18,11 @@ No versioned release has been published.
 - Version 3 saves resume at the current room and position; playtime pauses while menus are open.
 - Reduced-motion support now removes journey fades and sliding interface panels and resolves the inscription without scrambling.
 - Heavy hint use can add an extra Bell Court note and alter the High Steps map; both variants are shown in the world, journal, and Beth's hints.
-- Traveler's two-pose walk cycle now turns left/right with isometric movement and camera turns.
-- Windows x86_64 export preset and local single-file release build; runtime review remains due.
+- Optional reed causeway adds a seven-step waterline crossing, a safe return, village entrance, and valley-history record.
+- Mirror shard reveals an optional second archive lens path and hidden keeper's note; the main stair remains open.
+- Traveler's four-frame walk cycle turns left/right with isometric movement and camera turns; Beth has neutral, blink, curious, and happy poses.
+- Larger-text support now applies to journey controls and menu buttons widen to fit longer labels.
+- Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress
 

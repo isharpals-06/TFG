@@ -2,23 +2,23 @@
 
 ## Current state
 
-Workspace: `C:\Users\ishar\Projects\GGG`. Local Git branch `main` contains committed milestones for the initial route and later inventory, save, controls, audio, artwork, and documentation work. The remote is `https://github.com/isharpals-06/TFG.git`; it was bootstrapped through the connected GitHub integration. The latest local work still needs to be synced after it is committed.
+Workspace: `C:\Users\ishar\Projects\GGG`. Active local branch: `codex/forgotten-world-repo-sync`, reconciled with `origin/main` so it can be reviewed against the supplied repository. The remote is `https://github.com/isharpals-06/TFG.git`. Local changes have not been pushed.
 
 The Godot 4.7.2 editor is extracted in the workspace and excluded from Git. Original backgrounds and character sprites are under `design/assets/`; inspiration links are in `design/references/VISUAL_REFERENCES.md`.
 
 ## Current implementation
 
-A route through crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory reaches the inscription cliffhanger. An optional seed-restored garden branches from the orchard. Current source includes Beth, seven main puzzle mechanisms, the optional chime puzzle, optional valley-history discoveries, scrollable field notes, hints with escalating echo, item inventory and exchange, settings, pause, versioned local saves with room/position checkpoints, remappable movement and core actions, procedural area ambience, and generated backgrounds and character sprites.
+A route through crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory reaches the inscription cliffhanger. Optional orchard branches lead to a seed-restored garden and the seven-step reed causeway. The archive mirror shard unlocks a second lens path and an independent keeper's note after the main stair opens. Current source includes seven main puzzle mechanisms, three optional puzzles, optional valley-history records, scrollable field notes, hint-dependent Bell Court and High Steps variants, local saves, and remappable controls. Beth has four expression poses; the traveler has a four-frame walk cycle. The Windows export script builds from an isolated copy and checks parser errors before replacing the local executable.
 
-The editor imported the project successfully. No runtime playthrough or test suite has been run. The route remains short; it does not yet meet the 2–3 hour target.
+The isolated Godot 4.7.2 headless export completed and the local Windows executable/hash are current. No runtime playthrough has been completed. The route remains short; it does not yet meet the 2–3 hour target.
 
 ## Next work
 
-1. Continue content/puzzle expansion; the 2–3 hour target is not met yet, and keep the cliffhanger subtle.
+1. Continue content and puzzle expansion; the 2–3 hour target is not met yet, and keep the cliffhanger subtle.
 2. Refactor the oversized journey script into maintainable area and UI components as content grows.
-3. Complete production character animation, sound design, controller review, and accessibility. Save recovery now validates nested puzzle structures, item/clue IDs, story flag types, and rebind values; runtime review remains outstanding.
-4. Review the full route in a runtime session when the creator asks for verification.
-5. Prepare a Windows export and rights review; get approval before release.
+3. Complete production sound, controller review, and accessibility. Runtime review of character animations and larger-text layouts remains outstanding.
+4. Complete a full route playthrough, save/recovery review, and accessible-controls review before release.
+5. Resolve asset rights and release materials; get approval before publishing.
 
 ## Preserve
 
