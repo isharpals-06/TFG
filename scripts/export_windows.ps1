@@ -86,6 +86,15 @@ if ($finalFile.Length -ne $stagedLength -or $finalHash -ne $hash) {
 }
 if (Test-Path -LiteralPath $backupFile) { Remove-Item -LiteralPath $backupFile -Force }
 
+$assetImportRoot = Join-Path $exportProject 'design\assets'
+$projectAssetRoot = Join-Path $projectRoot 'design\assets'
+foreach ($importFile in Get-ChildItem -LiteralPath $assetImportRoot -Filter '*.import' -File -Recurse) {
+	$projectImportFile = Join-Path $projectAssetRoot $importFile.Name
+	if (-not (Test-Path -LiteralPath $projectImportFile)) {
+		Copy-Item -LiteralPath $importFile.FullName -Destination $projectImportFile
+	}
+}
+
 $staleGodotOutput = Join-Path $outputDirectory 'The Forgotten World.tmp'
 if (Test-Path -LiteralPath $staleGodotOutput) { Remove-Item -LiteralPath $staleGodotOutput -Force }
 Set-Content -LiteralPath (Join-Path $outputDirectory 'SHA256SUMS.txt') -Value "$hash  The Forgotten World.exe" -Encoding ascii

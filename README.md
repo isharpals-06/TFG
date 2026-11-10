@@ -27,7 +27,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Optional reed causeway with a seven-step waterline pattern, a return route, a village entrance, and a record about families crossing together.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
-- A two-pose traveler walk animation that turns left/right with movement, plus Beth's subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
+- A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
 - Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
 - Procedural ambient layers and event chimes; original generated backgrounds for the title, nine main locations, optional garden, and optional causeway, plus Beth's four-pose expression sheet.

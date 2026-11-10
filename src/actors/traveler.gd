@@ -2,7 +2,13 @@ extends CharacterBody2D
 class_name Traveler
 
 const TRAVELER_SPRITE: Texture2D = preload("res://design/assets/traveler_sprite.png")
-const TRAVELER_WALK_SPRITE: Texture2D = preload("res://design/assets/traveler_walk.png")
+const TRAVELER_WALK_SPRITE: Texture2D = preload("res://design/assets/traveler_walk_cycle.png")
+const WALK_FRAME_SOURCE_RECTS := [
+	Rect2(107, 67, 330, 590),
+	Rect2(650, 67, 330, 590),
+	Rect2(1193, 67, 330, 590),
+	Rect2(1736, 67, 330, 590),
+]
 
 signal moved(direction: Vector2)
 
@@ -46,13 +52,12 @@ func set_movement_enabled(value: bool) -> void:
 func _draw() -> void:
 	var reduced_motion := bool(RunState.settings.get("reduced_motion", false))
 	var walking := velocity.length() > 2.0
-	var step_pose := walking and int(_anim_time * 0.5) % 2 == 0 and not reduced_motion
-	var bob := 1.0 if step_pose else 0.0
 	var tint := Color.WHITE if RunState.presentation == 0 else Color("#c7d4ed")
 	draw_rect(Rect2(-8, -2, 16, 4), Color(0.04, 0.07, 0.075, 0.42))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < -0.05 else 1.0, 1.0))
-	if step_pose:
-		draw_texture_rect_region(TRAVELER_WALK_SPRITE, Rect2(-9, -29 + bob, 18, 32), Rect2(205, 305, 535, 1000), tint)
+	if walking and not reduced_motion:
+		var frame := int(_anim_time / 3.0) % WALK_FRAME_SOURCE_RECTS.size()
+		draw_texture_rect_region(TRAVELER_WALK_SPRITE, Rect2(-9, -29, 18, 32), WALK_FRAME_SOURCE_RECTS[frame], tint)
 	else:
 		draw_texture_rect_region(TRAVELER_SPRITE, Rect2(-9, -29, 18, 32), Rect2(235, 245, 555, 1120), tint)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
