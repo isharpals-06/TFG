@@ -31,7 +31,8 @@
 - [x] Add optional history records across the route without revealing the traveler's past.
 - [ ] Deepen area exploration and multi-step puzzles to meet the 2–3 hour target.
 - [x] Add a fair hint-dependent Bell Court variant: eight prior hints add a visible, clued fifth note.
-- [ ] Add and balance further hint-dependent variants while preserving a completable main route.
+- [x] Add a fair hint-dependent High Steps variant: twelve prior hints change the middle vane and its visible clue.
+- [ ] Balance both hint-dependent variants in a full runtime playthrough and add further variations if needed.
 - [ ] Refine generated environment art into the final consistent visual treatment; produce and animate the traveler and Beth sprites.
 - [ ] Refine ambient music and area-specific effects.
 - [ ] Complete a full beginning-to-cliffhanger playthrough and accessibility review.

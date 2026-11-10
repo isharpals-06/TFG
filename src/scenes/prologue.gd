@@ -685,7 +685,10 @@ func _examine_target() -> void:
 		"bell_door":
 			_set_status("The arch opens onto the roofless room above. A pale inscription waits in the dark.")
 		"high_steps_map":
-			_set_status("A wind-worn map shows the three vanes pointing west, north, and east along the rising path.")
+			if RunState.story_flags.get("high_steps_echo_variant", false):
+				_set_status("The map shows west and east, but a pale doubled arrow turns the middle vane south.")
+			else:
+				_set_status("A wind-worn map shows the three vanes pointing west, north, and east along the rising path.")
 			RunState.set_story_flag("high_steps_map_seen")
 			_record_clue_animated("high_steps_wind_map")
 		"steps_vane_west", "steps_vane_center", "steps_vane_east":
@@ -947,6 +950,12 @@ func _get_steps_vane_orientation(which: String) -> int:
 	var vanes: Dictionary = RunState.puzzle_progress.get("high_steps_vanes", {})
 	return posmod(int(vanes.get(which, 0)), 4)
 
+func _high_steps_solution() -> Dictionary:
+	var solution: Dictionary = HIGH_STEPS_SOLUTION.duplicate()
+	if RunState.story_flags.get("high_steps_echo_variant", false):
+		solution["center"] = 2
+	return solution
+
 func _rotate_steps_vane(which: String) -> void:
 	var vanes: Dictionary = RunState.puzzle_progress.get("high_steps_vanes", {"west": 0, "center": 0, "east": 0})
 	vanes[which] = (int(vanes.get(which, 0)) + 1) % 4
@@ -954,7 +963,7 @@ func _rotate_steps_vane(which: String) -> void:
 	RunState.save_game()
 	var aligned := true
 	for name in ["west", "center", "east"]:
-		if int(vanes.get(name, 0)) != int(HIGH_STEPS_SOLUTION[name]):
+		if int(vanes.get(name, 0)) != int(_high_steps_solution()[name]):
 			aligned = false
 	if aligned:
 		RunState.set_story_flag("high_steps_aligned")
@@ -1251,6 +1260,7 @@ func _enter_high_steps() -> void:
 	traveler.global_position = Vector2(320, 252)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_high_steps")
+	RunState.set_story_flag("high_steps_echo_variant", RunState.hint_uses >= 12)
 	beth.global_position = Vector2(337, 234)
 	beth.visible = true
 	beth.awake = true
@@ -1711,13 +1721,19 @@ func _give_hint(level: int) -> void:
 				3:
 					hint_text = "Ring crescent, rain-line, seed, then crescent."
 	elif phase == "high_steps":
-		match level:
-			1:
-				hint_text = "Beth watches the three vanes turn over the valley."
-			2:
-				hint_text = "The map gives one direction for each vane, from west to east."
-			3:
-				hint_text = "Point the western vane west, the middle vane north, and the eastern vane east."
+		if RunState.story_flags.get("high_steps_echo_variant", false):
+			match level:
+				1: hint_text = "Beth watches the doubled arrow on the map, where the old direction still lingers."
+				2: hint_text = "Follow the pale arrow for the middle vane; it points south."
+				3: hint_text = "Point the western vane west, the middle vane south, and the eastern vane east."
+		else:
+			match level:
+				1:
+					hint_text = "Beth watches the three vanes turn over the valley."
+				2:
+					hint_text = "The map gives one direction for each vane, from west to east."
+				3:
+					hint_text = "Point the western vane west, the middle vane north, and the eastern vane east."
 	elif phase == "quiet_garden":
 		match level:
 			1:
@@ -1867,7 +1883,7 @@ func _clue_text(clue_id: String) -> String:
 		"bell_garden_answer":
 			return "The bells answered in the order of the four marks carved into the garden wall."
 		"high_steps_wind_map":
-			return "The wind-worn map marks west, north, and east across the three vanes."
+			return "The wind-worn map marks west, south (under a doubled arrow), and east across the three vanes." if RunState.story_flags.get("high_steps_echo_variant", false) else "The wind-worn map marks west, north, and east across the three vanes."
 		"high_steps_open_door":
 			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
 		"quiet_garden_order":
@@ -2274,13 +2290,17 @@ func _draw_high_steps() -> void:
 	draw_rect(Rect2(294, 96, 32, 18), Color("#606d63"))
 	draw_rect(Rect2(298, 99, 24, 12), Color("#3d4a47"))
 	_draw_arrow(Vector2(302, 105), 3, Color("#c2c09c"))
-	_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc"))
+	if RunState.story_flags.get("high_steps_echo_variant", false):
+		_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc").darkened(0.25))
+		_draw_arrow(Vector2(310, 105), 2, Color("#c693bd"))
+	else:
+		_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc"))
 	_draw_arrow(Vector2(318, 105), 1, Color("#b0bd99"))
 	var vane_positions := [Vector2(118, 137), Vector2(268, 119), Vector2(423, 109)]
 	for index in range(vane_positions.size()):
 		var name: String = ["west", "center", "east"][index]
 		var direction := _get_steps_vane_orientation(name)
-		var aligned := direction == int(HIGH_STEPS_SOLUTION[name]) or RunState.story_flags.get("high_steps_aligned", false)
+		var aligned := direction == int(_high_steps_solution()[name]) or RunState.story_flags.get("high_steps_aligned", false)
 		_draw_arrow(vane_positions[index], direction, Color("#eadbb1") if aligned else Color("#b5aa89"))
 		if aligned:
 			draw_rect(Rect2(vane_positions[index].x - 6, vane_positions[index].y + 7, 12, 1), Color("#b1d0c4"))
