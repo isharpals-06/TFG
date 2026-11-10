@@ -270,6 +270,9 @@ func _action_mark(action_name: String) -> String:
 	var bindings := RunState.get_binding_text(action_name).split(" / ")
 	return str(bindings[0]) if not bindings.is_empty() else "?"
 
+func _motion_duration(seconds: float) -> float:
+	return 0.0 if bool(RunState.settings.get("reduced_motion", false)) else seconds
+
 func _get_targets() -> Array[Dictionary]:
 	if phase == "crossing":
 		var crossing_targets: Array[Dictionary] = []
@@ -1051,7 +1054,7 @@ func _enter_orchard() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.45)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.45))
 	await fade_out.finished
 	phase = "orchard"
 	Soundscape.set_area(phase)
@@ -1066,7 +1069,7 @@ func _enter_orchard() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.65))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1077,7 +1080,7 @@ func _enter_quiet_garden() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "quiet_garden"
 	Soundscape.set_area(phase)
@@ -1092,7 +1095,7 @@ func _enter_quiet_garden() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1103,7 +1106,7 @@ func _return_to_orchard() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.35)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.35))
 	await fade_out.finished
 	phase = "orchard"
 	Soundscape.set_area(phase)
@@ -1115,7 +1118,7 @@ func _return_to_orchard() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.5)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.5))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1126,7 +1129,7 @@ func _enter_empty_quarter() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "empty_quarter"
 	Soundscape.set_area(phase)
@@ -1141,7 +1144,7 @@ func _enter_empty_quarter() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1152,7 +1155,7 @@ func _enter_archive() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "archive"
 	Soundscape.set_area(phase)
@@ -1165,7 +1168,7 @@ func _enter_archive() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1176,7 +1179,7 @@ func _enter_gallery() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "gallery"
 	Soundscape.set_area(phase)
@@ -1192,7 +1195,7 @@ func _enter_gallery() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.6)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1203,7 +1206,7 @@ func _enter_bell_court() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "bell_court"
 	Soundscape.set_area(phase)
@@ -1219,7 +1222,7 @@ func _enter_bell_court() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.65))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1230,7 +1233,7 @@ func _enter_high_steps() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "high_steps"
 	Soundscape.set_area(phase)
@@ -1245,7 +1248,7 @@ func _enter_high_steps() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.65))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1256,7 +1259,7 @@ func _enter_observatory() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.4)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "observatory"
 	Soundscape.set_area(phase)
@@ -1269,7 +1272,7 @@ func _enter_observatory() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.7)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.7))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1296,13 +1299,13 @@ func _begin_inscription_reveal() -> void:
 	inscription_panel.add_child(inscription_label)
 	hud.add_child(inscription_panel)
 	var open_tween := create_tween()
-	open_tween.tween_property(inscription_panel, "position:y", 62.0, 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	open_tween.tween_property(inscription_panel, "position:y", 62.0, _motion_duration(0.55)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	await open_tween.finished
 	Soundscape.play_event("journal")
 	var reveal_tween := create_tween()
 	for count in range(1, FINAL_INSCRIPTION.length() + 1):
 		reveal_tween.tween_callback(_show_inscription_reveal.bind(count))
-		reveal_tween.tween_interval(0.14)
+		reveal_tween.tween_interval(_motion_duration(0.14))
 	reveal_tween.tween_interval(2.4)
 	reveal_tween.tween_callback(_finish_inscription_reveal)
 
@@ -1404,7 +1407,7 @@ func _cross_into_world() -> void:
 	transitioning = true
 	traveler.set_movement_enabled(false)
 	var fade_out := create_tween()
-	fade_out.tween_property(transition_cover, "modulate:a", 1.0, 0.45)
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.45))
 	await fade_out.finished
 	phase = "ruins"
 	Soundscape.set_area(phase)
@@ -1419,7 +1422,7 @@ func _cross_into_world() -> void:
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
-	fade_in.tween_property(transition_cover, "modulate:a", 0.0, 0.65)
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.65))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -1466,13 +1469,13 @@ func _open_journal() -> void:
 	column.add_child(close_hint)
 	hud.add_child(journal_panel)
 	var tween := create_tween()
-	tween.tween_property(journal_panel, "position:y", 20.0, 0.28).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(journal_panel, "position:y", 20.0, _motion_duration(0.28)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _close_journal() -> void:
 	var panel := journal_panel
 	journal_panel = null
 	var tween := create_tween()
-	tween.tween_property(panel, "position:y", 180.0, 0.2)
+	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.2))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
@@ -1539,7 +1542,7 @@ func _open_inventory() -> void:
 	if RunState.inventory.has(RunState.selected_item_id):
 		inventory_description_label.text = _item_description(RunState.selected_item_id)
 	var tween := create_tween()
-	tween.tween_property(inventory_panel, "position:y", 20.0, 0.24).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(inventory_panel, "position:y", 20.0, _motion_duration(0.24)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _close_inventory() -> void:
 	var panel := inventory_panel
@@ -1550,7 +1553,7 @@ func _close_inventory() -> void:
 	if pending_pickup_id != "":
 		pending_pickup_id = ""
 	var tween := create_tween()
-	tween.tween_property(panel, "position:y", 180.0, 0.16)
+	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.16))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
@@ -1611,7 +1614,7 @@ func _open_hint_panel() -> void:
 	column.add_child(close_hint)
 	hud.add_child(hint_panel)
 	var tween := create_tween()
-	tween.tween_property(hint_panel, "position:y", 37.0, 0.28).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(hint_panel, "position:y", 37.0, _motion_duration(0.28)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _add_hint_button(container: VBoxContainer, text: String, level: int) -> void:
 	var button := Button.new()
@@ -1627,7 +1630,7 @@ func _close_hint_panel() -> void:
 	var panel := hint_panel
 	hint_panel = null
 	var tween := create_tween()
-	tween.tween_property(panel, "position:y", 180.0, 0.18)
+	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.18))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
@@ -1737,7 +1740,7 @@ func _open_pause_menu() -> void:
 	hud.add_child(pause_panel)
 	resume.call_deferred("grab_focus")
 	var tween := create_tween()
-	tween.tween_property(pause_panel, "position:y", 49.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(pause_panel, "position:y", 49.0, _motion_duration(0.22)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _close_pause_menu() -> void:
 	var panel := pause_panel
@@ -1745,7 +1748,7 @@ func _close_pause_menu() -> void:
 		return
 	pause_panel = null
 	var tween := create_tween()
-	tween.tween_property(panel, "position:y", 180.0, 0.16)
+	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.16))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
 		if is_instance_valid(traveler) and not transitioning:
@@ -1761,8 +1764,8 @@ func _save_and_return_to_title() -> void:
 func _animate_journal_signal() -> void:
 	if is_instance_valid(inventory_label):
 		var tween := create_tween()
-		tween.tween_property(inventory_label, "modulate", Color("#e3dfb5"), 0.12)
-		tween.tween_property(inventory_label, "modulate", Color("#bdc8bb"), 0.5)
+		tween.tween_property(inventory_label, "modulate", Color("#e3dfb5"), _motion_duration(0.12))
+		tween.tween_property(inventory_label, "modulate", Color("#bdc8bb"), _motion_duration(0.5))
 
 func _record_clue_animated(clue_id: String) -> void:
 	if RunState.record_clue(clue_id):
