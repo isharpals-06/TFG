@@ -1642,7 +1642,18 @@ func _give_hint(level: int) -> void:
 	var echo_cost := RunState.add_hint(level)
 	beth.react_to_hint(echo_cost)
 	var hint_text := ""
-	if phase == "empty_quarter":
+	if phase == "crossing":
+		if not RunState.story_flags.get("medallion_found", false):
+			match level:
+				1: hint_text = "Beth peers through the grass beside the old stones."
+				2: hint_text = "A small glint rests just left of the worn path."
+				3: hint_text = "The medallion lies beside the path, near the buried stones."
+		else:
+			match level:
+				1: hint_text = "Beth's light circles the arch, then the medallion in your hand."
+				2: hint_text = "The disk's low pulse grows stronger beside the buried arch."
+				3: hint_text = "Choose the medallion and use it on the arch."
+	elif phase == "empty_quarter":
 		match level:
 			1: hint_text = "Beth watches the four doorways around the well."
 			2: hint_text = "The carving pairs a household symbol with each side of the square."
@@ -1695,6 +1706,11 @@ func _give_hint(level: int) -> void:
 				hint_text = "The wall carving gives three marks from left to right."
 			3:
 				hint_text = "Ring rain-line, seed, then crescent."
+	elif phase == "observatory":
+		match level:
+			1: hint_text = "Beth's light lingers over the hollow beneath the inscription."
+			2: hint_text = "The medallion's edge fits the empty space in the old stone."
+			3: hint_text = "Choose the medallion and use it on the inscription."
 	else:
 		match level:
 			1:

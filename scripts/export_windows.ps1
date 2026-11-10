@@ -21,7 +21,20 @@ if (-not $exportSucceeded -or ($null -ne $exportExitCode -and $exportExitCode -n
 	throw "Godot export failed$failureDetail."
 }
 
-$hash = (Get-FileHash -LiteralPath $outputFile -Algorithm SHA256).Hash.ToLowerInvariant()
+$previousHash = ''
+$hash = ''
+for ($attempt = 0; $attempt -lt 10; $attempt++) {
+	$currentHash = (Get-FileHash -LiteralPath $outputFile -Algorithm SHA256).Hash.ToLowerInvariant()
+	if ($currentHash -eq $previousHash) {
+		$hash = $currentHash
+		break
+	}
+	$previousHash = $currentHash
+	Start-Sleep -Milliseconds 200
+}
+if ([string]::IsNullOrEmpty($hash)) {
+	throw "The exported file did not settle to a stable SHA-256 hash."
+}
 Set-Content -LiteralPath (Join-Path $outputDirectory 'SHA256SUMS.txt') -Value "$hash  The Forgotten World.exe" -Encoding ascii
 Write-Output "Windows build created: $outputFile"
 Write-Output "SHA-256: $hash"
