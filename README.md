@@ -29,6 +29,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Optional west-house reading room unlocked by restoring the village households, with a saved three-marker puzzle and ordinary-history journal entries.
 - Optional lower cistern unlocked by restoring the waterworks, with a water-clock clue, saved four-turn valve sequence, three hint levels, a river-glass discovery, and a water-sharing ledger.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
+- Three records from separate locations unlock a saved village-well sequence about the valley's final gathering.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.

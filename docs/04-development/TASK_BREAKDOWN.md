@@ -21,6 +21,7 @@
 - [x] Add an optional reading room in the restored west house, with a saved three-marker observation puzzle, two history records, three hint levels, and a return to the village square.
 - [x] Extend the main Archive route through a map chamber with a saved spring-bridge-village sequence, three hint levels, a return stair, an open gallery route, and an optional valley-history ledger.
 - [x] Add an optional lower cistern beneath the restored waterworks with a saved four-turn valve puzzle, three hint levels, safe return, water-sharing history ledger, and an optional river-glass clue.
+- [x] Combine three ordinary-history records from separate areas into a saved optional village-well sequence and final gathering record.
 - [x] Add subtle lower-cistern water ripples and suppress them when reduced motion is enabled.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.

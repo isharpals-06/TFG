@@ -38,6 +38,12 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "Four household objects sit once more in the doorways around the well. A stair appears in its reflection."
 		"quarter_well_reflection":
 			return "After the Archive opens, the village well reflects its starless sky. Four warm lights gather around a quiet gap."
+		"village_gathering_order":
+			return "A worn line around the village well says: set aside water, leave one lamp, then ring once after the road is empty."
+		"village_gathering_restored":
+			return "The three marks answer around the well. A hidden line remembers how the village gathered before the road closed."
+		"village_last_gathering":
+			return "At the last gathering, the village set aside the first clean water, left a lamp in the doorway, and rang once when the road was empty. The register's blank final column is filled with one word: together."
 		"reading_order":
 			return "The children's slate shows a boat at the west mark, a lantern at center, and reeds at the east mark."
 		"reading_markers_aligned":

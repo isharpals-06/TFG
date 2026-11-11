@@ -6,6 +6,7 @@ No versioned release has been published.
 
 ### Added
 
+- Optional village-well gathering sequence that connects three history records across the route, saves its bowl-lamp-bell progress, and reveals a final account of ordinary valley life.
 - Optional lower cistern below the restored waterworks, with original background, water-clock clue, saved four-turn valve puzzle, three hint levels, a river-glass discovery, return stair, and water-sharing ledger.
 - Added a slow, quiet chord-tone motif to the existing area-specific procedural ambience.
 - Lower-cistern water now has small, reduced-motion-aware ripple strokes.

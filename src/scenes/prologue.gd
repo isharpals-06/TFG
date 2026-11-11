@@ -42,6 +42,7 @@ const READING_START := {"west": 2, "center": 2, "east": 0}
 const READING_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const MAP_ROUTE_SEQUENCE := ["spring", "bridge", "village"]
 const MAP_ROUTE_POSITIONS := {"spring": Vector2(240, 144), "bridge": Vector2(320, 165), "village": Vector2(402, 144)}
+const VILLAGE_GATHERING_SEQUENCE := ["bowl", "lamp", "bell"]
 
 var traveler: Traveler
 var beth: Beth
@@ -469,6 +470,14 @@ func _get_targets() -> Array[Dictionary]:
 			quarter_targets.append({"id": "quarter_reading_door", "name": "the open west-house reading room", "position": Vector2(111, 174)})
 		if not RunState.story_flags.get("quarter_register_seen", false):
 			quarter_targets.append({"id": "quarter_register", "name": "the stone register", "position": Vector2(572, 232)})
+		if _village_gathering_clues_complete() and not RunState.story_flags.get("village_gathering_solved", false):
+			if not RunState.story_flags.get("village_gathering_marks_seen", false):
+				quarter_targets.append({"id": "village_gathering_marks", "name": "the three worn marks around the well", "position": Vector2(320, 166)})
+			quarter_targets.append({"id": "village_gathering_bowl", "name": "the bowl mark beside the well", "position": Vector2(292, 166)})
+			quarter_targets.append({"id": "village_gathering_lamp", "name": "the lamp mark beside the well", "position": Vector2(320, 166)})
+			quarter_targets.append({"id": "village_gathering_bell", "name": "the bell mark beside the well", "position": Vector2(348, 166)})
+		elif RunState.story_flags.get("village_gathering_solved", false) and not RunState.story_flags.get("village_gathering_record_seen", false):
+			quarter_targets.append({"id": "village_gathering_record", "name": "the newly visible well inscription", "position": Vector2(320, 166)})
 		return quarter_targets
 	if phase == "reading_room":
 		var reading_targets: Array[Dictionary] = []
@@ -694,8 +703,10 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  follow the covered channel" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_return":
 			prompt_label.text = "%s  return to the orchard" % _action_mark("activate")
-		"quarter_mural", "quarter_register":
+		"quarter_mural", "quarter_register", "village_gathering_marks", "village_gathering_record":
 			prompt_label.text = "%s  study the old record" % _action_mark("examine")
+		"village_gathering_bowl", "village_gathering_lamp", "village_gathering_bell":
+			prompt_label.text = "%s  examine     %s  answer the mark" % [_action_mark("examine"), _action_mark("activate")]
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
 			prompt_label.text = "%s  examine     %s  turn the niche" % [_action_mark("examine"), _action_mark("activate")]
 		"quarter_well_stair":
@@ -905,6 +916,15 @@ func _examine_target() -> void:
 			_update_objective()
 		"quarter_register":
 			_reveal_world_memory("quarter_register_seen", "quarter_register", "A stone register lists the village trades: readers, potters, growers, lamplighters. The last column is worn blank.")
+		"village_gathering_marks":
+			_set_status("A line circles the rim: set aside water, leave one lamp, then ring once after the road is empty.")
+			RunState.set_story_flag("village_gathering_marks_seen")
+			_record_clue_animated("village_gathering_order")
+			_update_objective()
+		"village_gathering_bowl", "village_gathering_lamp", "village_gathering_bell":
+			_set_status("The %s mark is worn smooth by many hands." % target.id.trim_prefix("village_gathering_"))
+		"village_gathering_record":
+			_reveal_world_memory("village_gathering_record_seen", "village_last_gathering", "At the last gathering, the village set aside the first clean water, left a lamp in the doorway, and rang once when the road was empty. The register's blank final column is filled with a single word: together.")
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
 			var quarter_side: String = target.id.trim_prefix("quarter_slot_")
 			var quarter_room := {"west": "reading room", "north": "kitchen", "east": "seed room", "south": "entry hall"}
@@ -1141,6 +1161,8 @@ func _activate_target() -> void:
 		_return_to_waterworks()
 	elif target.id.begins_with("quarter_slot_"):
 		_rotate_quarter_slot(target.id.trim_prefix("quarter_slot_"))
+	elif target.id.begins_with("village_gathering_") and ["bowl", "lamp", "bell"].has(target.id.trim_prefix("village_gathering_")):
+		_activate_village_gathering(target.id.trim_prefix("village_gathering_"))
 	elif target.id == "quarter_well_stair" and RunState.story_flags.get("quarter_household_restored", false):
 		_enter_archive()
 	elif target.id == "quarter_reading_door" and RunState.story_flags.get("quarter_household_restored", false):
@@ -1350,6 +1372,36 @@ func _rotate_quarter_slot(side: String) -> void:
 	else:
 		Soundscape.play_event("resonance")
 		_set_status("The niche turns with a soft stone click. The other doorways remain dark.")
+	queue_redraw()
+
+func _village_gathering_clues_complete() -> bool:
+	return RunState.story_flags.get("waterworks_bowl_record_seen", false) and RunState.story_flags.get("archive_last_entry_seen", false) and RunState.story_flags.get("bell_keeper_names_seen", false)
+
+func _activate_village_gathering(mark: String) -> void:
+	if not _village_gathering_clues_complete() or not RunState.story_flags.get("village_gathering_marks_seen", false):
+		_set_status("The worn marks need the memories kept in the waterworks, Archive, and bell garden.")
+		return
+	var progress := int(RunState.puzzle_progress.get("village_gathering_sequence", 0))
+	if progress < VILLAGE_GATHERING_SEQUENCE.size() and mark == VILLAGE_GATHERING_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["village_gathering_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("resonance")
+		if progress == VILLAGE_GATHERING_SEQUENCE.size():
+			RunState.set_story_flag("village_gathering_solved")
+			RunState.reset_local_hint_echo()
+			_record_clue_animated("village_gathering_restored")
+			beth.react_to_discovery()
+			Soundscape.play_event("complete")
+			_set_status("Three small lights gather in the well. A line of writing appears in the stone.")
+			_update_objective()
+		else:
+			_set_status("The well answers with a quiet tone. Another mark waits around the rim.")
+	else:
+		RunState.puzzle_progress["village_gathering_sequence"] = 0
+		RunState.save_game()
+		Soundscape.play_event("soft_fade")
+		_set_status("The tone fades. The three marks wait for another try.")
 	queue_redraw()
 
 func _rotate_reading_tile(side: String) -> void:
@@ -2907,6 +2959,26 @@ func _draw_empty_quarter() -> void:
 	if RunState.story_flags.get("quarter_household_restored", false):
 		draw_circle(Vector2(320, 166), 12.0, Color("#d8e6d0", 0.28))
 		draw_circle(Vector2(320, 166), 5.0, Color("#d6e2c7", 0.72))
+	if _village_gathering_clues_complete() and not RunState.story_flags.get("village_gathering_solved", false):
+		var gathering_progress := int(RunState.puzzle_progress.get("village_gathering_sequence", 0))
+		var gathering_positions := [Vector2(292, 166), Vector2(320, 166), Vector2(348, 166)]
+		for index in range(gathering_positions.size()):
+			var lit := index < gathering_progress
+			var tint := Color("#e7d7a4") if lit else Color("#9c9d82")
+			var point: Vector2 = gathering_positions[index]
+			draw_circle(point, 8.0, Color("#394a45"))
+			draw_circle(point, 6.0, Color("#777b68"))
+			if index == 0:
+				_draw_quarter_object(point, "bowl", tint)
+			elif index == 1:
+				_draw_quarter_object(point, "lamp", tint)
+			else:
+				draw_rect(Rect2(point.x - 4, point.y - 5, 8, 8), tint)
+				draw_rect(Rect2(point.x - 6, point.y - 6, 12, 2), tint)
+				draw_line(point + Vector2(-3, 4), point + Vector2(3, 4), tint, 1.0)
+	if RunState.story_flags.get("village_gathering_solved", false):
+		draw_circle(Vector2(320, 166), 16.0, Color("#e4d5a2", 0.16))
+		draw_circle(Vector2(320, 166), 8.0, Color("#e4d5a2", 0.22))
 
 func _draw_quarter_object(point: Vector2, object_name: String, tint: Color) -> void:
 	match object_name:

@@ -16,6 +16,7 @@
 - As a player, I want the Archive's map chamber to show the route into the next room while allowing me to return to the Archive.
 - As a curious player, I want the mirror shard to reveal an optional archive puzzle and a small history record without blocking the open stair.
 - As a curious player, I want the observatory's star chart to guide an optional astrolabe puzzle and reveal a record of the valley's weather keepers.
+- As a returning player, I want records from the waterworks, Archive, and bell garden to reveal a final village gathering puzzle at the well.
 - As a player, I want small records of ordinary life to help me picture the valley's past without explaining the traveler.
 
 ## Puzzles and objects

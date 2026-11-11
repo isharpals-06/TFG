@@ -21,6 +21,7 @@ This is the working requirements baseline for a Windows-first, offline, single-p
 | FR-13 | Local save/resume preserves progress, clues, inventory, puzzles, hint state, playtime, settings, and the current checkpoint. | Version 3 JSON stores the room and player position, autosaves during play, falls back to a backup, and validates nested IDs, types, and ranges. Runtime recovery review remains due. |
 | FR-14 | The Archive route includes a map chamber with a saved sequence puzzle, optional history record, and safe return to the Archive. | Implemented: trace spring, bridge, village; the open arch leads to the reflection gallery. Runtime review remains due. |
 | FR-15 | The restored waterworks offers an optional lower-cistern puzzle and a safe return without closing the village route. | Implemented: saved four-turn valve sequence, three hint levels, optional river-glass discovery, water-sharing ledger, and return stair. Runtime review remains due. |
+| FR-16 | Records from separate areas may combine to unlock a saved optional village memory puzzle and its history reward. | Implemented at the village well after discovering three records; progress saves, wrong inputs reset safely, and it does not gate the main route. Runtime review remains due. |
 
 ## Quality requirements
 
