@@ -3070,6 +3070,12 @@ func _draw_empty_quarter() -> void:
 		draw_circle(Vector2(320, 166), 8.0, Color("#e4d5a2", 0.22))
 
 func _draw_highland_refuge() -> void:
+	var return_stone := Color("#74766a")
+	draw_rect(Rect2(27, 278, 32, 6), return_stone)
+	draw_rect(Rect2(30, 283, 7, 28), Color("#424c47"))
+	draw_rect(Rect2(49, 283, 7, 28), Color("#424c47"))
+	draw_rect(Rect2(37, 287, 12, 22), Color("#28353a"))
+	draw_line(Vector2(43, 303), Vector2(111, 280), Color("#a99a7a"), 2.0)
 	draw_rect(Rect2(99, 115, 24, 34), Color("#514b40"))
 	draw_rect(Rect2(102, 118, 18, 27), Color("#b3a47e"))
 	draw_line(Vector2(105, 125), Vector2(117, 125), Color("#5c6459"), 1.0)
