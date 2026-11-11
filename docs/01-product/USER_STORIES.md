@@ -11,6 +11,9 @@
 - As a player, I want an ordinary village home to become explorable after I restore the square, with a small puzzle and history reward.
 - As a player, I want a side route to offer a distinct traversal puzzle and a safe way back to the main path.
 - As a player, I want restored orchard water to carry me through the old waterworks, where a clear four-mark clue opens the way into the village.
+- As a curious player, I want a restored waterworks to open a safe, optional lower cistern with its own valve puzzle and water-sharing history.
+- As a curious player, I want an earlier keepsake to reveal an extra clue when I revisit a related place.
+- As a player, I want the Archive's map chamber to show the route into the next room while allowing me to return to the Archive.
 - As a curious player, I want the mirror shard to reveal an optional archive puzzle and a small history record without blocking the open stair.
 - As a curious player, I want the observatory's star chart to guide an optional astrolabe puzzle and reveal a record of the valley's weather keepers.
 - As a player, I want small records of ordinary life to help me picture the valley's past without explaining the traveler.
