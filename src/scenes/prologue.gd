@@ -1463,6 +1463,8 @@ func _enter_empty_quarter() -> void:
 	beth.global_position = Vector2(337, 270)
 	beth.visible = true
 	beth.awake = true
+	if RunState.story_flags.get("archive_puzzle_solved", false):
+		beth.investigate(Vector2(320, 166))
 	Soundscape.play_event("soft_fade")
 	if RunState.story_flags.get("archive_puzzle_solved", false):
 		_set_status("The square gathers again around the well. Its reflection holds a pale, starless sky.")
