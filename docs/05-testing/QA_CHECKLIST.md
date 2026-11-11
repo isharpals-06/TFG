@@ -5,6 +5,7 @@ Release review only; not performed.
 - [ ] Complete beginning-to-cliffhanger route plays from a clean save.
 - [ ] Main route completes without hints.
 - [ ] Restoring the village households opens the optional reading room; its clue, five-turn marker puzzle, journal records, hints, saved progress, and return door work correctly.
+- [ ] Causeway hop animation is calm and brief, mistakes remain safe, and reduced motion removes the animation.
 - [ ] Hint consequences rise clearly, recede locally, and never hard-lock progress.
 - [ ] Save/load and interrupted-save recovery preserve story, puzzles, clues, items, settings, and hint state.
 - [ ] Keyboard and controller mappings, rebinding, focus, and prompts work.

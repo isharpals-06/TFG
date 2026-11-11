@@ -13,6 +13,7 @@
 - [x] Add clue journal, three hint levels, initial escalating hint trace, and generated sound cues.
 - [x] Add generated backgrounds for the title and all ten main locations plus the optional garden, with asset credits.
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or onward to the waterworks.
+- [x] Give correct causeway steps a brief traveler hop animation; make wrong stones return safely to shore, with the hop removed in reduced-motion mode.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
 - [x] Add an optional chart-guided three-arm astrolabe puzzle and weather ledger in the observatory, independent of the cliffhanger.
 - [x] Add the old waterworks as a main-route room between orchard and village, with a saved four-mark wheel sequence, optional history record, and original generated background.

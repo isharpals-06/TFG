@@ -20,10 +20,14 @@ var facing := Vector2.DOWN
 var movement_enabled := true
 var camera_reference: Camera2D
 var _anim_time := 0.0
+var _traversal_active := false
 
 func _physics_process(delta: float) -> void:
 	if not movement_enabled:
 		velocity = Vector2.ZERO
+		if _traversal_active and not RunState.settings.get("reduced_motion", false):
+			_anim_time += delta * 8.0
+			queue_redraw()
 		move_and_slide()
 		return
 	var input_direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -49,9 +53,26 @@ func _physics_process(delta: float) -> void:
 func set_movement_enabled(value: bool) -> void:
 	movement_enabled = value
 
+func hop_to(destination: Vector2, duration: float) -> void:
+	set_movement_enabled(false)
+	if duration <= 0.0:
+		global_position = destination
+		set_movement_enabled(true)
+		return
+	_traversal_active = true
+	var takeoff := global_position
+	var midair := takeoff.lerp(destination, 0.5) + Vector2(0, -8)
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", midair, duration * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "global_position", destination, duration * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await tween.finished
+	global_position = destination
+	_traversal_active = false
+	set_movement_enabled(true)
+
 func _draw() -> void:
 	var reduced_motion := bool(RunState.settings.get("reduced_motion", false))
-	var walking := velocity.length() > 2.0
+	var walking := velocity.length() > 2.0 or _traversal_active
 	var tint := Color.WHITE if RunState.presentation == 0 else Color("#c7d4ed")
 	draw_rect(Rect2(-8, -2, 16, 4), Color(0.04, 0.07, 0.075, 0.42))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < -0.05 else 1.0, 1.0))

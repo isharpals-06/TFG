@@ -24,7 +24,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Four-slot keepsake inventory, item notes, selection, safe swapping, and a protected story medallion.
 - Persistent first-gate sequence, orchard water puzzle, four-household empty-quarter puzzle, archive lens puzzle, reflection alignment, four-note bell sequence, and highland vane alignment.
 - Optional restored garden with its own short chime puzzle and memory clues.
-- Optional reed causeway with a seven-step waterline pattern, a return route, a village entrance, and a record about families crossing together.
+- Optional reed causeway with a seven-step waterline pattern, brief stepping-stone hops, a return route, a village entrance, and a record about families crossing together.
 - Optional archive reflection puzzle unlocked by the mirror shard, revealing a hidden keeper's note without touching the main route.
 - Optional west-house reading room unlocked by restoring the village households, with a saved three-marker puzzle and ordinary-history journal entries.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.

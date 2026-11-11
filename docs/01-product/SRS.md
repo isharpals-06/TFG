@@ -7,7 +7,7 @@ This is the working requirements baseline for a Windows-first, offline, single-p
 | ID | Requirement | Current state |
 | --- | --- | --- |
 | FR-01 | Eight-direction movement in the isometric view, with walking and running. | Prototype implemented. |
-| FR-02 | Optional low-pressure traversal actions with a short animation. | Not implemented. |
+| FR-02 | Optional low-pressure traversal actions with a short animation. | Implemented on the optional reed causeway: each correct stone advances the traveler with a brief hop; mistakes return safely to shore, and reduced-motion mode removes the hop. |
 | FR-03 | Nearby targets provide a prompt; examine, take, activate, and use item are separate actions. | Prototype implemented. |
 | FR-04 | Carry, inspect, select, and use a few items on compatible objects. | Prototype implemented with item notes and authored combinations. |
 | FR-05 | A full inventory allows the player to exchange a non-story item for a new find. | Prototype implemented; medallion is protected. |
@@ -31,4 +31,4 @@ This is the working requirements baseline for a Windows-first, offline, single-p
 
 ## Open requirements
 
-Final display options, control coverage, save recovery behavior, traversal actions, camera occlusion rules, story text, and exact content length need design and review before release.
+Final display options, control coverage, save recovery behavior, causeway traversal animation, camera occlusion rules, story text, and exact content length need review before release.

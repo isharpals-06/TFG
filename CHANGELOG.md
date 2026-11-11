@@ -31,6 +31,7 @@ No versioned release has been published.
 - Moved authored journal clue descriptions into a dedicated catalog, keeping the journey controller focused on room flow.
 - Moved authored three-level hints into a dedicated catalog while leaving hint penalties, Beth's reactions, and presentation in the journey flow.
 - Added an optional west-house reading room that opens after the village household puzzle. Its children's lesson slate guides a saved three-marker puzzle, with an ordinary-life journal reward and a safe return to the square.
+- The optional reed causeway now advances the traveler with a brief hop between stones; wrong choices return gently to shore, and reduced-motion mode skips the hop.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress

@@ -10,6 +10,7 @@ Invite curiosity, let environments guide the player without a permanent marker, 
 - A nearby marker and a short prompt describe available actions.
 - Examine, take, activate, and item use are separate actions.
 - Puzzle failures are gentle and do not consume items.
+- The optional reed causeway advances the traveler stone by stone with a brief hop; a wrong choice returns them safely to shore without a timer or item cost.
 - The journal records clue IDs; Beth offers three hint levels.
 - Escape opens pause. The player can resume or save and return to title.
 - Camera follows, turns by quarter turns, zooms a little, and can snap rather than ease.

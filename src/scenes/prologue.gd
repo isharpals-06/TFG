@@ -28,6 +28,7 @@ const OBSERVATORY_SOLUTION := {"west": 3, "center": 0, "east": 1}
 const BELL_SEQUENCE := ["moon", "water", "seed", "moon"]
 const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
 const CAUSEWAY_STEP_PATTERN := [0, 1, 2, 3, 2, 1, 0]
+const CAUSEWAY_STONE_POSITIONS := [Vector2(320, 258), Vector2(320, 218), Vector2(320, 178), Vector2(320, 140)]
 const WATERWORKS_WHEEL_SEQUENCE := ["west", "center", "east", "center"]
 const CAUSEWAY_STEP_MARKS := ["moon", "water", "seed", "water"]
 const QUARTER_OBJECTS := ["book", "bowl", "seed", "lamp"]
@@ -412,9 +413,8 @@ func _get_targets() -> Array[Dictionary]:
 			causeway_targets.append({"id": "causeway_record", "name": "a reed basket beside the water", "position": Vector2(554, 264)})
 		if not RunState.story_flags.get("causeway_solved", false):
 			var step_names := ["near", "second", "third", "far"]
-			var step_positions := [Vector2(320, 258), Vector2(320, 218), Vector2(320, 178), Vector2(320, 140)]
-			for index in range(4):
-				causeway_targets.append({"id": "causeway_step_%d" % index, "name": "the %s stepping stone" % step_names[index], "position": step_positions[index]})
+			for index in range(CAUSEWAY_STONE_POSITIONS.size()):
+				causeway_targets.append({"id": "causeway_step_%d" % index, "name": "the %s stepping stone" % step_names[index], "position": CAUSEWAY_STONE_POSITIONS[index]})
 		else:
 			causeway_targets.append({"id": "causeway_village_gate", "name": "the covered channel beyond the water", "position": Vector2(320, 111)})
 		causeway_targets.append({"id": "causeway_return", "name": "the shore path back to the orchard", "position": Vector2(320, 324)})
@@ -630,7 +630,7 @@ func _update_prompt() -> void:
 		"causeway_record":
 			prompt_label.text = "%s  study the old record" % _action_mark("examine")
 		"causeway_step_0", "causeway_step_1", "causeway_step_2", "causeway_step_3":
-			prompt_label.text = "%s  test the stepping stone" % _action_mark("activate")
+			prompt_label.text = "%s  step onto the stone" % _action_mark("activate")
 		"causeway_village_gate":
 			prompt_label.text = "%s  examine     %s  follow the covered channel" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_return":
@@ -1381,6 +1381,8 @@ func _step_causeway(step_index: int) -> void:
 		RunState.puzzle_progress["causeway_sequence"] = progress
 		RunState.save_game()
 		Soundscape.play_event("resonance")
+		var next_order_index := mini(progress, CAUSEWAY_STEP_PATTERN.size() - 1)
+		await _hop_causeway_to(int(CAUSEWAY_STEP_PATTERN[next_order_index]))
 		if progress == CAUSEWAY_STEP_PATTERN.size():
 			RunState.set_story_flag("causeway_solved")
 			RunState.reset_local_hint_echo()
@@ -1396,8 +1398,16 @@ func _step_causeway(step_index: int) -> void:
 		RunState.puzzle_progress["causeway_sequence"] = progress
 		RunState.save_game()
 		Soundscape.play_event("soft_fade")
+		await _hop_causeway_to(int(CAUSEWAY_STEP_PATTERN[progress]))
 		_set_status("The note fades into the water. The stones wait without hurry.")
 	queue_redraw()
+
+func _hop_causeway_to(stone_index: int) -> void:
+	transitioning = true
+	await traveler.hop_to(CAUSEWAY_STONE_POSITIONS[stone_index], _motion_duration(0.28))
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.save_game()
+	transitioning = false
 
 func _ring_garden_chime(index: int) -> void:
 	if not RunState.story_flags.get("garden_carving_seen", false):

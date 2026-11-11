@@ -20,7 +20,7 @@ For players who enjoy calm exploration, environmental puzzles, atmosphere, and s
 - One continuous journey; the current ten main spaces are an implementation slice, not a fixed limit on the final level plan.
 - Main route leads; optional branches are short. A few return paths permit revisiting discoveries.
 - Direct eight-direction movement mapped to the isometric view; walking and player-controlled running.
-- Low-pressure traversal actions are a future content requirement; they are not in the current route.
+- The optional reed causeway uses short hop animations between stepping stones as a low-pressure traversal action.
 - A small icon marks interactable objects. Examine, pick up, and activate are distinct actions.
 - Four inventory slots as a provisional baseline; most items reusable, rare consumables, swap when full.
 - Journal automatically animates discovered clues into an archive; players make connections themselves.
