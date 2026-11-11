@@ -20,6 +20,7 @@ Planned runtime checks; none executed:
 - After solving Bell Court, enter the highland refuge; examine its map, guest book, and lantern, save and continue in the room, return to Bell Court, re-enter, then follow the route to High Steps. Confirm each journal entry appears once and room transitions restore the expected checkpoint.
 - On the High Steps, confirm Beth's hint first points to the wind-worn map, then the active vane puzzle, and only after its solution points to the optional ridge-fork cairn. Examine the cairn and confirm its trail custom appears once in the journal.
 - Review traveler facing in all eight movement directions and after each camera quarter-turn; confirm the left/right flip follows world movement and reduced motion holds the standing pose.
+- Pause movement for at least seven seconds and observe Beth's brief orbit around the traveler; confirm examining clues interrupts it and reduced motion suppresses it.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.
 - Move and interact first by keyboard, then controller, and confirm HUD prompts switch device labels; verify each direction names the expected stick or D-pad input and actions show the expected controller button.
