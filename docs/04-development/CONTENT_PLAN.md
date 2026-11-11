@@ -18,7 +18,7 @@ The main chapter targets total approximately 135 minutes. Optional paths should 
 
 ## Current content status
 
-- Twelve main spaces, nine main puzzle mechanisms, and seven optional puzzles are implemented in the local source.
+- Twelve main spaces, nine main puzzle mechanisms, and seven optional puzzles are implemented in the local source. The High Steps also has an optional ridge-fork cairn and a short record of the trail custom.
 - The village well's saved bowl → lamp → bell sequence connects three records from separate locations and reveals ordinary valley history.
 - The highland refuge adds a saveable rest area and three records between Bell Court and High Steps.
 - Optional records, wrong-input recovery, local saves, three hint levels, reduced motion, and a Windows export exist.

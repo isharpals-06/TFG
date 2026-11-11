@@ -22,6 +22,8 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
 		"high_steps_last_lantern":
 			return "A neatly trimmed wick waits beside a note: extinguish the last lantern after the descent."
+		"high_steps_trail_cairn":
+			return "At the ridge fork, travelers added one stone before continuing. Its three marks point to the village, the refuge, and the upper path."
 		"refuge_high_path":
 			return "The refuge map marks three shelters along the ridge path. A note says the upper stair remains open in every season."
 		"refuge_guest_book":

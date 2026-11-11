@@ -593,6 +593,8 @@ func _get_targets() -> Array[Dictionary]:
 			steps_targets.append({"id": "steps_door", "name": "the observatory door", "position": Vector2(560, 110)})
 		if not RunState.story_flags.get("high_steps_lantern_seen", false):
 			steps_targets.append({"id": "high_steps_lantern", "name": "the last trail lantern", "position": Vector2(205, 262)})
+		if not RunState.story_flags.get("high_steps_cairn_seen", false):
+			steps_targets.append({"id": "high_steps_cairn", "name": "the little trail cairn", "position": Vector2(486, 253)})
 		return steps_targets
 	if phase == "highland_refuge":
 		var refuge_targets: Array[Dictionary] = []
@@ -736,7 +738,7 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  follow the covered channel" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_return":
 			prompt_label.text = "%s  return to the orchard" % _action_mark("activate")
-		"quarter_mural", "quarter_register", "village_gathering_marks", "village_gathering_record", "refuge_map", "refuge_guest_book", "refuge_lantern":
+		"quarter_mural", "quarter_register", "village_gathering_marks", "village_gathering_record", "refuge_map", "refuge_guest_book", "refuge_lantern", "high_steps_cairn":
 			prompt_label.text = "%s  study the old record" % _action_mark("examine")
 		"refuge_return":
 			prompt_label.text = "%s  return to the bell garden" % _action_mark("activate")
@@ -1083,6 +1085,8 @@ func _examine_target() -> void:
 			_set_status("The upper door stands open. Beyond it, the night sky presses close to the stone.")
 		"high_steps_lantern":
 			_reveal_world_memory("high_steps_lantern_seen", "high_steps_last_lantern", "The wick is neatly trimmed. Its note asks the last keeper to extinguish it after the descent.")
+		"high_steps_cairn":
+			_reveal_world_memory("high_steps_cairn_seen", "high_steps_trail_cairn", "A small cairn marks the old ridge fork. Three flat stones carry faded marks for the village, the refuge, and the upper path; the trail keeper's note says each traveler added one stone before continuing.")
 		"garden_gate":
 			_set_status("The planted seed has opened a narrow arch beneath the old tree.")
 		"garden_return":
@@ -3266,6 +3270,9 @@ func _draw_quiet_garden() -> void:
 		draw_rect(Rect2(316, 149, 3, 2), Color("#e5e7c8"))
 
 func _draw_high_steps() -> void:
+	for cairn_stone in [Vector2(480, 255), Vector2(484, 251), Vector2(488, 254)]:
+		draw_rect(Rect2(cairn_stone, Vector2(9, 3)), Color("#8c8d7d"))
+	draw_rect(Rect2(483, 247, 7, 3), Color("#b3ad91"))
 	draw_rect(Rect2(294, 96, 32, 18), Color("#606d63"))
 	draw_rect(Rect2(298, 99, 24, 12), Color("#3d4a47"))
 	_draw_arrow(Vector2(302, 105), 3, Color("#c2c09c"))

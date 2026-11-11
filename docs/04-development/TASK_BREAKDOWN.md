@@ -23,6 +23,7 @@
 - [x] Add an optional lower cistern beneath the restored waterworks with a saved four-turn valve puzzle, three hint levels, safe return, water-sharing history ledger, and an optional river-glass clue.
 - [x] Combine three ordinary-history records from separate areas into a saved optional village-well sequence and final gathering record.
 - [x] Add a highland refuge between the bell garden and High Steps, with three local history discoveries, distinct ambience, a return stair, a saved checkpoint, and original background art.
+- [x] Add an optional ridge-fork cairn discovery and journal record, with a proportional Beth hint, to deepen the High Steps route without adding another identity clue.
 - [x] Add subtle lower-cistern water ripples and suppress them when reduced motion is enabled.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
