@@ -126,7 +126,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var water_motion_enabled := not bool(RunState.settings.get("reduced_motion", false))
-	if water_motion_enabled and (phase == "cistern_vault" or (phase == "orchard" and RunState.story_flags.get("orchard_water_restored", false))):
+	if water_motion_enabled and (phase == "cistern_vault" or (phase == "orchard" and RunState.story_flags.get("orchard_water_restored", false)) or (phase == "waterworks" and RunState.story_flags.get("waterworks_solved", false))):
 		_water_motion_time += delta
 		queue_redraw()
 	if is_instance_valid(traveler):
@@ -2980,6 +2980,11 @@ func _draw_waterworks() -> void:
 		draw_rect(Rect2(559, 104, 31, 3), Color("#a9d7cc"))
 		draw_rect(Rect2(571, 107, 3, 16), Color("#c7b788"))
 		_draw_arch(Vector2(82, 158), true)
+		if not bool(RunState.settings.get("reduced_motion", false)):
+			for index in range(4):
+				var travel := fposmod(_water_motion_time * 18.0 + float(index) * 62.0, 214.0)
+				var ripple_start := Vector2(207.0 + travel, 196.0 + sin(travel * 0.035 + float(index)) * 9.0)
+				draw_line(ripple_start, ripple_start + Vector2(8, 0), Color("#b8d8ca", 0.58), 1.0)
 
 func _draw_cistern_vault() -> void:
 	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size())

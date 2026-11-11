@@ -29,6 +29,7 @@
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Add a brief idle-time playful orbit for Beth that yields to player movement, discoveries, and reduced-motion settings.
 - [x] Animate the restored orchard channels with subtle ripples and suppress the motion when reduced motion is enabled.
+- [x] Carry the restored-water animation into the waterworks pool, with reduced-motion support.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.
 - [x] Add a quiet chord-tone motif to each area's procedural ambience; final level and headphone review remain open.
 

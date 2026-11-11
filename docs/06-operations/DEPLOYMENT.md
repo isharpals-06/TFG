@@ -2,7 +2,7 @@
 
 ## Status
 
-The latest single-file Windows x86_64 development export exists at `build/The Forgotten World.exe` (about 144 MB). Its PCK is embedded. Godot 4.7.2 stable release templates were installed from the official release mirror. A prior export was opened on Windows: the title menu, traveler selection, and transition into the crossing all appeared. The latest export, including the ridge-fork cairn, revised High Steps hint order, required chart-led observatory alignment, Beth's playful idle orbit, and orchard ripples, has not been opened in runtime. No complete playthrough, full controls review, or release review has been performed. This is not an approved public release.
+The latest single-file Windows x86_64 development export exists at `build/The Forgotten World.exe` (about 144 MB). Its PCK is embedded. Godot 4.7.2 stable release templates were installed from the official release mirror. A prior export was opened on Windows: the title menu, traveler selection, and transition into the crossing all appeared. The latest export, including the ridge-fork cairn, revised High Steps hint order, required chart-led observatory alignment, Beth's playful idle orbit, and reduced-motion-aware water ripples in the orchard and waterworks, has not been opened in runtime. No complete playthrough, full controls review, or release review has been performed. This is not an approved public release.
 
 ## Release preparation
 
