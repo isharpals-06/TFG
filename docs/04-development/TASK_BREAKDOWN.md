@@ -16,6 +16,7 @@
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
 - [x] Add an optional chart-guided three-arm astrolabe puzzle and weather ledger in the observatory, independent of the cliffhanger.
 - [x] Add the old waterworks as a main-route room between orchard and village, with a saved four-mark wheel sequence, optional history record, and original generated background.
+- [x] Open a return stair from the Archive to the empty quarter after the lens puzzle; the village well gains a new, optional reflection clue on revisiting it.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.

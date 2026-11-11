@@ -407,6 +407,7 @@ func _get_targets() -> Array[Dictionary]:
 				archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 220)})
 				archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(525, 220)})
 			archive_targets.append({"id": "archive_stair", "name": "the revealed stair", "position": Vector2(320, 142)})
+			archive_targets.append({"id": "archive_well_stair", "name": "the stair back to the village well", "position": Vector2(320, 264)})
 		if RunState.story_flags.get("archive_fourth_path_solved", false) and not RunState.story_flags.get("archive_hidden_ledger_seen", false):
 			archive_targets.append({"id": "archive_hidden_ledger", "name": "a leaf on the low shelf", "position": Vector2(72, 205)})
 		if not RunState.story_flags.get("mirror_shard_found", false):
@@ -595,6 +596,8 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  turn the lens" % _action_mark("activate")
 		"archive_stair":
 			prompt_label.text = "%s  look into the light     %s  climb" % [_action_mark("examine"), _action_mark("activate")]
+		"archive_well_stair":
+			prompt_label.text = "%s  climb back to the village well" % _action_mark("activate")
 		"seed_bed":
 			prompt_label.text = "%s  examine     %s  plant the pale seed" % [_action_mark("examine"), _action_mark("use_item")]
 		"final_inscription":
@@ -761,7 +764,14 @@ func _examine_target() -> void:
 			var quarter_object: String = QUARTER_OBJECTS[int(quarter_slots.get(quarter_side, 0))]
 			_set_status("The %s doorway opens to a %s. Its niche currently holds the %s." % [quarter_side, quarter_room[quarter_side], quarter_object])
 		"quarter_well_stair":
-			_set_status("Four warm reflections meet in the well. A stone stair descends through the water without wetting it.")
+			if RunState.story_flags.get("archive_puzzle_solved", false) and not RunState.story_flags.get("quarter_well_reflection_seen", false):
+				_set_status("The well holds the Archive's starless sky. Four warm reflections gather around one quiet gap.")
+				RunState.set_story_flag("quarter_well_reflection_seen")
+				if RunState.record_clue("quarter_well_reflection"):
+					Soundscape.play_event("journal")
+					_animate_journal_signal()
+			else:
+				_set_status("Four warm reflections meet in the well. A stone stair descends through the water without wetting it.")
 		"archive_mural":
 			_set_status("Three reflected paths are carved overhead: turn right, then down, then left.")
 			RunState.set_story_flag("archive_mural_seen")
@@ -956,6 +966,8 @@ func _activate_target() -> void:
 		_rotate_archive_lens(target.id.trim_prefix("lens_"))
 	elif target.id == "archive_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
 		_enter_gallery()
+	elif target.id == "archive_well_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
+		_enter_empty_quarter()
 	elif target.id.begins_with("gallery_mirror_"):
 		_rotate_gallery_mirror(target.id.trim_prefix("gallery_mirror_"))
 	elif target.id == "gallery_stair" and RunState.story_flags.get("gallery_lights_solved", false):
@@ -2196,6 +2208,8 @@ func _clue_text(clue_id: String) -> String:
 			return "The village register remembers readers, potters, growers, and lamplighters. Its last column is worn blank."
 		"quarter_household_restored":
 			return "Four household objects sit once more in the doorways around the well. A stair appears in its reflection."
+		"quarter_well_reflection":
+			return "After the Archive opens, the village well reflects its starless sky. Four warm lights gather around a quiet gap."
 		"orchard_water_memory":
 			return "Three sluices feed the same basin; water returns to the garden."
 		"archive_reflection_map":
@@ -2623,6 +2637,9 @@ func _draw_archive() -> void:
 		draw_line(Vector2(320, 211), Vector2(525, 220), Color("#a9d7cc"), 1.0)
 		draw_rect(Rect2(304, 94, 32, 31), Color("#526966"))
 		draw_rect(Rect2(310, 99, 20, 22), Color("#9fc1b5"))
+		draw_circle(Vector2(320, 264), 9.0, Color("#79b5ab", 0.18))
+		draw_arc(Vector2(320, 264), 9.0, 0.0, TAU, 20, Color("#9fc9bb", 0.8), 1.0)
+		draw_circle(Vector2(320, 264), 2.0, Color("#c2d9be", 0.8))
 	else:
 		draw_rect(Rect2(302, 94, 36, 31), Color("#27343a"))
 		draw_rect(Rect2(311, 101, 18, 19), Color("#202d33"))
