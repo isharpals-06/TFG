@@ -14,4 +14,4 @@ The creator is a beginner with a few hours per week. Deliver small, understandab
 
 ## Current evidence
 
-The isolated Godot 4.7.2 headless export completed after adding the waterworks room, saved wheel sequence, and background; the executable was replaced and its SHA-256 recorded. This confirms resource import and packaging only. An earlier export opened on Windows; the current build still needs runtime review, and no complete playthrough has been completed. No test suite was added or run.
+The isolated Godot 4.7.2 export completed after adding the waterworks room, saved wheel sequence, and background; the executable was replaced and its SHA-256 recorded. The latest build opened through the title menu, traveler selection, and into the crossing on Windows. The Archive-to-village return and the new well reflection have been implemented and exported; they have not yet been played through in the runtime. The full route still needs a playthrough, and the 2–3 hour target, visual/audio polish, accessibility review, and release work remain incomplete. No test suite was added or run.
