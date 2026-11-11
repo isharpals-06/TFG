@@ -12,6 +12,7 @@ const REED_CAUSEWAY_BACKGROUND: Texture2D = preload("res://design/assets/reed_ca
 const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")
 const READING_ROOM_BACKGROUND: Texture2D = preload("res://design/assets/west_house_reading_room.png")
 const ARCHIVE_BACKGROUND: Texture2D = preload("res://design/assets/under_archive.png")
+const MAP_CHAMBER_BACKGROUND: Texture2D = preload("res://design/assets/archive_map_chamber.png")
 const GALLERY_BACKGROUND: Texture2D = preload("res://design/assets/gallery_reflection_hall.png")
 const BELL_COURT_BACKGROUND: Texture2D = preload("res://design/assets/bell_garden.png")
 const QUIET_GARDEN_BACKGROUND: Texture2D = preload("res://design/assets/quiet_garden.png")
@@ -36,6 +37,8 @@ const QUARTER_START := {"west": 2, "north": 0, "east": 3, "south": 1}
 const QUARTER_SOLUTION := {"west": 0, "north": 1, "east": 2, "south": 3}
 const READING_START := {"west": 2, "center": 2, "east": 0}
 const READING_SOLUTION := {"west": 0, "center": 1, "east": 2}
+const MAP_ROUTE_SEQUENCE := ["spring", "bridge", "village"]
+const MAP_ROUTE_POSITIONS := {"spring": Vector2(240, 144), "bridge": Vector2(320, 165), "village": Vector2(402, 144)}
 
 var traveler: Traveler
 var beth: Beth
@@ -67,6 +70,8 @@ func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
 	if RunState.story_flags.get("in_reading_room", false):
 		phase = "reading_room"
+	elif RunState.story_flags.get("in_map_chamber", false):
+		phase = "map_chamber"
 	elif RunState.story_flags.get("in_quiet_garden", false):
 		phase = "quiet_garden"
 	elif RunState.story_flags.get("reached_observatory", false):
@@ -191,6 +196,8 @@ func _create_traveler() -> void:
 				traveler.position = Vector2(320, 286)
 			"reading_room":
 				traveler.position = Vector2(320, 284)
+			"map_chamber":
+				traveler.position = Vector2(320, 282)
 			_:
 				traveler.position = Vector2(320, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
@@ -207,6 +214,7 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"reading_room": return RunState.story_flags.get("in_reading_room", false)
 		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
+		"map_chamber": return RunState.story_flags.get("in_map_chamber", false)
 		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
 		"bell_court": return RunState.story_flags.get("reached_bell_court", false) and not RunState.story_flags.get("reached_high_steps", false)
 		"high_steps": return RunState.story_flags.get("reached_high_steps", false) and not RunState.story_flags.get("reached_observatory", false)
@@ -342,6 +350,8 @@ func _initial_status_for_phase() -> String:
 			return "A lantern still warms the little room above the square."
 		"archive":
 			return "The archive holds its breath beneath the orchard. Beth's light doubles in the still water."
+		"map_chamber":
+			return "An old map gathers the valley's paths beneath a quiet stone arch."
 		"gallery":
 			return "A quiet pool waits beneath the reflected sky."
 		"bell_court":
@@ -461,7 +471,7 @@ func _get_targets() -> Array[Dictionary]:
 				archive_targets.append({"id": "lens_west", "name": "the western lens", "position": Vector2(145, 220)})
 				archive_targets.append({"id": "lens_center", "name": "the central lens", "position": Vector2(320, 220)})
 				archive_targets.append({"id": "lens_east", "name": "the eastern lens", "position": Vector2(525, 220)})
-			archive_targets.append({"id": "archive_stair", "name": "the revealed stair", "position": Vector2(320, 142)})
+			archive_targets.append({"id": "archive_stair", "name": "the stair to the map chamber", "position": Vector2(320, 142)})
 			archive_targets.append({"id": "archive_well_stair", "name": "the stair back to the village well", "position": Vector2(320, 264)})
 		if RunState.story_flags.get("archive_fourth_path_solved", false) and not RunState.story_flags.get("archive_hidden_ledger_seen", false):
 			archive_targets.append({"id": "archive_hidden_ledger", "name": "a leaf on the low shelf", "position": Vector2(72, 205)})
@@ -485,6 +495,19 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("gallery_figures_seen", false):
 			gallery_targets.append({"id": "gallery_figures", "name": "the worn procession", "position": Vector2(88, 252)})
 		return gallery_targets
+	if phase == "map_chamber":
+		var map_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("map_chamber_mural_seen", false):
+			map_targets.append({"id": "map_chamber_mural", "name": "the old valley map", "position": Vector2(320, 95)})
+		if not RunState.story_flags.get("map_route_solved", false):
+			for route_node in ["spring", "bridge", "village"]:
+				map_targets.append({"id": "map_route_%s" % route_node, "name": "the %s on the map" % route_node, "position": MAP_ROUTE_POSITIONS[route_node]})
+		elif not RunState.story_flags.get("map_chamber_record_seen", false):
+			map_targets.append({"id": "map_chamber_record", "name": "the keeper's route ledger", "position": Vector2(88, 274)})
+		map_targets.append({"id": "map_chamber_return", "name": "the stair back to the archive", "position": Vector2(320, 314)})
+		if RunState.story_flags.get("map_route_solved", false):
+			map_targets.append({"id": "map_chamber_exit", "name": "the opened gallery arch", "position": Vector2(320, 222)})
+		return map_targets
 	if phase == "bell_court":
 		var bell_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("bell_mural_seen", false):
@@ -660,9 +683,19 @@ func _update_prompt() -> void:
 		"lens_west", "lens_center", "lens_east":
 			prompt_label.text = "%s  turn the lens" % _action_mark("activate")
 		"archive_stair":
-			prompt_label.text = "%s  look into the light     %s  climb" % [_action_mark("examine"), _action_mark("activate")]
+			prompt_label.text = "%s  look into the light     %s  descend to the map room" % [_action_mark("examine"), _action_mark("activate")]
 		"archive_well_stair":
 			prompt_label.text = "%s  climb back to the village well" % _action_mark("activate")
+		"map_chamber_mural":
+			prompt_label.text = "%s  study the valley map" % _action_mark("examine")
+		"map_route_spring", "map_route_bridge", "map_route_village":
+			prompt_label.text = "%s  trace this place" % _action_mark("activate")
+		"map_chamber_record":
+			prompt_label.text = "%s  read the route ledger" % _action_mark("examine")
+		"map_chamber_return":
+			prompt_label.text = "%s  climb back to the archive" % _action_mark("activate")
+		"map_chamber_exit":
+			prompt_label.text = "%s  enter the reflection gallery" % _action_mark("activate")
 		"seed_bed":
 			prompt_label.text = "%s  examine     %s  plant the pale seed" % [_action_mark("examine"), _action_mark("use_item")]
 		"final_inscription":
@@ -876,6 +909,20 @@ func _examine_target() -> void:
 			_set_status("The eastern lens points toward the sealed stair.")
 		"archive_stair":
 			_set_status("A narrow stair descends toward a pale, starless glow. Another room waits below.")
+		"map_chamber_mural":
+			_set_status("A spring, an old bridge, and the village are linked by one safe route. The keeper marked them in the order a traveler would follow.")
+			RunState.set_story_flag("map_chamber_mural_seen")
+			_record_clue_animated("map_chamber_route")
+			_update_objective()
+		"map_route_spring", "map_route_bridge", "map_route_village":
+			var route_progress := int(RunState.puzzle_progress.get("map_route_sequence", 0))
+			_set_status("The %s is the %s mark in the keeper's route." % [target.id.trim_prefix("map_route_"), "first" if route_progress == 0 else ("second" if route_progress == 1 else "last")])
+		"map_chamber_record":
+			_reveal_world_memory("map_chamber_record_seen", "map_chamber_ledger", "The keeper's ledger records flood seasons, repaired bridges, and which homes shared lantern oil. On its last page, a blank map waits for a river that never came.")
+		"map_chamber_return":
+			_set_status("The stairs climb back to the archive pool.")
+		"map_chamber_exit":
+			_set_status("Beyond the arch, a still pool catches the light from below.")
 		"gallery_mural":
 			_set_status("The mural shows three reflections: west points north, the center points south, and east turns west.")
 			RunState.set_story_flag("gallery_mural_seen")
@@ -1049,9 +1096,15 @@ func _activate_target() -> void:
 	elif target.id.begins_with("lens_"):
 		_rotate_archive_lens(target.id.trim_prefix("lens_"))
 	elif target.id == "archive_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
-		_enter_gallery()
+		_enter_map_chamber()
 	elif target.id == "archive_well_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
 		_enter_empty_quarter()
+	elif target.id.begins_with("map_route_"):
+		_trace_map_route(target.id.trim_prefix("map_route_"))
+	elif target.id == "map_chamber_return":
+		_return_to_archive()
+	elif target.id == "map_chamber_exit" and RunState.story_flags.get("map_route_solved", false):
+		_enter_gallery()
 	elif target.id.begins_with("gallery_mirror_"):
 		_rotate_gallery_mirror(target.id.trim_prefix("gallery_mirror_"))
 	elif target.id == "gallery_stair" and RunState.story_flags.get("gallery_lights_solved", false):
@@ -1651,6 +1704,83 @@ func _enter_archive() -> void:
 	traveler.set_movement_enabled(true)
 	transitioning = false
 
+func _trace_map_route(node_name: String) -> void:
+	if not RunState.story_flags.get("map_chamber_mural_seen", false):
+		_set_status("The route marks are difficult to follow until you study the map.")
+		return
+	var progress := clampi(int(RunState.puzzle_progress.get("map_route_sequence", 0)), 0, MAP_ROUTE_SEQUENCE.size() - 1)
+	if node_name == MAP_ROUTE_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["map_route_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("resonance")
+		if progress == MAP_ROUTE_SEQUENCE.size():
+			RunState.set_story_flag("map_route_solved")
+			RunState.reset_local_hint_echo()
+			_record_clue_animated("map_chamber_route_open")
+			beth.react_to_discovery()
+			Soundscape.play_event("complete")
+			_set_status("The three route marks glow in sequence. The stone arch opens onto the still gallery pool.")
+			_update_objective()
+		else:
+			_set_status("A small light follows the river onward. The route remembers the next place.")
+	else:
+		progress = 1 if node_name == MAP_ROUTE_SEQUENCE[0] else 0
+		RunState.puzzle_progress["map_route_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("soft_fade")
+		_set_status("The route's light returns to the spring. The map waits without hurry.")
+	RunState.save_game()
+	queue_redraw()
+
+func _enter_map_chamber() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
+	await fade_out.finished
+	phase = "map_chamber"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 282)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_map_chamber")
+	RunState.set_story_flag("in_map_chamber")
+	RunState.save_game()
+	camera_target_rotation = 0.0
+	_set_status("A broad map of the valley waits beneath the archive. A stone arch seals the far wall.")
+	Soundscape.play_event("complete")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _return_to_archive() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.35))
+	await fade_out.finished
+	RunState.set_story_flag("in_map_chamber", false)
+	phase = "archive"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 185)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.save_game()
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.5))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
 func _enter_gallery() -> void:
 	if transitioning:
 		return
@@ -1660,10 +1790,12 @@ func _enter_gallery() -> void:
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
 	phase = "gallery"
+	RunState.set_story_flag("in_map_chamber", false)
 	Soundscape.set_area(phase)
 	traveler.global_position = Vector2(320, 248)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_gallery")
+	RunState.save_game()
 	beth.global_position = Vector2(337, 232)
 	beth.visible = true
 	beth.awake = true
@@ -2274,6 +2406,15 @@ func _update_objective() -> void:
 				objective_label.text = "Return to the village square"
 		"archive":
 			objective_label.text = "Study the ceiling mural" if not RunState.story_flags.get("archive_mural_seen", false) else ("Align the three lenses" if not RunState.story_flags.get("archive_puzzle_solved", false) else "Follow the reflected light")
+		"map_chamber":
+			if not RunState.story_flags.get("map_chamber_mural_seen", false):
+				objective_label.text = "Study the keeper's valley map"
+			elif not RunState.story_flags.get("map_route_solved", false):
+				objective_label.text = "Trace spring, bridge, then village"
+			elif not RunState.story_flags.get("map_chamber_record_seen", false):
+				objective_label.text = "Read the route ledger or enter the open arch"
+			else:
+				objective_label.text = "Enter the reflection gallery"
 		"gallery":
 			objective_label.text = "Read the pool mural" if not RunState.story_flags.get("gallery_mural_seen", false) else ("Align the reflected stones" if not RunState.story_flags.get("gallery_lights_solved", false) else "Follow the stair below")
 		"bell_court":
@@ -2307,6 +2448,7 @@ func _draw() -> void:
 		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"reading_room": draw_texture_rect(READING_ROOM_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"archive": draw_texture_rect(ARCHIVE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"map_chamber": draw_texture_rect(MAP_CHAMBER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"gallery":
 			draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"bell_court":
@@ -2329,6 +2471,7 @@ func _draw_scene_overlays() -> void:
 		"empty_quarter": _draw_empty_quarter()
 		"reading_room": _draw_reading_room()
 		"archive": _draw_archive()
+		"map_chamber": _draw_map_chamber()
 		"gallery": _draw_gallery()
 		"bell_court": _draw_bell_court()
 		"quiet_garden": _draw_quiet_garden()
@@ -2642,6 +2785,27 @@ func _draw_archive() -> void:
 		draw_line(Vector2(145, 220), Vector2(78, 204), Color("#b0d3cd"), 1.0)
 		draw_rect(Rect2(68, 201, 10, 2), Color("#c9c2a0"))
 		draw_rect(Rect2(70, 199, 5, 2), Color("#e0dcc4"))
+
+func _draw_map_chamber() -> void:
+	var progress := int(RunState.puzzle_progress.get("map_route_sequence", 0))
+	var route_colors := [Color("#c5d7aa"), Color("#9ed8ce"), Color("#e3c990")]
+	for index in range(MAP_ROUTE_SEQUENCE.size()):
+		var point: Vector2 = MAP_ROUTE_POSITIONS[MAP_ROUTE_SEQUENCE[index]]
+		var is_lit: bool = bool(RunState.story_flags.get("map_route_solved", false)) or index < progress
+		var glow_color: Color = route_colors[index] if is_lit else Color("#857b62")
+		draw_circle(point, 8.0, Color(glow_color, 0.22) if is_lit else Color("#192a2a", 0.7))
+		draw_arc(point, 9.0, 0.0, TAU, 16, glow_color, 1.5, true)
+		if (index < progress - 1 or RunState.story_flags.get("map_route_solved", false)) and index + 1 < MAP_ROUTE_SEQUENCE.size():
+			var next_point: Vector2 = MAP_ROUTE_POSITIONS[MAP_ROUTE_SEQUENCE[index + 1]]
+			draw_line(point, next_point, Color("#a9d9ce", 0.8), 2.0)
+	if RunState.story_flags.get("map_route_solved", false):
+		_draw_arch(Vector2(320, 222), true)
+	else:
+		_draw_arch(Vector2(320, 222), false)
+	if not RunState.story_flags.get("map_chamber_record_seen", false) and RunState.story_flags.get("map_route_solved", false):
+		draw_rect(Rect2(78, 269, 20, 8), Color("#35443e"))
+		draw_rect(Rect2(81, 264, 13, 8), Color("#8f8064"))
+		draw_rect(Rect2(83, 266, 9, 1), Color("#d4c394"))
 
 func _draw_archive_arrows(pos: Vector2) -> void:
 	_draw_arrow(pos + Vector2(-12, 0), 1, Color("#c2c09c"))

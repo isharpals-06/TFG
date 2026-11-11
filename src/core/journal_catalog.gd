@@ -98,6 +98,12 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "A fourth path of reflected light opens a narrow shelf beneath the archive's western wall."
 		"archive_hidden_register":
 			return "A loose leaf is headed “Borrowed skies.” Its final line asks the keeper to leave the east windows uncovered so the last light has somewhere to go."
+		"map_chamber_route":
+			return "The keeper's valley map marks a route in travel order: spring, bridge, village."
+		"map_chamber_route_open":
+			return "The spring, bridge, and village answer in sequence. A quiet arch opens toward the reflected pool."
+		"map_chamber_ledger":
+			return "The map keeper recorded flood seasons, bridge repairs, and which homes shared lantern oil. The last page leaves a blank map for a river that never came."
 		"river_glass_memory":
 			return "Green river glass catches a hidden thread beneath the pool's false sky."
 		"bead_resonance":

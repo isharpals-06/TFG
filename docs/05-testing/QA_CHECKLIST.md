@@ -13,6 +13,7 @@ Release review only; not performed.
 - [ ] Pixel art scales cleanly and important objects stay visible.
 - [ ] Placeholder geometry and sound are resolved or intentionally retained.
 - [ ] 2–3 hour duration is measured on a first playthrough.
+- [ ] The Archive map chamber route puzzle, checkpoint restore, Archive return, gallery exit, and optional ledger are reviewed in a runtime playthrough.
 - [ ] Third-party licenses and attributions are recorded.
 - [ ] Windows export launches on a clean system without the editor.
 - [ ] Creator approves the final release candidate.

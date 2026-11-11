@@ -6,6 +6,7 @@ No versioned release has been published.
 
 ### Added
 
+- Main-route Archive map chamber with original background, saved spring-bridge-village tracing puzzle, three hint levels, a return stair, gallery passage, and optional flood-season ledger.
 - Godot 4.7.2 project, title menu, two traveler color choices, movement, camera controls, Beth, journal, and a first puzzle route.
 - Crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and the animated inscription cliffhanger.
 - Seven main puzzle mechanisms and an optional seed-restored garden with a three-note chime puzzle.

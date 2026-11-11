@@ -9,7 +9,7 @@ Keep the project offline, small, and understandable to a beginner. Prefer Godot'
 - **RunState autoload:** journey state, inventory, journal IDs, settings, input bindings, hint echo, local JSON save/load, and elapsed playtime.
 - **Soundscape autoload:** generated ambience and short event tones. Area changes select a matching loop.
 - **Main menu scene:** title, traveler palette choice, continue, settings, controls, and key rebinding.
-- **Prologue scene:** currently owns area progression, interactions, puzzles, HUD, fades, and state overlays for ten main spaces plus the optional garden; generated backgrounds and character sprites are loaded from `design/assets/`. This is a prototype boundary; split it into area/interaction/UI scripts as content grows.
+- **Prologue scene:** currently owns area progression, interactions, puzzles, HUD, fades, and state overlays for eleven main spaces plus optional branches; generated backgrounds and character sprites are loaded from `design/assets/`. This is a prototype boundary; split it into area/interaction/UI scripts as content grows.
 - **Traveler and Beth scenes:** direct movement and the glowing companion.
 
 ## Persistence

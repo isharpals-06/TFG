@@ -8,13 +8,13 @@ There is no database server. Journey state is stored locally at `user://forgotte
 - `presentation`: selected traveler palette.
 - `inventory`, `selected_item_id`: stable item IDs and selected item, bounded to four slots.
 - `journal_entries`: stable clue IDs, in discovery order.
-- `puzzle_progress`: per-puzzle values such as resonator sequence, sluice states, lens positions, the causeway's seven-step rhythm, the waterworks' four-mark wheel order, the village reading room's three study markers, and the observatory's three astrolabe arms. Nested maps are rebuilt from known keys; orientations and sequence counts are clamped to their legal ranges.
-- `story_flags`: progression and optional-discovery flags, including entry to the optional reading room, its slate, solved markers, and lesson record; the archive's independent fourth-path puzzle and hidden-leaf record; the waterworks map and bowl record; plus the observatory chart and weather ledger.
+- `puzzle_progress`: per-puzzle values such as resonator sequence, sluice states, lens positions, the causeway's seven-step rhythm, the waterworks' four-mark wheel order, the reading room's three study markers, the map chamber's three-place route sequence, and the observatory's three astrolabe arms. Nested maps are rebuilt from known keys; orientations and sequence counts are clamped to their legal ranges.
+- `story_flags`: progression and optional-discovery flags, including entry to the optional reading room and map chamber; their clues, solved states, and records; the archive's independent fourth-path puzzle and hidden-leaf record; the waterworks map and bowl record; plus the observatory chart and weather ledger.
 - `hint_echo`, `total_hint_points`, `local_hint_points`, `hint_uses`: escalating hint consequence.
 - `journey_started`, `seconds_played`: journey presence and elapsed playtime.
 - `settings`, `input_bindings`: local options and user control overrides.
 
-Version 1 saves are accepted and receive a conservative estimated hint-use count. Unknown future versions are rejected. The current checkpoint list includes the optional `reed_causeway` and `reading_room` phases and the main-route `waterworks` room. Earlier single-binding and current per-device input bindings are accepted and filtered against supported actions and valid key/button ranges.
+Version 1 saves are accepted and receive a conservative estimated hint-use count. Unknown future versions are rejected. The current checkpoint list includes the optional `reed_causeway` and `reading_room` phases and the main-route `waterworks` and `map_chamber` rooms. Earlier single-binding and current per-device input bindings are accepted and filtered against supported actions and valid key/button ranges.
 
 ## Current limitations
 

@@ -11,7 +11,7 @@
 - [x] Add the optional seed-restored quiet garden and its chime puzzle.
 - [x] Add the highland approach and wind-vane alignment before the observatory.
 - [x] Add clue journal, three hint levels, initial escalating hint trace, and generated sound cues.
-- [x] Add generated backgrounds for the title and all ten main locations plus the optional garden, with asset credits.
+- [x] Add generated backgrounds for the title and all eleven main locations plus optional areas, with asset credits.
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or onward to the waterworks.
 - [x] Give correct causeway steps a brief traveler hop animation; make wrong stones return safely to shore, with the hop removed in reduced-motion mode.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
@@ -19,6 +19,7 @@
 - [x] Add the old waterworks as a main-route room between orchard and village, with a saved four-mark wheel sequence, optional history record, and original generated background.
 - [x] Open a return stair from the Archive to the empty quarter after the lens puzzle; the village well gains a new, optional reflection clue on revisiting it.
 - [x] Add an optional reading room in the restored west house, with a saved three-marker observation puzzle, two history records, three hint levels, and a return to the village square.
+- [x] Extend the main Archive route through a map chamber with a saved spring-bridge-village sequence, three hint levels, a return stair, an open gallery route, and an optional valley-history ledger.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.
@@ -43,6 +44,7 @@
 - [ ] Design and implement enough exploration and puzzle content for a 2–3 hour first playthrough; the current route is not yet long enough.
 - [x] Add optional history records across the route without revealing the traveler's past.
 - [ ] Deepen area exploration and multi-step puzzles to meet the 2–3 hour target.
+- [ ] Runtime-review the Archive map chamber sequence, its save/return paths, and its optional history ledger.
 - [x] Add a fair hint-dependent Bell Court variant: eight prior hints add a visible, clued fifth note.
 - [x] Add a fair hint-dependent High Steps variant: twelve prior hints change the middle vane and its visible clue.
 - [ ] Balance both hint-dependent variants in a full runtime playthrough and add further variations if needed.
