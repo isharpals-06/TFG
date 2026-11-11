@@ -1,9 +1,9 @@
 extends RefCounted
 
 static func get_place_name(clue_id: String) -> String:
-	if clue_id.begins_with("crossing_") or clue_id in ["gibberish_inscription", "bead_resonance", "resonance_mosaic"]:
+	if clue_id.begins_with("crossing_"):
 		return "The buried crossing"
-	if clue_id.begins_with("ruins_"):
+	if clue_id.begins_with("ruins_") or clue_id in ["gibberish_inscription", "bead_resonance", "resonance_mosaic"]:
 		return "The first ruins"
 	if clue_id.begins_with("orchard_"):
 		return "The quiet orchard"
