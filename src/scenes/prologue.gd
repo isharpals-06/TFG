@@ -3332,6 +3332,8 @@ func _draw_observatory() -> void:
 		_draw_arrow(pos, int(arms.get(arm_name, 0)), Color("#f0d798"))
 		_draw_symbol(pos + Vector2(0, -8), arm_symbols[index], Color("#e2d3a5"))
 	if RunState.story_flags.get("observatory_orrery_solved", false):
+		draw_line(Vector2(320, 142), Vector2(320, 113), Color("#c8d6bf"), 1.0)
+		draw_rect(Rect2(318, 128, 4, 1), Color("#e8ddb5"))
 		draw_rect(Rect2(132, 178, 14, 2), Color("#dfc891"))
 		draw_rect(Rect2(132, 181, 14, 2), Color("#8f927e"))
 	if RunState.story_flags.get("ending_revealed", false):
