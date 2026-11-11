@@ -1,0 +1,102 @@
+extends RefCounted
+
+static func get_text(clue_id: String, story_flags: Dictionary) -> String:
+	match clue_id:
+		"crossing_floodlines":
+			return "Three floodlines climb the roadstone. Beyond the highest, someone carved a row of little boats."
+		"ruins_kiln_tag":
+			return "The kiln's last clay tag says: bowls packed first; bells left to dry."
+		"orchard_grafts_uphill":
+			return "A grafting label lists trees sent uphill when the river failed. Each orchard tree began as a cutting."
+		"causeway_rhythm":
+			return "Seven waterlines climb to the highest mark, then return to shore: near, second, third, far, third, second, near."
+		"causeway_departure":
+			return "A reed basket held four colored wrist cords. Its note asked the families to wait by the water and cross together."
+		"causeway_crossing_open":
+			return "The old stepping stones answered in a path that rose toward the gate and returned to shore."
+		"archive_last_entry":
+			return "The last catalogue line says: carry the books east; leave one lamp in the doorway."
+		"gallery_procession":
+			return "Three faceless figures carry bowls and lanterns toward a path cut into the mountain."
+		"bell_keeper_list":
+			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
+		"high_steps_last_lantern":
+			return "A neatly trimmed wick waits beside a note: extinguish the last lantern after the descent."
+		"quiet_garden_cup":
+			return "An upside-down clay cup shelters a seed hollow from the rain."
+		"gibberish_inscription":
+			return "At the ruin wall: a line of marks, still unreadable."
+		"resonance_mosaic":
+			return "A worn mosaic repeats three shapes: crescent, rain-line, seed."
+		"orchard_memory":
+			return "A pale flower chimed as the orchard water returned."
+		"quarter_household_map":
+			return "A carving pairs the west doorway with a book, north with a bowl, east with a seed, and south with a lamp."
+		"quarter_register":
+			return "The village register remembers readers, potters, growers, and lamplighters. Its last column is worn blank."
+		"quarter_household_restored":
+			return "Four household objects sit once more in the doorways around the well. A stair appears in its reflection."
+		"quarter_well_reflection":
+			return "After the Archive opens, the village well reflects its starless sky. Four warm lights gather around a quiet gap."
+		"orchard_water_memory":
+			return "Three sluices feed the same basin; water returns to the garden."
+		"archive_reflection_map":
+			return "The archive ceiling shows a reflection turning right, down, then left."
+		"archive_memory":
+			return "The reflecting pool holds a sky that is absent above the ruins."
+		"archive_hidden_stair":
+			return "Aligned lenses reveal a stair below the archive."
+		"gallery_reflection_map":
+			return "The pool-side mural shows west pointing north, center pointing south, and east turning west."
+		"gallery_memory":
+			return "Beth's light is the only star reflected in the lower pool."
+		"gallery_second_sky":
+			return "The mirror shard catches the same stars around a missing place in the reflected sky."
+		"gallery_hidden_stair":
+			return "Three aligned reflections reveal a stair beneath the starless pool."
+		"bell_garden_pattern":
+			return "The bell garden's carving repeats five marks: crescent, rain-line, seed, crescent, then a pale rain-line echo." if story_flags.get("bell_echo_variant", false) else "The bell garden's carving repeats four marks: crescent, rain-line, seed, crescent."
+		"bell_bench_memory":
+			return "Beth rested on the old garden bench as if she had sat there many times before."
+		"bell_garden_answer":
+			return "The bells answered in the order of the four marks carved into the garden wall."
+		"high_steps_wind_map":
+			return "The wind-worn map marks west, south (under a doubled arrow), and east across the three vanes." if story_flags.get("high_steps_echo_variant", false) else "The wind-worn map marks west, north, and east across the three vanes."
+		"high_steps_open_door":
+			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
+		"waterworks_channel_map":
+			return "The channel map gives four wheel marks in order: rain-line, crescent, seed, crescent."
+		"waterworks_gate_open":
+			return "The waterwheels raise the sluice gate and uncover the dry lane into the village."
+		"waterworks_waiting_bowls":
+			return "Three bowls waited at the waterline each summer. A note says no one drank from the first spill."
+		"observatory_star_chart":
+			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
+		"observatory_weather_log":
+			return "The drawer holds years of careful weather notes: first floodwater, last spring rain, and the nights the valley's lanterns were lit. The final page is a blank table for the next season."
+		"quiet_garden_order":
+			return "The small garden carving gives three marks: rain-line, seed, crescent."
+		"quiet_garden_bench":
+			return "The old stone bench holds the warmth of a place where someone once waited."
+		"quiet_garden_song":
+			return "Three glass chimes answered above the seedling; one white flower opened by the basin."
+		"matching_stone_cuts":
+			return "A broken chip fits a narrow break at the observatory inscription."
+		"crossing_sun_mark":
+			return "A green brass button fits an old mark on the buried arch."
+		"quiet_garden_memory":
+			return "A small green shoot returned where the orchard channels meet."
+		"archive_second_image":
+			return "In the silvered shard, a fourth archive path points north from west, east from center, and south from east."
+		"archive_fourth_path":
+			return "A fourth path of reflected light opens a narrow shelf beneath the archive's western wall."
+		"archive_hidden_register":
+			return "A loose leaf is headed “Borrowed skies.” Its final line asks the keeper to leave the east windows uncovered so the last light has somewhere to go."
+		"river_glass_memory":
+			return "Green river glass catches a hidden thread beneath the pool's false sky."
+		"bead_resonance":
+			return "A blue fleck in a cloudy bead answers the rain-line with a low note."
+		"message_from_past":
+			return "The old inscription changed: Your hand has been here before."
+		_:
+			return clue_id.replace("_", " ").capitalize()

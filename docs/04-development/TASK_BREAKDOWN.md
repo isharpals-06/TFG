@@ -24,6 +24,7 @@
 ## Core-system work in progress
 
 - [x] Add four-slot keepsake inventory, descriptions, selection, item-use combinations, and a protected story item.
+- [x] Keep authored journal clue text in its own catalog file, separate from room and puzzle flow.
 - [x] Add item replacement when full and optional keepsake discoveries.
 - [x] Add pause/resume, save-and-return, autosave time, save version handling, and remapping for movement, interaction, inventory, journal, hints, pause, and camera controls.
 - [ ] Review the inventory, rebinding, save migration, and pause flows in a runtime playthrough.
