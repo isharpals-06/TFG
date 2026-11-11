@@ -28,7 +28,7 @@
 - [x] Add pause/resume, save-and-return, autosave time, save version handling, and remapping for movement, interaction, inventory, journal, hints, pause, and camera controls.
 - [ ] Review the inventory, rebinding, save migration, and pause flows in a runtime playthrough.
 - [x] Add temporary-file save replacement, previous-save backup, and fallback loading.
-- [x] Save and restore the current room and bounded player position; pause the playtime counter in menus.
+- [x] Save and restore the current room and bounded player position, show a progress-aware status on resume, and pause the playtime counter in menus.
 - [x] Validate nested save data, inventory and clue IDs, settings, puzzle values, story flag types, checkpoints, input bindings, hint counters, and playtime.
 - [ ] Review controller prompts and all remapped actions in a runtime playthrough.
 - [x] Shift the camera framing upward to show more of the path ahead and fade the traveler under orchard canopy silhouettes.

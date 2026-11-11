@@ -85,6 +85,7 @@ func _ready() -> void:
 		phase = "crossing"
 	if RunState.checkpoint_valid and _checkpoint_matches_progress(RunState.checkpoint_phase):
 		phase = RunState.checkpoint_phase
+	status_text = _initial_status_for_phase()
 	RunState.set_journey_active(true)
 	Soundscape.set_area(phase)
 	_create_traveler()
@@ -311,6 +312,35 @@ func _action_mark(action_name: String) -> String:
 
 func _motion_duration(seconds: float) -> float:
 	return 0.0 if bool(RunState.settings.get("reduced_motion", false)) else seconds
+
+func _initial_status_for_phase() -> String:
+	match phase:
+		"crossing":
+			return "A medallion rests beside the buried arch."
+		"ruins":
+			return "Beth's small light waits among the old stones." if RunState.story_flags.get("beth_awake", false) else "A small light rests beside the silent gate."
+		"orchard":
+			return "Water runs again through the quiet orchard." if RunState.story_flags.get("orchard_water_restored", false) else "Three dry channels meet at the old basin."
+		"waterworks":
+			return "The water gate stands open toward the village." if RunState.story_flags.get("waterworks_solved", false) else "The old cistern waits beneath the orchard."
+		"reed_causeway":
+			return "The old stones lead across the still water."
+		"empty_quarter":
+			return "The well holds a pale, starless reflection." if RunState.story_flags.get("archive_puzzle_solved", false) else "Four dark doorways face the village well."
+		"archive":
+			return "The archive holds its breath beneath the orchard. Beth's light doubles in the still water."
+		"gallery":
+			return "A quiet pool waits beneath the reflected sky."
+		"bell_court":
+			return "The garden bells stir in the mountain air."
+		"high_steps":
+			return "The wind moves softly across the high steps."
+		"quiet_garden":
+			return "The hidden garden keeps its small, clear song."
+		"observatory":
+			return "The world remembers." if RunState.story_flags.get("ending_revealed", false) else "The old inscription waits in the starlight."
+		_:
+			return status_text
 
 func _get_targets() -> Array[Dictionary]:
 	if phase == "crossing":
