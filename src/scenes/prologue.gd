@@ -8,6 +8,7 @@ const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_cle
 const RUINS_BACKGROUND: Texture2D = preload("res://design/assets/first_ruins.png")
 const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard_dry.png")
 const WATERWORKS_BACKGROUND: Texture2D = preload("res://design/assets/old_waterworks.png")
+const CISTERN_BACKGROUND: Texture2D = preload("res://design/assets/lower_cistern.png")
 const REED_CAUSEWAY_BACKGROUND: Texture2D = preload("res://design/assets/reed_causeway.png")
 const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")
 const READING_ROOM_BACKGROUND: Texture2D = preload("res://design/assets/west_house_reading_room.png")
@@ -31,6 +32,8 @@ const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
 const CAUSEWAY_STEP_PATTERN := [0, 1, 2, 3, 2, 1, 0]
 const CAUSEWAY_STONE_POSITIONS := [Vector2(320, 258), Vector2(320, 218), Vector2(320, 178), Vector2(320, 140)]
 const WATERWORKS_WHEEL_SEQUENCE := ["west", "center", "east", "center"]
+const CISTERN_VALVE_SEQUENCE := ["east", "west", "center", "west"]
+const CISTERN_VALVE_POSITIONS := {"west": Vector2(188, 168), "center": Vector2(320, 168), "east": Vector2(452, 168)}
 const CAUSEWAY_STEP_MARKS := ["moon", "water", "seed", "water"]
 const QUARTER_OBJECTS := ["book", "bowl", "seed", "lamp"]
 const QUARTER_START := {"west": 2, "north": 0, "east": 3, "south": 1}
@@ -70,6 +73,8 @@ func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
 	if RunState.story_flags.get("in_reading_room", false):
 		phase = "reading_room"
+	elif RunState.story_flags.get("in_cistern_vault", false):
+		phase = "cistern_vault"
 	elif RunState.story_flags.get("in_map_chamber", false):
 		phase = "map_chamber"
 	elif RunState.story_flags.get("in_quiet_garden", false):
@@ -192,6 +197,8 @@ func _create_traveler() -> void:
 				traveler.position = Vector2(320, 310)
 			"waterworks":
 				traveler.position = Vector2(94, 280)
+			"cistern_vault":
+				traveler.position = Vector2(320, 284)
 			"empty_quarter":
 				traveler.position = Vector2(320, 286)
 			"reading_room":
@@ -211,6 +218,7 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 		"ruins": return RunState.story_flags.get("crossed_into_world", false) and not RunState.story_flags.get("reached_orchard", false)
 		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"waterworks": return RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"cistern_vault": return RunState.story_flags.get("in_cistern_vault", false)
 		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"reading_room": return RunState.story_flags.get("in_reading_room", false)
 		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
@@ -342,6 +350,8 @@ func _initial_status_for_phase() -> String:
 			return "Water runs again through the quiet orchard." if RunState.story_flags.get("orchard_water_restored", false) else "Three dry channels meet at the old basin."
 		"waterworks":
 			return "The water gate stands open toward the village." if RunState.story_flags.get("waterworks_solved", false) else "The old cistern waits beneath the orchard."
+		"cistern_vault":
+			return "The lower cistern keeps the old water clock running without a sound."
 		"reed_causeway":
 			return "The old stones lead across the still water."
 		"empty_quarter":
@@ -414,7 +424,19 @@ func _get_targets() -> Array[Dictionary]:
 			waterworks_targets.append({"id": "waterwheel_east", "name": "the eastern waterwheel", "position": Vector2(463, 151)})
 		else:
 			waterworks_targets.append({"id": "waterworks_exit", "name": "the opened village gate", "position": Vector2(575, 106)})
+			waterworks_targets.append({"id": "waterworks_cistern_stair", "name": "the lower cistern stair", "position": Vector2(82, 158)})
 		return waterworks_targets
+	if phase == "cistern_vault":
+		var cistern_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("cistern_mural_seen", false):
+			cistern_targets.append({"id": "cistern_mural", "name": "the old water clock", "position": Vector2(320, 88)})
+		if not RunState.story_flags.get("cistern_solved", false):
+			for valve_name in ["west", "center", "east"]:
+				cistern_targets.append({"id": "cistern_valve_%s" % valve_name, "name": "the %s cistern valve" % valve_name, "position": CISTERN_VALVE_POSITIONS[valve_name]})
+		elif not RunState.story_flags.get("cistern_record_seen", false):
+			cistern_targets.append({"id": "cistern_record", "name": "the water keeper's ledger", "position": Vector2(552, 230)})
+		cistern_targets.append({"id": "cistern_return", "name": "the stair back to the waterworks", "position": Vector2(46, 194)})
+		return cistern_targets
 	if phase == "reed_causeway":
 		var causeway_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("causeway_marks_seen", false):
@@ -640,6 +662,16 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  turn the waterwheel" % [_action_mark("examine"), _action_mark("activate")]
 		"waterworks_exit":
 			prompt_label.text = "%s  look through the open gate     %s  enter the village" % [_action_mark("examine"), _action_mark("activate")]
+		"waterworks_cistern_stair":
+			prompt_label.text = "%s  descend to the lower cistern" % _action_mark("activate")
+		"cistern_mural":
+			prompt_label.text = "%s  study the water clock" % _action_mark("examine")
+		"cistern_valve_west", "cistern_valve_center", "cistern_valve_east":
+			prompt_label.text = "%s  examine     %s  turn the cistern valve" % [_action_mark("examine"), _action_mark("activate")]
+		"cistern_record":
+			prompt_label.text = "%s  read the water keeper's ledger" % _action_mark("examine")
+		"cistern_return":
+			prompt_label.text = "%s  return to the waterworks" % _action_mark("activate")
 		"memory_bloom":
 			prompt_label.text = "%s  listen to the pale bloom" % _action_mark("examine")
 		"sluice_west", "sluice_north", "sluice_east":
@@ -833,6 +865,19 @@ func _examine_target() -> void:
 			_set_status("A seed mark is cut into the eastern wheel.")
 		"waterworks_exit":
 			_set_status("The sluice gate has lifted. A dry lane leads into the empty quarter.")
+		"waterworks_cistern_stair":
+			_set_status("The side stair descends below the waterline. A pale clockface glows in the dark.")
+		"cistern_mural":
+			_set_status("The water clock's four marks read east, west, center, west. The keeper used the pattern to balance water between the village channels.")
+			RunState.set_story_flag("cistern_mural_seen")
+			_record_clue_animated("cistern_valve_pattern")
+			_update_objective()
+		"cistern_valve_west", "cistern_valve_center", "cistern_valve_east":
+			_set_status("The %s valve is still. Its brass wheel bears a worn water mark." % target.id.trim_prefix("cistern_valve_"))
+		"cistern_record":
+			_reveal_world_memory("cistern_record_seen", "cistern_shared_water", "A water keeper's ledger records the dry seasons by household. Each family took one measure at dawn; anyone who missed a turn was written in the next day's margin.")
+		"cistern_return":
+			_set_status("A narrow stair rises to the roofless waterworks.")
 		"waterworks_gate":
 			_set_status("The water slips beneath a low stone arch and disappears into a roofless cistern.")
 		"causeway_gate":
@@ -1083,6 +1128,12 @@ func _activate_target() -> void:
 		_ring_waterworks_wheel(target.id.trim_prefix("waterwheel_"))
 	elif target.id == "waterworks_exit" and RunState.story_flags.get("waterworks_solved", false):
 		_enter_empty_quarter()
+	elif target.id == "waterworks_cistern_stair" and RunState.story_flags.get("waterworks_solved", false):
+		_enter_cistern_vault()
+	elif target.id.begins_with("cistern_valve_"):
+		_turn_cistern_valve(target.id.trim_prefix("cistern_valve_"))
+	elif target.id == "cistern_return":
+		_return_to_waterworks()
 	elif target.id.begins_with("quarter_slot_"):
 		_rotate_quarter_slot(target.id.trim_prefix("quarter_slot_"))
 	elif target.id == "quarter_well_stair" and RunState.story_flags.get("quarter_household_restored", false):
@@ -1228,6 +1279,33 @@ func _ring_waterworks_wheel(which: String) -> void:
 		RunState.save_game()
 		Soundscape.play_event("soft_fade")
 		_set_status("The water slows and returns to its steady course. The wheels can be tried again.")
+	queue_redraw()
+
+func _turn_cistern_valve(which: String) -> void:
+	if not RunState.story_flags.get("cistern_mural_seen", false):
+		_set_status("The water clock might explain how the three channels should be balanced.")
+		return
+	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size() - 1)
+	if which == CISTERN_VALVE_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["cistern_sequence"] = progress
+		Soundscape.play_event("resonance")
+		if progress == CISTERN_VALVE_SEQUENCE.size():
+			RunState.set_story_flag("cistern_solved")
+			RunState.reset_local_hint_echo()
+			_record_clue_animated("cistern_basin_balanced")
+			beth.react_to_discovery()
+			Soundscape.play_event("complete")
+			_set_status("The three channels settle into an even flow. A keeper's ledger becomes visible beside the cups.")
+			_update_objective()
+		else:
+			_set_status("Water rises a little in the central clock. The channels hold their quiet rhythm.")
+	else:
+		progress = 1 if which == CISTERN_VALVE_SEQUENCE[0] else 0
+		RunState.puzzle_progress["cistern_sequence"] = progress
+		Soundscape.play_event("soft_fade")
+		_set_status("The water settles back to its resting level. The valves can be tried again.")
+	RunState.save_game()
 	queue_redraw()
 
 func _get_quarter_slots() -> Dictionary:
@@ -1618,6 +1696,56 @@ func _enter_waterworks(from_causeway: bool = false) -> void:
 	queue_redraw()
 	var fade_in := create_tween()
 	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_cistern_vault() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
+	await fade_out.finished
+	phase = "cistern_vault"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 284)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("in_cistern_vault")
+	RunState.save_game()
+	beth.global_position = Vector2(337, 264)
+	beth.visible = true
+	beth.awake = true
+	_set_status("Below the cistern, a water clock keeps time for three quiet channels.")
+	Soundscape.play_event("soft_fade")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _return_to_waterworks() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.35))
+	await fade_out.finished
+	RunState.set_story_flag("in_cistern_vault", false)
+	phase = "waterworks"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(82, 164)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.save_game()
+	_set_status("The roofless waterworks opens again toward the village and orchard.")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.5))
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
@@ -2379,6 +2507,15 @@ func _update_objective() -> void:
 				objective_label.text = "Follow the four-mark wheel pattern"
 			else:
 				objective_label.text = "Enter the empty quarter"
+		"cistern_vault":
+			if not RunState.story_flags.get("cistern_mural_seen", false):
+				objective_label.text = "Study the lower cistern's water clock"
+			elif not RunState.story_flags.get("cistern_solved", false):
+				objective_label.text = "Balance the three channels"
+			elif not RunState.story_flags.get("cistern_record_seen", false):
+				objective_label.text = "Read the water keeper's ledger or return"
+			else:
+				objective_label.text = "Return to the waterworks"
 		"reed_causeway":
 			if not RunState.story_flags.get("causeway_marks_seen", false):
 				objective_label.text = "Study the shoreline marks"
@@ -2444,6 +2581,7 @@ func _draw() -> void:
 		"ruins": draw_texture_rect(RUINS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"orchard": draw_texture_rect(ORCHARD_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"waterworks": draw_texture_rect(WATERWORKS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"cistern_vault": draw_texture_rect(CISTERN_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"reed_causeway": draw_texture_rect(REED_CAUSEWAY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"reading_room": draw_texture_rect(READING_ROOM_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
@@ -2467,6 +2605,7 @@ func _draw_scene_overlays() -> void:
 		"ruins": _draw_ruins()
 		"orchard": _draw_orchard()
 		"waterworks": _draw_waterworks()
+		"cistern_vault": _draw_cistern_vault()
 		"reed_causeway": _draw_reed_causeway()
 		"empty_quarter": _draw_empty_quarter()
 		"reading_room": _draw_reading_room()
@@ -2643,6 +2782,25 @@ func _draw_waterworks() -> void:
 	if RunState.story_flags.get("waterworks_solved", false):
 		draw_rect(Rect2(559, 104, 31, 3), Color("#a9d7cc"))
 		draw_rect(Rect2(571, 107, 3, 16), Color("#c7b788"))
+		_draw_arch(Vector2(82, 158), true)
+
+func _draw_cistern_vault() -> void:
+	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size())
+	for valve_name in ["west", "center", "east"]:
+		var point: Vector2 = CISTERN_VALVE_POSITIONS[valve_name]
+		var lit: bool = bool(RunState.story_flags.get("cistern_solved", false))
+		for sequence_index in range(progress):
+			if CISTERN_VALVE_SEQUENCE[sequence_index] == valve_name:
+				lit = true
+		_draw_symbol(point, "water", Color("#a5d7cc") if lit else Color("#8d9c86"))
+		if lit:
+			draw_circle(point + Vector2(0, 9), 5.0, Color("#9fd7cc", 0.22))
+	if RunState.story_flags.get("cistern_solved", false):
+		draw_line(Vector2(188, 181), Vector2(452, 181), Color("#a4d8cd", 0.8), 2.0)
+	if not RunState.story_flags.get("cistern_record_seen", false) and RunState.story_flags.get("cistern_solved", false):
+		draw_rect(Rect2(545, 226, 18, 7), Color("#394740"))
+		draw_rect(Rect2(548, 221, 12, 8), Color("#877c61"))
+		draw_rect(Rect2(550, 223, 8, 1), Color("#c1b28b"))
 
 func _draw_reed_causeway() -> void:
 	var progress := int(RunState.puzzle_progress.get("causeway_sequence", 0))

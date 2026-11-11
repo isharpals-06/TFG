@@ -16,6 +16,8 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		return _pick(hint_level, "Beth listens along the three dry channels.", "The mural shows each channel pointing inward toward the basin.", "Point the western sluice east, the northern sluice south, and the eastern sluice west.")
 	if phase == "waterworks":
 		return _pick(hint_level, "Beth listens to the three waterwheels, then looks back toward the channel map.", "The map's four marks give the wheel order; the crescents repeat on the middle wheel.", "Turn western, middle, eastern, then middle waterwheel.")
+	if phase == "cistern_vault":
+		return _pick(hint_level, "Beth follows the quiet water from the eastern channel toward the western one.", "The water clock gives four turns: east, west, center, west.", "Turn the eastern valve, western, center, then western again.")
 	if phase == "archive":
 		if story_flags.get("archive_puzzle_solved", false) and journal_entries.has("archive_second_image"):
 			return _pick(hint_level, "Beth follows the shard's pale line back over the three lenses.", "The fourth reflection points north from west, east from center, and south from east.", "Turn west north, center east, and east south.")

@@ -76,6 +76,12 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "The waterwheels raise the sluice gate and uncover the dry lane into the village."
 		"waterworks_waiting_bowls":
 			return "Three bowls waited at the waterline each summer. A note says no one drank from the first spill."
+		"cistern_valve_pattern":
+			return "The lower cistern's water clock gives four turns: east, west, center, west."
+		"cistern_basin_balanced":
+			return "The three cistern channels settle into an even flow."
+		"cistern_shared_water":
+			return "The water keeper recorded the dry seasons by household. Each family took one measure at dawn; anyone who missed a turn was written in the next day's margin."
 		"observatory_star_chart":
 			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
 		"observatory_weather_log":

@@ -11,6 +11,7 @@ Invite curiosity, let environments guide the player without a permanent marker, 
 - Examine, take, activate, and item use are separate actions.
 - Puzzle failures are gentle and do not consume items.
 - The optional reed causeway advances the traveler stone by stone with a brief hop; a wrong choice returns them safely to shore without a timer or item cost.
+- After solving the waterworks wheels, the player may explore the lower cistern's saved four-turn valve pattern and water-sharing ledger; a stair always returns them to the waterworks.
 - The journal records clue IDs; Beth offers three hint levels.
 - Escape opens pause. The player can resume or save and return to title.
 - Camera follows, turns by quarter turns, zooms a little, and can snap rather than ease.
