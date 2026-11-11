@@ -11,10 +11,11 @@
 - [x] Add the optional seed-restored quiet garden and its chime puzzle.
 - [x] Add the highland approach and wind-vane alignment before the observatory.
 - [x] Add clue journal, three hint levels, initial escalating hint trace, and generated sound cues.
-- [x] Add generated backgrounds for the title and all nine main locations plus the optional garden, with asset credits.
-- [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or into the village.
+- [x] Add generated backgrounds for the title and all ten main locations plus the optional garden, with asset credits.
+- [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or onward to the waterworks.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
 - [x] Add an optional chart-guided three-arm astrolabe puzzle and weather ledger in the observatory, independent of the cliffhanger.
+- [x] Add the old waterworks as a main-route room between orchard and village, with a saved four-mark wheel sequence, optional history record, and original generated background.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.

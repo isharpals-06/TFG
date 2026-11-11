@@ -20,8 +20,8 @@ const PUZZLE_SLOT_KEYS := {
 	"high_steps_vanes": ["west", "center", "east"],
 	"observatory_arms": ["west", "center", "east"]
 }
-const PUZZLE_COUNTER_LIMITS := {"first_gate": 3, "bell_sequence": 5, "quiet_garden_sequence": 3, "causeway_sequence": 7}
-const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "empty_quarter", "archive", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
+const PUZZLE_COUNTER_LIMITS := {"first_gate": 3, "bell_sequence": 5, "quiet_garden_sequence": 3, "causeway_sequence": 7, "waterworks_sequence": 4}
+const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "waterworks", "empty_quarter", "archive", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
 const REBINDABLE_ACTIONS := [
 	"move_left", "move_right", "move_up", "move_down", "run",
 	"examine", "pick_up", "activate", "use_item", "inventory",

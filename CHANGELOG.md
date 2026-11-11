@@ -24,6 +24,7 @@ No versioned release has been published.
 - Larger-text support now applies to journey controls and menu buttons widen to fit longer labels.
 - Area ambience now crossfades between the original procedural loops during room transitions.
 - Observatory's optional astrolabe puzzle aligns three marked arms from a keeper's chart and reveals a weather ledger; the inscription remains available throughout.
+- Old waterworks main-route room adds an original background, a saved four-mark waterwheel sequence, an optional waterline record, and a passage linking the orchard to the empty quarter. The optional causeway now rejoins through this room.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress

@@ -8,6 +8,7 @@
 - `crossing_clearing_pixel.png` — opening background restyled from the crossing draft on 2026-11-10; the arch, altar, path, and forest landmarks are preserved; no supplied reference image was used.
 - `first_ruins.png` — original generated ruin court background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `quiet_orchard_dry.png` — original generated dry orchard background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
+- `old_waterworks.png` — original roofless cistern background generated on 2026-11-11 with OpenAI image generation. The orchard background was supplied as a style reference only; the composition and scene are new.
 - `reed_causeway.png` — original generated pixel-art background for the optional causeway, generated on 2026-11-10 from a text prompt; no supplied reference image was used.
 - `beth_expressions.png` — original four-pose expression sheet generated on 2026-11-11 from the existing Beth orb sprite as a visual reference; transparent background, no other source art.
 - `traveler_walk_cycle.png` — original four-frame walking cycle generated on 2026-11-11 from the existing traveler sprite as a visual reference; transparent background, no other source art.

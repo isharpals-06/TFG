@@ -2,7 +2,7 @@
 
 ## Status
 
-An initial single-file Windows x86_64 release export exists at `build/The Forgotten World.exe` (about 136 MB). Its PCK is embedded. Godot 4.7.2 stable release templates were installed from the official release mirror. The export completed successfully, but the executable has not been launched or reviewed in a runtime playthrough. This is a local development build, not an approved public release.
+The latest single-file Windows x86_64 development export exists at `build/The Forgotten World.exe` (about 144 MB). Its PCK is embedded. Godot 4.7.2 stable release templates were installed from the official release mirror. The export completed after adding the waterworks room; an earlier build opened on Windows, but this current executable still needs runtime review. No complete playthrough has been performed. This is not an approved public release.
 
 ## Release preparation
 

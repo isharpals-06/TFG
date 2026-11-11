@@ -4,7 +4,7 @@ An isometric exploration and puzzle adventure about a silent traveler, a sleepin
 
 ## Project status
 
-The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. In the observatory, a keeper's chart offers an optional three-arm astrolabe puzzle and a weather ledger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
+The project is in active development. The current main route connects the crossing, first ruins, orchard, old waterworks, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. The waterworks adds a four-mark wheel sequence and an optional record. In the observatory, a keeper's chart offers an optional three-arm astrolabe puzzle and a weather ledger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
 
 The current route is shorter than the intended 2–3 hour experience. Character animation and audio still need production passes, and no runtime playthrough or release review has been completed. An initial local Windows export exists under `build/`; it has not been runtime-reviewed and is not a finished release.
 
@@ -31,7 +31,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
 - Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
-- Procedural ambient layers with crossfaded area changes and event chimes; original generated backgrounds for the title, nine main locations, optional garden, and optional causeway, plus Beth's four-pose expression sheet.
+- Procedural ambient layers with crossfaded area changes and event chimes; original generated backgrounds for the title, ten main locations, optional garden, and optional causeway, plus Beth's four-pose expression sheet.
 
 ## Run the project
 

@@ -5,6 +5,7 @@ const BETH_SCENE := preload("res://src/scenes/beth.tscn")
 const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_clearing_pixel.png")
 const RUINS_BACKGROUND: Texture2D = preload("res://design/assets/first_ruins.png")
 const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard_dry.png")
+const WATERWORKS_BACKGROUND: Texture2D = preload("res://design/assets/old_waterworks.png")
 const REED_CAUSEWAY_BACKGROUND: Texture2D = preload("res://design/assets/reed_causeway.png")
 const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")
 const ARCHIVE_BACKGROUND: Texture2D = preload("res://design/assets/under_archive.png")
@@ -24,6 +25,7 @@ const OBSERVATORY_SOLUTION := {"west": 3, "center": 0, "east": 1}
 const BELL_SEQUENCE := ["moon", "water", "seed", "moon"]
 const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
 const CAUSEWAY_STEP_PATTERN := [0, 1, 2, 3, 2, 1, 0]
+const WATERWORKS_WHEEL_SEQUENCE := ["west", "center", "east", "center"]
 const CAUSEWAY_STEP_MARKS := ["moon", "water", "seed", "water"]
 const QUARTER_OBJECTS := ["book", "bowl", "seed", "lamp"]
 const QUARTER_START := {"west": 2, "north": 0, "east": 3, "south": 1}
@@ -73,6 +75,8 @@ func _ready() -> void:
 		phase = "archive"
 	elif RunState.story_flags.get("reached_quarter", false):
 		phase = "empty_quarter"
+	elif RunState.story_flags.get("reached_waterworks", false):
+		phase = "waterworks"
 	elif RunState.story_flags.get("reached_orchard", false):
 		phase = "orchard"
 	elif RunState.story_flags.get("crossed_into_world", false):
@@ -172,6 +176,8 @@ func _create_traveler() -> void:
 				traveler.position = Vector2(285, 248)
 			"reed_causeway":
 				traveler.position = Vector2(320, 310)
+			"waterworks":
+				traveler.position = Vector2(94, 280)
 			"empty_quarter":
 				traveler.position = Vector2(320, 286)
 			_:
@@ -185,7 +191,8 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 	match checkpoint_name:
 		"crossing": return not RunState.story_flags.get("crossed_into_world", false)
 		"ruins": return RunState.story_flags.get("crossed_into_world", false) and not RunState.story_flags.get("reached_orchard", false)
-		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"waterworks": return RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
 		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
@@ -328,7 +335,7 @@ func _get_targets() -> Array[Dictionary]:
 			orchard_targets.append({"id": "sluice_north", "name": "the northern sluice", "position": Vector2(320, 130)})
 			orchard_targets.append({"id": "sluice_east", "name": "the eastern sluice", "position": Vector2(422, 158)})
 		else:
-			orchard_targets.append({"id": "archive_gate", "name": "the village arch", "position": Vector2(320, 87)})
+			orchard_targets.append({"id": "waterworks_gate", "name": "the channel arch", "position": Vector2(320, 87)})
 		if RunState.story_flags.get("orchard_memory_seen", false) and not RunState.story_flags.get("seed_pod_found", false):
 			orchard_targets.append({"id": "seed_pod", "name": "the pale seed pod", "position": Vector2(563, 160)})
 		if RunState.story_flags.get("orchard_water_restored", false) and not RunState.story_flags.get("river_glass_found", false):
@@ -342,6 +349,19 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("orchard_rope_seen", false):
 			orchard_targets.append({"id": "orchard_rope", "name": "the old grafting stand", "position": Vector2(84, 222)})
 		return orchard_targets
+	if phase == "waterworks":
+		var waterworks_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("waterworks_map_seen", false):
+			waterworks_targets.append({"id": "waterworks_map", "name": "the channel map", "position": Vector2(320, 76)})
+		if not RunState.story_flags.get("waterworks_bowl_record_seen", false):
+			waterworks_targets.append({"id": "waterworks_bowls", "name": "three small bowls by the channel", "position": Vector2(112, 245)})
+		if not RunState.story_flags.get("waterworks_solved", false):
+			waterworks_targets.append({"id": "waterwheel_west", "name": "the western waterwheel", "position": Vector2(173, 151)})
+			waterworks_targets.append({"id": "waterwheel_center", "name": "the middle waterwheel", "position": Vector2(320, 128)})
+			waterworks_targets.append({"id": "waterwheel_east", "name": "the eastern waterwheel", "position": Vector2(463, 151)})
+		else:
+			waterworks_targets.append({"id": "waterworks_exit", "name": "the opened village gate", "position": Vector2(575, 106)})
+		return waterworks_targets
 	if phase == "reed_causeway":
 		var causeway_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("causeway_marks_seen", false):
@@ -354,7 +374,7 @@ func _get_targets() -> Array[Dictionary]:
 			for index in range(4):
 				causeway_targets.append({"id": "causeway_step_%d" % index, "name": "the %s stepping stone" % step_names[index], "position": step_positions[index]})
 		else:
-			causeway_targets.append({"id": "causeway_village_gate", "name": "the village gate beyond the water", "position": Vector2(320, 111)})
+			causeway_targets.append({"id": "causeway_village_gate", "name": "the covered channel beyond the water", "position": Vector2(320, 111)})
 		causeway_targets.append({"id": "causeway_return", "name": "the shore path back to the orchard", "position": Vector2(320, 324)})
 		return causeway_targets
 	if phase == "empty_quarter":
@@ -533,12 +553,20 @@ func _update_prompt() -> void:
 				prompt_label.text = "%s  look beyond     %s  enter the orchard" % [_action_mark("examine"), _action_mark("activate")]
 		"orchard_mural":
 			prompt_label.text = "%s  study the water channels" % _action_mark("examine")
+		"waterworks_map":
+			prompt_label.text = "%s  study the channel map" % _action_mark("examine")
+		"waterworks_bowls":
+			prompt_label.text = "%s  look at the waiting bowls" % _action_mark("examine")
+		"waterwheel_west", "waterwheel_center", "waterwheel_east":
+			prompt_label.text = "%s  examine     %s  turn the waterwheel" % [_action_mark("examine"), _action_mark("activate")]
+		"waterworks_exit":
+			prompt_label.text = "%s  look through the open gate     %s  enter the village" % [_action_mark("examine"), _action_mark("activate")]
 		"memory_bloom":
 			prompt_label.text = "%s  listen to the pale bloom" % _action_mark("examine")
 		"sluice_west", "sluice_north", "sluice_east":
 			prompt_label.text = "%s  turn the sluice" % _action_mark("activate")
-		"archive_gate":
-			prompt_label.text = "%s  examine     %s  enter the empty quarter" % [_action_mark("examine"), _action_mark("activate")]
+		"waterworks_gate":
+			prompt_label.text = "%s  follow the water     %s  enter the old waterworks" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_gate":
 			prompt_label.text = "%s  examine     %s  follow the reeds" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_marks":
@@ -548,7 +576,7 @@ func _update_prompt() -> void:
 		"causeway_step_0", "causeway_step_1", "causeway_step_2", "causeway_step_3":
 			prompt_label.text = "%s  test the stepping stone" % _action_mark("activate")
 		"causeway_village_gate":
-			prompt_label.text = "%s  examine     %s  enter the village" % [_action_mark("examine"), _action_mark("activate")]
+			prompt_label.text = "%s  examine     %s  follow the covered channel" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_return":
 			prompt_label.text = "%s  return to the orchard" % _action_mark("activate")
 		"quarter_mural", "quarter_register":
@@ -690,8 +718,22 @@ func _examine_target() -> void:
 			_set_status("The northern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("north")))
 		"sluice_east":
 			_set_status("The eastern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("east")))
-		"archive_gate":
-			_set_status("The stone lintel is marked with the same three shapes as the mural. The open road leads into the empty quarter.")
+		"waterworks_map":
+			_set_status("A channel map gives four marks: rain-line, crescent, seed, crescent. The wheels answer in that order.")
+			RunState.set_story_flag("waterworks_map_seen")
+			_record_clue_animated("waterworks_channel_map")
+		"waterworks_bowls":
+			_reveal_world_memory("waterworks_bowl_record_seen", "waterworks_waiting_bowls", "Three clay bowls sit at the waterline. A faded note says the children waited here for the first cool water after summer, and no one drank from the first spill.")
+		"waterwheel_west":
+			_set_status("A rain-line mark is cut into the western wheel.")
+		"waterwheel_center":
+			_set_status("A crescent mark is cut into the middle wheel.")
+		"waterwheel_east":
+			_set_status("A seed mark is cut into the eastern wheel.")
+		"waterworks_exit":
+			_set_status("The sluice gate has lifted. A dry lane leads into the empty quarter.")
+		"waterworks_gate":
+			_set_status("The water slips beneath a low stone arch and disappears into a roofless cistern.")
 		"causeway_gate":
 			_set_status("A narrow reed path has appeared beside the village road. Its stones lead over the still water.")
 		"causeway_marks":
@@ -704,7 +746,7 @@ func _examine_target() -> void:
 			var stone_number := int(target.id.trim_prefix("causeway_step_")) + 1
 			_set_status("Stone %d holds a shallow mark worn smooth by many careful steps." % stone_number)
 		"causeway_village_gate":
-			_set_status("Beyond the last stepping stone, a quiet lane leads into the empty quarter.")
+			_set_status("Beyond the last stepping stone, a covered channel leads toward the village waterworks.")
 		"quarter_mural":
 			_set_status("Four house marks circle the well: book, bowl, seed, lamp. Each belongs to one doorway.")
 			RunState.set_story_flag("quarter_mural_seen")
@@ -892,8 +934,8 @@ func _activate_target() -> void:
 		_enter_orchard()
 	elif target.id.begins_with("sluice_"):
 		_toggle_sluice(target.id.trim_prefix("sluice_"))
-	elif target.id == "archive_gate" and RunState.story_flags.get("orchard_water_restored", false):
-		_enter_empty_quarter()
+	elif target.id == "waterworks_gate" and RunState.story_flags.get("orchard_water_restored", false):
+		_enter_waterworks()
 	elif target.id == "causeway_gate" and RunState.story_flags.get("orchard_water_restored", false):
 		_enter_causeway()
 	elif target.id.begins_with("causeway_step_"):
@@ -901,6 +943,10 @@ func _activate_target() -> void:
 	elif target.id == "causeway_return":
 		_return_to_orchard()
 	elif target.id == "causeway_village_gate" and RunState.story_flags.get("causeway_solved", false):
+		_enter_waterworks(true)
+	elif target.id.begins_with("waterwheel_"):
+		_ring_waterworks_wheel(target.id.trim_prefix("waterwheel_"))
+	elif target.id == "waterworks_exit" and RunState.story_flags.get("waterworks_solved", false):
 		_enter_empty_quarter()
 	elif target.id.begins_with("quarter_slot_"):
 		_rotate_quarter_slot(target.id.trim_prefix("quarter_slot_"))
@@ -1007,6 +1053,32 @@ func _toggle_sluice(which: String) -> void:
 	else:
 		Soundscape.play_event("resonance")
 		_set_status("Stone turns beneath your hand. %d of 3 channels now point toward the basin." % opened)
+	queue_redraw()
+
+func _ring_waterworks_wheel(which: String) -> void:
+	if not RunState.story_flags.get("waterworks_map_seen", false):
+		_set_status("The wheel groans against its frame. The channel map may tell you the keeper's order.")
+		return
+	var progress := int(RunState.puzzle_progress.get("waterworks_sequence", 0))
+	if which == WATERWORKS_WHEEL_SEQUENCE[progress]:
+		progress += 1
+		RunState.puzzle_progress["waterworks_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("resonance")
+		if progress >= WATERWORKS_WHEEL_SEQUENCE.size():
+			RunState.set_story_flag("waterworks_solved")
+			RunState.reset_local_hint_echo()
+			_record_clue_animated("waterworks_gate_open")
+			Soundscape.play_event("complete")
+			_set_status("The wheels answer one another. Water lifts the old gate, and the dry village lane appears beyond it.")
+		else:
+			_set_status("The wheel settles into its notch. Water travels farther beneath the cistern.")
+	else:
+		progress = 1 if which == WATERWORKS_WHEEL_SEQUENCE[0] else 0
+		RunState.puzzle_progress["waterworks_sequence"] = progress
+		RunState.save_game()
+		Soundscape.play_event("soft_fade")
+		_set_status("The water slows and returns to its steady course. The wheels can be tried again.")
 	queue_redraw()
 
 func _get_quarter_slots() -> Dictionary:
@@ -1326,6 +1398,33 @@ func _enter_causeway() -> void:
 	beth.visible = true
 	beth.awake = true
 	_set_status("The reed path follows still water toward the darkened village gate.")
+	Soundscape.play_event("soft_fade")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_waterworks(from_causeway: bool = false) -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
+	await fade_out.finished
+	phase = "waterworks"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(554, 260) if from_causeway else Vector2(94, 280)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("reached_waterworks")
+	RunState.set_story_flag("in_causeway", false)
+	beth.global_position = Vector2(531, 242) if from_causeway else Vector2(111, 262)
+	beth.visible = true
+	beth.awake = true
+	_set_status("The reed path joins a roofless cistern. Water keeps moving beneath the old stone arches." if from_causeway else "The restored channel pours into a roofless cistern. Three wheels mark its quiet rhythm.")
 	Soundscape.play_event("soft_fade")
 	_update_objective()
 	queue_redraw()
@@ -1903,6 +2002,11 @@ func _give_hint(level: int) -> void:
 				hint_text = "The mural shows each channel pointing inward toward the basin."
 			3:
 				hint_text = "Point the western sluice east, the northern sluice south, and the eastern sluice west."
+	elif phase == "waterworks":
+		match level:
+			1: hint_text = "Beth listens to the three waterwheels, then looks back toward the channel map."
+			2: hint_text = "The map's four marks give the wheel order; the crescents repeat on the middle wheel."
+			3: hint_text = "Turn western, middle, eastern, then middle waterwheel."
 	elif phase == "archive":
 		if RunState.story_flags.get("archive_puzzle_solved", false) and RunState.journal_entries.has("archive_second_image"):
 			match level:
@@ -2118,6 +2222,12 @@ func _clue_text(clue_id: String) -> String:
 			return "The wind-worn map marks west, south (under a doubled arrow), and east across the three vanes." if RunState.story_flags.get("high_steps_echo_variant", false) else "The wind-worn map marks west, north, and east across the three vanes."
 		"high_steps_open_door":
 			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
+		"waterworks_channel_map":
+			return "The channel map gives four wheel marks in order: rain-line, crescent, seed, crescent."
+		"waterworks_gate_open":
+			return "The waterwheels raise the sluice gate and uncover the dry lane into the village."
+		"waterworks_waiting_bowls":
+			return "Three bowls waited at the waterline each summer. A note says no one drank from the first spill."
 		"observatory_star_chart":
 			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
 		"observatory_weather_log":
@@ -2170,14 +2280,21 @@ func _update_objective() -> void:
 			else:
 				objective_label.text = "Pass through the opened gate"
 		"orchard":
-			objective_label.text = "Bring water back to the orchard" if not RunState.story_flags.get("orchard_water_restored", false) else "Enter the empty quarter"
+			objective_label.text = "Bring water back to the orchard" if not RunState.story_flags.get("orchard_water_restored", false) else "Follow the channel into the old waterworks"
+		"waterworks":
+			if not RunState.story_flags.get("waterworks_map_seen", false):
+				objective_label.text = "Study the channel map"
+			elif not RunState.story_flags.get("waterworks_solved", false):
+				objective_label.text = "Follow the four-mark wheel pattern"
+			else:
+				objective_label.text = "Enter the empty quarter"
 		"reed_causeway":
 			if not RunState.story_flags.get("causeway_marks_seen", false):
 				objective_label.text = "Study the shoreline marks"
 			elif not RunState.story_flags.get("causeway_solved", false):
 				objective_label.text = "Follow the five-stone rhythm"
 			else:
-				objective_label.text = "Reach the village gate or return"
+				objective_label.text = "Follow the covered channel or return"
 		"empty_quarter":
 			if not RunState.story_flags.get("quarter_mural_seen", false):
 				objective_label.text = "Read the well carving"
@@ -2215,6 +2332,7 @@ func _draw() -> void:
 		"crossing": draw_texture_rect(CROSSING_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"ruins": draw_texture_rect(RUINS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"orchard": draw_texture_rect(ORCHARD_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"waterworks": draw_texture_rect(WATERWORKS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"reed_causeway": draw_texture_rect(REED_CAUSEWAY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"archive": draw_texture_rect(ARCHIVE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
@@ -2235,6 +2353,7 @@ func _draw_scene_overlays() -> void:
 		"crossing": _draw_threshold()
 		"ruins": _draw_ruins()
 		"orchard": _draw_orchard()
+		"waterworks": _draw_waterworks()
 		"reed_causeway": _draw_reed_causeway()
 		"empty_quarter": _draw_empty_quarter()
 		"archive": _draw_archive()
@@ -2265,6 +2384,12 @@ func _draw_memory_prop() -> void:
 			draw_rect(Rect2(80, 207, 2, 12), stone)
 			draw_rect(Rect2(87, 210, 2, 9), stone)
 			draw_line(Vector2(80, 211), Vector2(88, 214), Color("#a59b76"), 1.0)
+		"waterworks":
+			for index in range(3):
+				var bowl_x := 104 + index * 8
+				draw_rect(Rect2(bowl_x, 242, 6, 2), Color("#9a886e"))
+				draw_rect(Rect2(bowl_x + 1, 244, 4, 2), Color("#706e5d"))
+				draw_rect(Rect2(bowl_x + 1, 241, 4, 1), Color("#c2b991"))
 		"archive":
 			draw_rect(Rect2(68, 263, 18, 8), shadow)
 			draw_rect(Rect2(70, 258, 15, 8), Color("#998d72"))
@@ -2384,6 +2509,25 @@ func _draw_orchard() -> void:
 		draw_rect(Rect2(171, 264, 21, 3), Color("#645b48"))
 	if RunState.story_flags.get("orchard_water_restored", false):
 		_draw_arch(Vector2(548, 100), RunState.story_flags.get("causeway_solved", false))
+
+func _draw_waterworks() -> void:
+	var wheel_positions := [Vector2(173, 151), Vector2(320, 128), Vector2(463, 151)]
+	var wheel_marks := ["water", "moon", "seed"]
+	for index in range(wheel_positions.size()):
+		var pos: Vector2 = wheel_positions[index]
+		_draw_symbol(pos + Vector2(0, -18), wheel_marks[index], Color("#e0d2a1"))
+	var map_box := Rect2(293, 65, 54, 21)
+	draw_rect(map_box, Color("#39443e"))
+	draw_rect(Rect2(296, 68, 48, 15), Color("#8c866a"))
+	for index in range(WATERWORKS_WHEEL_SEQUENCE.size()):
+		var wheel_name: String = WATERWORKS_WHEEL_SEQUENCE[index]
+		var mark_index := ["west", "center", "east"].find(wheel_name)
+		var mark_name: String = wheel_marks[mark_index]
+		var mark_color := Color("#f2dca3") if index <= int(RunState.puzzle_progress.get("waterworks_sequence", 0)) - 1 else Color("#c5c2a5")
+		_draw_symbol(Vector2(302 + index * 12, 75), mark_name, mark_color)
+	if RunState.story_flags.get("waterworks_solved", false):
+		draw_rect(Rect2(559, 104, 31, 3), Color("#a9d7cc"))
+		draw_rect(Rect2(571, 107, 3, 16), Color("#c7b788"))
 
 func _draw_reed_causeway() -> void:
 	var progress := int(RunState.puzzle_progress.get("causeway_sequence", 0))
