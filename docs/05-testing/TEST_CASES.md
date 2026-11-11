@@ -24,5 +24,6 @@ Planned runtime checks; none executed:
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.
 - Move and interact first by keyboard, then controller, and confirm HUD prompts switch device labels; verify each direction names the expected stick or D-pad input and actions show the expected controller button.
 - Save, leave to title, continue, and confirm area/puzzles/clues/inventory/settings load.
+- In the observatory, confirm the star chart is required before the arms can be turned; align crescent west, rain-line north, and seed east, then confirm the inscription becomes interactable. Read the weather drawer separately as an optional record.
 - Reach the cliffhanger and confirm the previously discovered gibberish transforms into the message.
 - Check text, focus order, integer scaling, reduced motion, audio cues, and visual alternatives on a controller and keyboard.

@@ -100,6 +100,8 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "Through river glass, a fourth waterline appears beneath the cistern clock. Three cups wait beside the mark, one for each shared channel."
 		"observatory_star_chart":
 			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
+		"observatory_orrery_aligned":
+			return "The three brass arms settle into the keeper's star chart. A narrow drawer opens beneath the astrolabe."
 		"observatory_weather_log":
 			return "The drawer holds years of careful weather notes: first floodwater, last spring rain, and the nights the valley's lanterns were lit. The final page is a blank table for the next season."
 		"quiet_garden_order":

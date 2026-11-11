@@ -398,7 +398,13 @@ func _initial_status_for_phase() -> String:
 		"quiet_garden":
 			return "The hidden garden keeps its small, clear song."
 		"observatory":
-			return "The world remembers." if RunState.story_flags.get("ending_revealed", false) else "The old inscription waits in the starlight."
+			if RunState.story_flags.get("ending_revealed", false):
+				return "The world remembers."
+			if not RunState.story_flags.get("observatory_chart_seen", false):
+				return "A keeper's star chart rests beneath the roofless sky."
+			if not RunState.story_flags.get("observatory_orrery_solved", false):
+				return "The brass astrolabe waits for the chart's pattern."
+			return "The old inscription waits in the starlight."
 		_:
 			return status_text
 
@@ -625,11 +631,13 @@ func _get_targets() -> Array[Dictionary]:
 		var observatory_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("observatory_chart_seen", false):
 			observatory_targets.append({"id": "observatory_chart", "name": "the keeper's star chart", "position": Vector2(148, 157)})
-		if not RunState.story_flags.get("observatory_orrery_solved", false):
+		if RunState.story_flags.get("observatory_chart_seen", false) and not RunState.story_flags.get("observatory_orrery_solved", false):
 			observatory_targets.append({"id": "observatory_arm_west", "name": "the western astrolabe arm", "position": Vector2(87, 150)})
 			observatory_targets.append({"id": "observatory_arm_center", "name": "the upper astrolabe arm", "position": Vector2(108, 126)})
 			observatory_targets.append({"id": "observatory_arm_east", "name": "the eastern astrolabe arm", "position": Vector2(132, 150)})
-		if not RunState.story_flags.get("ending_revealed", false):
+		if RunState.story_flags.get("observatory_orrery_solved", false) and not RunState.story_flags.get("observatory_weather_log_seen", false):
+			observatory_targets.append({"id": "observatory_weather_drawer", "name": "the narrow weather drawer", "position": Vector2(139, 179)})
+		if RunState.story_flags.get("observatory_orrery_solved", false) and not RunState.story_flags.get("ending_revealed", false):
 			observatory_targets.append({"id": "final_inscription", "name": "the old inscription", "position": Vector2(320, 101)})
 		return observatory_targets
 	var targets: Array[Dictionary] = []
@@ -788,6 +796,8 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  use the selected keepsake" % [_action_mark("examine"), _action_mark("use_item")]
 		"observatory_chart":
 			prompt_label.text = "%s  read the keeper's chart" % _action_mark("examine")
+		"observatory_weather_drawer":
+			prompt_label.text = "%s  read the open weather drawer" % _action_mark("examine")
 		"observatory_arm_west", "observatory_arm_center", "observatory_arm_east":
 			prompt_label.text = "%s  examine     %s  turn the astrolabe arm" % [_action_mark("examine"), _action_mark("activate")]
 		"gallery_mirror_west", "gallery_mirror_center", "gallery_mirror_east":
@@ -1110,6 +1120,9 @@ func _examine_target() -> void:
 			_set_status("The keeper's chart says: the crescent faces west; the rain-line faces north; the seed faces east.")
 			RunState.set_story_flag("observatory_chart_seen")
 			_record_clue_animated("observatory_star_chart")
+			_update_objective()
+		"observatory_weather_drawer":
+			_reveal_world_memory("observatory_weather_log_seen", "observatory_weather_log", "The drawer holds years of careful weather notes: first floodwater, last spring rain, and the nights the valley's lanterns were lit. The final page is a blank table for the next season.")
 		"observatory_arm_west", "observatory_arm_center", "observatory_arm_east":
 			var arm_name: String = target.id.trim_prefix("observatory_arm_")
 			var arms: Dictionary = RunState.puzzle_progress.get("observatory_arms", {})
@@ -1548,9 +1561,10 @@ func _rotate_observatory_arm(which: String) -> void:
 	if aligned:
 		RunState.set_story_flag("observatory_orrery_solved")
 		RunState.reset_local_hint_echo()
-		_record_clue_animated("observatory_weather_log")
+		_record_clue_animated("observatory_orrery_aligned")
 		Soundscape.play_event("complete")
-		_set_status("The astrolabe settles into the chart's pattern. A narrow drawer opens with a weather ledger inside.")
+		_set_status("The astrolabe settles into the chart's pattern. A narrow drawer opens; the old inscription catches a faint line of starlight.")
+		_update_objective()
 	else:
 		Soundscape.play_event("resonance")
 		_set_status("The brass arm catches the starlight, then rests against another mark.")
@@ -2172,7 +2186,7 @@ func _enter_observatory() -> void:
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_observatory")
 	camera_target_rotation = 0.0
-	_set_status("The stair opens beneath a roofless observatory. The old inscription waits in the starlight.")
+	_set_status("The stair opens beneath a roofless observatory. A keeper's star chart rests beneath the open sky.")
 	Soundscape.play_event("complete")
 	_update_objective()
 	queue_redraw()
@@ -2728,7 +2742,14 @@ func _update_objective() -> void:
 		"quiet_garden":
 			objective_label.text = "Listen for the garden's three notes" if not RunState.story_flags.get("quiet_garden_song_solved", false) else "Return to the orchard when you are ready"
 		"observatory":
-			objective_label.text = "Approach the old inscription" if not RunState.story_flags.get("ending_revealed", false) else "The world remembers"
+			if not RunState.story_flags.get("observatory_chart_seen", false):
+				objective_label.text = "Study the keeper's star chart"
+			elif not RunState.story_flags.get("observatory_orrery_solved", false):
+				objective_label.text = "Set the astrolabe to the chart"
+			elif not RunState.story_flags.get("ending_revealed", false):
+				objective_label.text = "Approach the old inscription"
+			else:
+				objective_label.text = "The world remembers"
 
 func _update_hud(_items: Array[String] = []) -> void:
 	if inventory_label == null:
@@ -3312,6 +3333,7 @@ func _draw_observatory() -> void:
 		_draw_symbol(pos + Vector2(0, -8), arm_symbols[index], Color("#e2d3a5"))
 	if RunState.story_flags.get("observatory_orrery_solved", false):
 		draw_rect(Rect2(132, 178, 14, 2), Color("#dfc891"))
+		draw_rect(Rect2(132, 181, 14, 2), Color("#8f927e"))
 	if RunState.story_flags.get("ending_revealed", false):
 		draw_rect(Rect2(315, 143, 10, 2), Color("#e0d29d"))
 

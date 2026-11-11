@@ -15,7 +15,7 @@
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or onward to the waterworks.
 - [x] Give correct causeway steps a brief traveler hop animation; make wrong stones return safely to shore, with the hop removed in reduced-motion mode.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
-- [x] Add an optional chart-guided three-arm astrolabe puzzle and weather ledger in the observatory, independent of the cliffhanger.
+- [x] Require the keeper's chart and three-arm astrolabe alignment before the inscription cliffhanger; keep the opened weather drawer optional.
 - [x] Add the old waterworks as a main-route room between orchard and village, with a saved four-mark wheel sequence, optional history record, and original generated background.
 - [x] Open a return stair from the Archive to the empty quarter after the lens puzzle; the village well gains a new, optional reflection clue on revisiting it.
 - [x] Add an optional reading room in the restored west house, with a saved three-marker observation puzzle, two history records, three hint levels, and a return to the village square.

@@ -9,7 +9,7 @@ There is no database server. Journey state is stored locally at `user://forgotte
 - `inventory`, `selected_item_id`: stable item IDs and selected item, bounded to four slots.
 - `journal_entries`: stable clue IDs, in discovery order.
 - `puzzle_progress`: per-puzzle values such as resonator sequence, sluice states, lens positions, the causeway's seven-step rhythm, the waterworks' four-mark wheel order, the lower cistern's four-turn valve pattern, the reading room's three study markers, the map chamber's three-place route sequence, and the observatory's three astrolabe arms. Nested maps are rebuilt from known keys; orientations and sequence counts are clamped to their legal ranges.
-- `story_flags`: progression and optional-discovery flags, including entry to the optional lower cistern, reading room, and map chamber; their clues, solved states, and records; the archive's independent fourth-path puzzle and hidden-leaf record; the waterworks map and bowl record; plus the observatory chart and weather ledger.
+- `story_flags`: progression and optional-discovery flags, including entry to the optional lower cistern, reading room, and map chamber; their clues, solved states, and records; the archive's independent fourth-path puzzle and hidden-leaf record; the waterworks map and bowl record; plus the observatory chart, required astrolabe alignment, and optional weather ledger.
 - `hint_echo`, `total_hint_points`, `local_hint_points`, `hint_uses`: escalating hint consequence.
 - `journey_started`, `seconds_played`: journey presence and elapsed playtime.
 - `settings`, `input_bindings`: local options and user control overrides.
