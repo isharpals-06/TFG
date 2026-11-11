@@ -28,7 +28,8 @@
 - [x] Save and restore the current room and bounded player position; pause the playtime counter in menus.
 - [x] Validate nested save data, inventory and clue IDs, settings, puzzle values, story flag types, checkpoints, input bindings, hint counters, and playtime.
 - [ ] Review controller prompts and all remapped actions in a runtime playthrough.
-- [ ] Improve camera framing and object occlusion.
+- [x] Shift the camera framing upward to show more of the path ahead and fade the traveler under orchard canopy silhouettes.
+- [ ] Review camera framing and orchard occlusion zones in a runtime playthrough; extend foreground handling to other areas where it improves readability.
 
 ## Content and production remaining
 

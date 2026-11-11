@@ -17,4 +17,4 @@ Invite curiosity, let environments guide the player without a permanent marker, 
 
 ## Remaining UX work
 
-A runtime review is still needed for controller focus, text clipping, prompt position, first-time onboarding, long-route pacing, and item discovery. Camera framing/occlusion and a fuller journal presentation are unfinished.
+A runtime review is still needed for controller focus, text clipping, prompt position, first-time onboarding, long-route pacing, item discovery, and the recent camera/occlusion change. The camera frames slightly above the traveler; the traveler fades while moving beneath the orchard canopy painted into the background. Foreground handling in other areas and a fuller journal presentation remain open.

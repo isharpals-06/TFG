@@ -95,6 +95,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if is_instance_valid(traveler):
 		RunState.update_checkpoint(phase, traveler.global_position)
+		_update_traveler_occlusion()
 	if is_instance_valid(camera):
 		camera.global_position = traveler.global_position
 		if camera_snap:
@@ -198,6 +199,8 @@ func _create_camera() -> void:
 	camera = Camera2D.new()
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 6.5
+	# Keep the traveler's feet below center so the next stretch of path is visible.
+	camera.offset = Vector2(0, -10)
 	camera.limit_enabled = true
 	camera.limit_left = 0
 	camera.limit_top = 0
@@ -208,6 +211,25 @@ func _create_camera() -> void:
 	add_child(camera)
 	camera.make_current()
 	camera.global_position = traveler.global_position
+
+func _update_traveler_occlusion() -> void:
+	# Orchard branches and canopy are painted into the backdrop. Fade the sprite
+	# only while it passes beneath those foreground silhouettes.
+	var under_canopy := false
+	if phase == "orchard":
+		var point := traveler.global_position
+		under_canopy = _inside_ellipse(point, Vector2(51, 119), Vector2(67, 112)) \
+			or _inside_ellipse(point, Vector2(597, 124), Vector2(48, 105)) \
+			or _inside_ellipse(point, Vector2(293, 47), Vector2(173, 28))
+	var target_alpha := 0.52 if under_canopy else 1.0
+	var easing := 0.18 if RunState.settings.get("reduced_motion", false) else 0.12
+	var tint := traveler.modulate
+	tint.a = lerpf(tint.a, target_alpha, easing)
+	traveler.modulate = tint
+
+func _inside_ellipse(point: Vector2, center: Vector2, radii: Vector2) -> bool:
+	var normalized := (point - center) / radii
+	return normalized.length_squared() <= 1.0
 
 func _create_beth() -> void:
 	beth = BETH_SCENE.instantiate() as Beth

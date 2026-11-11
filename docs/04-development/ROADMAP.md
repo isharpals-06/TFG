@@ -14,4 +14,4 @@ The creator is a beginner with a few hours per week. Deliver small, understandab
 
 ## Current evidence
 
-The isolated Godot 4.7.2 headless export completed with the new Beth expression asset and corrected GDScript parser issues; the executable was replaced and its SHA-256 recorded. This confirms resource import and packaging only; the game has not been launched from the exported build or reviewed in a runtime playthrough. No test suite was added or run.
+The isolated Godot 4.7.2 headless export completed after the camera framing and orchard canopy fade update; the executable was replaced and its SHA-256 recorded. This confirms resource import and packaging only; the game has not been launched from the exported build or reviewed in a runtime playthrough. No test suite was added or run.
