@@ -30,6 +30,7 @@ No versioned release has been published.
 - Resuming a saved room now begins with a location- and progress-aware status line instead of repeating the opening medallion message.
 - Moved authored journal clue descriptions into a dedicated catalog, keeping the journey controller focused on room flow.
 - Moved authored three-level hints into a dedicated catalog while leaving hint penalties, Beth's reactions, and presentation in the journey flow.
+- Added an optional west-house reading room that opens after the village household puzzle. Its children's lesson slate guides a saved three-marker puzzle, with an ordinary-life journal reward and a safe return to the square.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress

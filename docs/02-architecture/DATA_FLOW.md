@@ -6,7 +6,7 @@ Movement input → nearest visible target → contextual prompt → examine/take
 
 ## Puzzle
 
-Observe environment → examine a clue → add a clue ID to the journal → experiment without resource loss → update puzzle state → show a visible world response → autosave. The optional causeway stores progress through its seven-step crossing pattern and supports returning to the orchard mid-puzzle. In the archive, the optional mirror-shard clue enables a second lens solution after the main stair opens; solving it reveals a separate history record and leaves the main exit available.
+Observe environment → examine a clue → add a clue ID to the journal → experiment without resource loss → update puzzle state → show a visible world response → autosave. The optional causeway stores progress through its seven-step crossing pattern and supports returning to the orchard mid-puzzle. Restoring the village households opens an optional west-house room whose three saved study markers follow the lesson slate; solving the puzzle reveals a book of children's river-path lessons. In the archive, the optional mirror-shard clue enables a second lens solution after the main stair opens; solving it reveals a separate history record and leaves the main exit available.
 
 ## Hint
 

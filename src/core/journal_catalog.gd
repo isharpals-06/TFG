@@ -38,6 +38,12 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "Four household objects sit once more in the doorways around the well. A stair appears in its reflection."
 		"quarter_well_reflection":
 			return "After the Archive opens, the village well reflects its starless sky. Four warm lights gather around a quiet gap."
+		"reading_order":
+			return "The children's slate shows a boat at the west mark, a lantern at center, and reeds at the east mark."
+		"reading_markers_aligned":
+			return "The three study markers now follow the order of the children's lesson slate."
+		"reading_lesson":
+			return "A damp lesson book says children learned the safe river path from boat, lantern, and reeds. The final page is filled with small copied drawings."
 		"orchard_water_memory":
 			return "Three sluices feed the same basin; water returns to the garden."
 		"archive_reflection_map":

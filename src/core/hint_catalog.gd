@@ -10,6 +10,8 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		return _pick(hint_level, "Beth follows a ripple up the stones, then watches it return to shore.", "The shoreline marks rise to the far stone and descend in reverse.", "Activate near, second, third, far, third, second, then near.")
 	if phase == "empty_quarter":
 		return _pick(hint_level, "Beth watches the four doorways around the well.", "The carving pairs a household symbol with each side of the square.", "West holds the book, north the bowl, east the seed, and south the lamp.")
+	if phase == "reading_room":
+		return _pick(hint_level, "Beth keeps drifting back to the children's lesson slate.", "Arrange the three study markers in the same order as the slate, from west to east.", "Set boat at the west mark, lantern at center, and reeds at the east mark.")
 	if phase == "orchard":
 		return _pick(hint_level, "Beth listens along the three dry channels.", "The mural shows each channel pointing inward toward the basin.", "Point the western sluice east, the northern sluice south, and the eastern sluice west.")
 	if phase == "waterworks":

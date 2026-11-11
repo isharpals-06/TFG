@@ -4,7 +4,7 @@ An isometric exploration and puzzle adventure about a silent traveler, a sleepin
 
 ## Project status
 
-The project is in active development. The current main route connects the crossing, first ruins, orchard, old waterworks, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Solving the Archive also opens a return to the village well, where a new optional reflection clue appears. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. The waterworks adds a four-mark wheel sequence and an optional record. In the observatory, a keeper's chart offers an optional three-arm astrolabe puzzle and a weather ledger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
+The project is in active development. The current main route connects the crossing, first ruins, orchard, old waterworks, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Solving the Archive also opens a return to the village well, where a new optional reflection clue appears. Restoring the village households opens an optional west-house reading room with a three-marker puzzle and two local history records. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. The waterworks adds a four-mark wheel sequence and an optional record. In the observatory, a keeper's chart offers an optional three-arm astrolabe puzzle and a weather ledger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
 
 The current route is shorter than the intended 2–3 hour experience. Character animation and audio still need production passes. A startup review reached the crossing in the Windows export, but the game has not had a full playthrough or release review. The local Windows export under `build/` is not a finished release.
 
@@ -26,12 +26,13 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Optional restored garden with its own short chime puzzle and memory clues.
 - Optional reed causeway with a seven-step waterline pattern, a return route, a village entrance, and a record about families crossing together.
 - Optional archive reflection puzzle unlocked by the mirror shard, revealing a hidden keeper's note without touching the main route.
+- Optional west-house reading room unlocked by restoring the village households, with a saved three-marker puzzle and ordinary-history journal entries.
 - Optional environmental records add the valley's history to the field journal without resolving the traveler's mystery.
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
 - Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
-- Procedural ambient layers with crossfaded area changes and event chimes; original generated backgrounds for the title, ten main locations, optional garden, and optional causeway, plus Beth's four-pose expression sheet.
+- Procedural ambient layers with crossfaded area changes and event chimes; original generated backgrounds for the title, ten main locations, optional garden, causeway, and reading room, plus Beth's four-pose expression sheet.
 
 ## Run the project
 

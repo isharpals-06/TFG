@@ -8,6 +8,7 @@
 - As a player, I want to revisit nearby details where the route allows.
 - As a player, I want a solved underground route to reconnect to a familiar place, where I can notice how its history echoes what I found below.
 - As a player, I want an optional restored place to explore without blocking the main journey.
+- As a player, I want an ordinary village home to become explorable after I restore the square, with a small puzzle and history reward.
 - As a player, I want a side route to offer a distinct traversal puzzle and a safe way back to the main path.
 - As a player, I want restored orchard water to carry me through the old waterworks, where a clear four-mark clue opens the way into the village.
 - As a curious player, I want the mirror shard to reveal an optional archive puzzle and a small history record without blocking the open stair.

@@ -8,6 +8,7 @@ Planned runtime checks; none executed:
 - Take each keepsake; fill the four slots; exchange a non-story item; verify the medallion cannot be dropped.
 - Select and inspect items; use each authored item/target combination; try a mismatched item.
 - Solve the ruins sequence, orchard sluices, empty-quarter household niches, and archive lenses; confirm safe wrong attempts and saved progress.
+- Restore the empty-quarter households, enter and leave the optional reading room, examine its slate, arrange all three markers, and read the opened lesson book. Confirm wrong turns are safe, the five required turns persist through Continue, and the room never blocks the archive route.
 - After opening the archive stair, use the mirror shard on the mural; solve the fourth lens path, read its hidden leaf, and confirm the stair remains available. Save and continue before and after the optional solution.
 - Visit the optional causeway after restoring orchard water; inspect the seven waterlines, test a wrong stepping stone, complete the rise-and-return sequence, and confirm both return and village exits. Save and continue mid-sequence and after solving.
 - Use each hint level repeatedly; confirm later requests leave stronger traces, local echo recedes after a solved puzzle, and main progress remains possible.

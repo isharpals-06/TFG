@@ -10,6 +10,7 @@ const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard
 const WATERWORKS_BACKGROUND: Texture2D = preload("res://design/assets/old_waterworks.png")
 const REED_CAUSEWAY_BACKGROUND: Texture2D = preload("res://design/assets/reed_causeway.png")
 const EMPTY_QUARTER_BACKGROUND: Texture2D = preload("res://design/assets/empty_quarter.png")
+const READING_ROOM_BACKGROUND: Texture2D = preload("res://design/assets/west_house_reading_room.png")
 const ARCHIVE_BACKGROUND: Texture2D = preload("res://design/assets/under_archive.png")
 const GALLERY_BACKGROUND: Texture2D = preload("res://design/assets/gallery_reflection_hall.png")
 const BELL_COURT_BACKGROUND: Texture2D = preload("res://design/assets/bell_garden.png")
@@ -32,6 +33,8 @@ const CAUSEWAY_STEP_MARKS := ["moon", "water", "seed", "water"]
 const QUARTER_OBJECTS := ["book", "bowl", "seed", "lamp"]
 const QUARTER_START := {"west": 2, "north": 0, "east": 3, "south": 1}
 const QUARTER_SOLUTION := {"west": 0, "north": 1, "east": 2, "south": 3}
+const READING_START := {"west": 2, "center": 2, "east": 0}
+const READING_SOLUTION := {"west": 0, "center": 1, "east": 2}
 
 var traveler: Traveler
 var beth: Beth
@@ -61,7 +64,9 @@ var transitioning := false
 
 func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
-	if RunState.story_flags.get("in_quiet_garden", false):
+	if RunState.story_flags.get("in_reading_room", false):
+		phase = "reading_room"
+	elif RunState.story_flags.get("in_quiet_garden", false):
 		phase = "quiet_garden"
 	elif RunState.story_flags.get("reached_observatory", false):
 		phase = "observatory"
@@ -183,6 +188,8 @@ func _create_traveler() -> void:
 				traveler.position = Vector2(94, 280)
 			"empty_quarter":
 				traveler.position = Vector2(320, 286)
+			"reading_room":
+				traveler.position = Vector2(320, 284)
 			_:
 				traveler.position = Vector2(320, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
@@ -197,6 +204,7 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"waterworks": return RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
 		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"reading_room": return RunState.story_flags.get("in_reading_room", false)
 		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
 		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
 		"bell_court": return RunState.story_flags.get("reached_bell_court", false) and not RunState.story_flags.get("reached_high_steps", false)
@@ -329,6 +337,8 @@ func _initial_status_for_phase() -> String:
 			return "The old stones lead across the still water."
 		"empty_quarter":
 			return "The well holds a pale, starless reflection." if RunState.story_flags.get("archive_puzzle_solved", false) else "Four dark doorways face the village well."
+		"reading_room":
+			return "A lantern still warms the little room above the square."
 		"archive":
 			return "The archive holds its breath beneath the orchard. Beth's light doubles in the still water."
 		"gallery":
@@ -420,9 +430,22 @@ func _get_targets() -> Array[Dictionary]:
 			quarter_targets.append({"id": "quarter_slot_south", "name": "the south-house niche", "position": Vector2(566, 210)})
 		else:
 			quarter_targets.append({"id": "quarter_well_stair", "name": "the opened well stair", "position": Vector2(320, 184)})
+			quarter_targets.append({"id": "quarter_reading_door", "name": "the open west-house reading room", "position": Vector2(111, 174)})
 		if not RunState.story_flags.get("quarter_register_seen", false):
 			quarter_targets.append({"id": "quarter_register", "name": "the stone register", "position": Vector2(572, 232)})
 		return quarter_targets
+	if phase == "reading_room":
+		var reading_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("reading_mural_seen", false):
+			reading_targets.append({"id": "reading_mural", "name": "the children's lesson slate", "position": Vector2(519, 87)})
+		if not RunState.story_flags.get("reading_puzzle_solved", false):
+			reading_targets.append({"id": "reading_tile_west", "name": "the west study marker", "position": Vector2(431, 152)})
+			reading_targets.append({"id": "reading_tile_center", "name": "the center study marker", "position": Vector2(503, 152)})
+			reading_targets.append({"id": "reading_tile_east", "name": "the east study marker", "position": Vector2(575, 152)})
+		elif not RunState.story_flags.get("reading_lesson_seen", false):
+			reading_targets.append({"id": "reading_ledger", "name": "the open lesson book", "position": Vector2(547, 148)})
+		reading_targets.append({"id": "reading_return", "name": "the doorway back to the village square", "position": Vector2(42, 203)})
+		return reading_targets
 	if phase == "archive":
 		var archive_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("archive_mural_seen", false) or (RunState.inventory.has("mirror_shard") and not RunState.journal_entries.has("archive_second_image")):
@@ -618,6 +641,16 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  turn the niche" % [_action_mark("examine"), _action_mark("activate")]
 		"quarter_well_stair":
 			prompt_label.text = "%s  look into the well     %s  descend" % [_action_mark("examine"), _action_mark("activate")]
+		"quarter_reading_door":
+			prompt_label.text = "%s  enter the reading room" % _action_mark("activate")
+		"reading_mural":
+			prompt_label.text = "%s  study the lesson slate" % _action_mark("examine")
+		"reading_tile_west", "reading_tile_center", "reading_tile_east":
+			prompt_label.text = "%s  examine     %s  turn the study marker" % [_action_mark("examine"), _action_mark("activate")]
+		"reading_ledger":
+			prompt_label.text = "%s  read the open lesson book" % _action_mark("examine")
+		"reading_return":
+			prompt_label.text = "%s  return to the village square" % _action_mark("activate")
 		"archive_mural":
 			prompt_label.text = "%s  study the reflected shapes" % _action_mark("examine")
 		"archive_hidden_ledger":
@@ -804,6 +837,19 @@ func _examine_target() -> void:
 					_animate_journal_signal()
 			else:
 				_set_status("Four warm reflections meet in the well. A stone stair descends through the water without wetting it.")
+		"reading_mural":
+			_set_status("A child's lesson shows a boat at the west mark, a lantern at the center, and reeds at the east mark.")
+			RunState.set_story_flag("reading_mural_seen")
+			_record_clue_animated("reading_order")
+			_update_objective()
+		"reading_tile_west", "reading_tile_center", "reading_tile_east":
+			var reading_side: String = target.id.trim_prefix("reading_tile_")
+			var reading_tiles: Dictionary = RunState.puzzle_progress.get("reading_tiles", READING_START)
+			_set_status("The %s marker shows a %s." % [reading_side, _reading_mark_name(int(reading_tiles.get(reading_side, READING_START[reading_side])))])
+		"reading_ledger":
+			_reveal_world_memory("reading_lesson_seen", "reading_lesson", "A damp lesson book says children learned the safe river path from boat, lantern, and reeds. The final page is filled with small copied drawings.")
+		"reading_return":
+			_set_status("The doorway opens back onto the village square.")
 		"archive_mural":
 			_set_status("Three reflected paths are carved overhead: turn right, then down, then left.")
 			RunState.set_story_flag("archive_mural_seen")
@@ -994,6 +1040,12 @@ func _activate_target() -> void:
 		_rotate_quarter_slot(target.id.trim_prefix("quarter_slot_"))
 	elif target.id == "quarter_well_stair" and RunState.story_flags.get("quarter_household_restored", false):
 		_enter_archive()
+	elif target.id == "quarter_reading_door" and RunState.story_flags.get("quarter_household_restored", false):
+		_enter_reading_room()
+	elif target.id == "reading_return":
+		_enter_empty_quarter()
+	elif target.id.begins_with("reading_tile_"):
+		_rotate_reading_tile(target.id.trim_prefix("reading_tile_"))
 	elif target.id.begins_with("lens_"):
 		_rotate_archive_lens(target.id.trim_prefix("lens_"))
 	elif target.id == "archive_stair" and RunState.story_flags.get("archive_puzzle_solved", false):
@@ -1158,6 +1210,35 @@ func _rotate_quarter_slot(side: String) -> void:
 		Soundscape.play_event("resonance")
 		_set_status("The niche turns with a soft stone click. The other doorways remain dark.")
 	queue_redraw()
+
+func _rotate_reading_tile(side: String) -> void:
+	if not RunState.story_flags.get("reading_mural_seen", false):
+		_set_status("The lesson slate may explain the three study markers.")
+		return
+	var tiles: Dictionary = RunState.puzzle_progress.get("reading_tiles", READING_START).duplicate(true)
+	tiles[side] = (int(tiles.get(side, READING_START[side])) + 1) % 3
+	RunState.puzzle_progress["reading_tiles"] = tiles
+	RunState.save_game()
+	var solved := true
+	for marker in READING_SOLUTION:
+		if int(tiles.get(marker, READING_START[marker])) != int(READING_SOLUTION[marker]):
+			solved = false
+			break
+	if solved:
+		RunState.set_story_flag("reading_puzzle_solved")
+		RunState.reset_local_hint_echo()
+		RunState.record_clue("reading_markers_aligned")
+		Soundscape.play_event("complete")
+		beth.react_to_discovery()
+		_set_status("The markers match the lesson slate. A narrow drawer opens beneath the desk.")
+	else:
+		Soundscape.play_event("resonance")
+		_set_status("The marker turns with a wooden click. The lesson slate remains above it.")
+	_update_objective()
+	queue_redraw()
+
+func _reading_mark_name(index: int) -> String:
+	return ["boat", "lantern", "reeds"][posmod(index, 3)]
 
 func _get_valve_orientation(which: String) -> int:
 	var states: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
@@ -1491,6 +1572,7 @@ func _enter_empty_quarter() -> void:
 	traveler.global_position = Vector2(320, 286)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("in_causeway", false)
+	RunState.set_story_flag("in_reading_room", false)
 	RunState.set_story_flag("reached_quarter")
 	beth.global_position = Vector2(337, 270)
 	beth.visible = true
@@ -1502,6 +1584,31 @@ func _enter_empty_quarter() -> void:
 		_set_status("The square gathers again around the well. Its reflection holds a pale, starless sky.")
 	else:
 		_set_status("An empty village square gathers around a well. Four dark doorways face the water.")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _enter_reading_room() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
+	await fade_out.finished
+	phase = "reading_room"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 284)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("in_reading_room")
+	beth.global_position = Vector2(337, 265)
+	beth.visible = true
+	beth.awake = true
+	_set_status("A small reading room opens above the village square. An old lesson waits on the desk.")
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
@@ -2146,6 +2253,15 @@ func _update_objective() -> void:
 				objective_label.text = "Follow the well's reflection into the archive"
 			else:
 				objective_label.text = "Descend into the archive"
+		"reading_room":
+			if not RunState.story_flags.get("reading_mural_seen", false):
+				objective_label.text = "Study the children's lesson slate"
+			elif not RunState.story_flags.get("reading_puzzle_solved", false):
+				objective_label.text = "Arrange the three study markers"
+			elif not RunState.story_flags.get("reading_lesson_seen", false):
+				objective_label.text = "Read the open lesson book"
+			else:
+				objective_label.text = "Return to the village square"
 		"archive":
 			objective_label.text = "Study the ceiling mural" if not RunState.story_flags.get("archive_mural_seen", false) else ("Align the three lenses" if not RunState.story_flags.get("archive_puzzle_solved", false) else "Follow the reflected light")
 		"gallery":
@@ -2179,6 +2295,7 @@ func _draw() -> void:
 		"waterworks": draw_texture_rect(WATERWORKS_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"reed_causeway": draw_texture_rect(REED_CAUSEWAY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"empty_quarter": draw_texture_rect(EMPTY_QUARTER_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"reading_room": draw_texture_rect(READING_ROOM_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"archive": draw_texture_rect(ARCHIVE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"gallery":
 			draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
@@ -2200,6 +2317,7 @@ func _draw_scene_overlays() -> void:
 		"waterworks": _draw_waterworks()
 		"reed_causeway": _draw_reed_causeway()
 		"empty_quarter": _draw_empty_quarter()
+		"reading_room": _draw_reading_room()
 		"archive": _draw_archive()
 		"gallery": _draw_gallery()
 		"bell_court": _draw_bell_court()
@@ -2413,6 +2531,40 @@ func _draw_orchard_sluice(pos: Vector2, name: String, index: int) -> void:
 	draw_rect(Rect2(pos.x - 7, pos.y - 8, 14, 14), body)
 	draw_rect(Rect2(pos.x - 8, pos.y - 10, 16, 3), Color("#9b9c7a"))
 	_draw_arrow(pos + Vector2(0, -1), orientation, Color("#8bc2c0") if is_aligned else Color("#4f6159"))
+
+func _draw_reading_room() -> void:
+	var tiles: Dictionary = RunState.puzzle_progress.get("reading_tiles", READING_START)
+	if not RunState.story_flags.get("reading_puzzle_solved", false):
+		for side in ["west", "center", "east"]:
+			var point: Vector2 = {"west": Vector2(431, 152), "center": Vector2(503, 152), "east": Vector2(575, 152)}[side]
+			var mark := int(tiles.get(side, READING_START[side]))
+			draw_rect(Rect2(point + Vector2(-13, -11), Vector2(26, 23)), Color("#695344"))
+			draw_rect(Rect2(point + Vector2(-10, -9), Vector2(20, 18)), Color("#978064"))
+			_draw_reading_mark(point, mark, Color("#f1dfb8"))
+	else:
+		draw_rect(Rect2(538, 153, 21, 7), Color("#6b4c39"))
+		draw_rect(Rect2(541, 155, 15, 3), Color("#d6c59c"))
+		draw_rect(Rect2(545, 154, 6, 1), Color("#e7ddc0"))
+
+func _draw_reading_mark(point: Vector2, mark: int, color: Color) -> void:
+	match posmod(mark, 3):
+		0:
+			# A tiny boat with a centered mast and a single square sail.
+			draw_colored_polygon(PackedVector2Array([point + Vector2(-7, 1), point + Vector2(7, 1), point + Vector2(4, 5), point + Vector2(-4, 5)]), color)
+			draw_line(point + Vector2(0, -7), point + Vector2(0, 1), color, 1.0)
+			draw_colored_polygon(PackedVector2Array([point + Vector2(1, -6), point + Vector2(6, -2), point + Vector2(1, -2)]), color.lightened(0.1))
+		1:
+			draw_rect(Rect2(point + Vector2(-4, -3), Vector2(8, 9)), color)
+			draw_rect(Rect2(point + Vector2(-2, -1), Vector2(4, 4)), Color("#745c45"))
+			draw_line(point + Vector2(0, -8), point + Vector2(0, -4), color, 1.0)
+			draw_rect(Rect2(point.x - 1, point.y - 9, 2, 2), Color("#f1c477"))
+		2:
+			draw_line(point + Vector2(-2, 6), point + Vector2(-3, -6), color, 1.0)
+			draw_line(point + Vector2(1, 6), point + Vector2(2, -8), color, 1.0)
+			draw_line(point + Vector2(4, 6), point + Vector2(5, -5), color, 1.0)
+			draw_line(point + Vector2(-3, -2), point + Vector2(-7, -5), color, 1.0)
+			draw_line(point + Vector2(2, 0), point + Vector2(6, -3), color, 1.0)
+			draw_line(point + Vector2(2, -4), point + Vector2(-2, -7), color, 1.0)
 
 func _draw_empty_quarter() -> void:
 	var slots := _get_quarter_slots()

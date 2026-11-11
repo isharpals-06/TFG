@@ -18,10 +18,12 @@ const PUZZLE_SLOT_KEYS := {
 	"archive_lenses": ["west", "center", "east"],
 	"gallery_mirrors": ["west", "center", "east"],
 	"high_steps_vanes": ["west", "center", "east"],
-	"observatory_arms": ["west", "center", "east"]
+	"observatory_arms": ["west", "center", "east"],
+	"reading_tiles": ["west", "center", "east"]
 }
+const PUZZLE_ORIENTATION_LIMITS := {"reading_tiles": 2}
 const PUZZLE_COUNTER_LIMITS := {"first_gate": 3, "bell_sequence": 5, "quiet_garden_sequence": 3, "causeway_sequence": 7, "waterworks_sequence": 4}
-const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "waterworks", "empty_quarter", "archive", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
+const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "waterworks", "empty_quarter", "reading_room", "archive", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
 const REBINDABLE_ACTIONS := [
 	"move_left", "move_right", "move_up", "move_down", "run",
 	"examine", "pick_up", "activate", "use_item", "inventory",
@@ -507,7 +509,7 @@ func _sanitize_puzzle_progress(value: Variant) -> Dictionary:
 		for slot_name in PUZZLE_SLOT_KEYS[puzzle_name]:
 			var orientation: Variant = saved_slots.get(slot_name, 0)
 			if orientation is int or orientation is float:
-				slots[slot_name] = clampi(int(orientation), 0, 3)
+				slots[slot_name] = clampi(int(orientation), 0, int(PUZZLE_ORIENTATION_LIMITS.get(puzzle_name, 3)))
 		result[puzzle_name] = slots
 	for puzzle_name in PUZZLE_COUNTER_LIMITS:
 		var counter: Variant = value.get(puzzle_name, 0)
