@@ -33,11 +33,15 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 			return _pick(hint_level, "Beth's light lingers on a fifth, fainter mark at the end of the carving.", "Follow the first four notes, then ring the pale rain-line once more.", "Ring crescent, rain-line, seed, crescent, then rain-line.")
 		return _pick(hint_level, "Beth's light rises and falls with the marks on the garden wall.", "The carving gives four notes. Ring them from left to right, including the repeated mark.", "Ring crescent, rain-line, seed, then crescent.")
 	if phase == "high_steps":
+		if not story_flags.get("high_steps_map_seen", false):
+			return _pick(hint_level, "Beth pauses by the wind-worn map above the trail.", "Study the map set into the stone beside the upper path.", "Examine the wind-worn map before turning the vanes.")
+		if not story_flags.get("high_steps_aligned", false):
+			if story_flags.get("high_steps_echo_variant", false):
+				return _pick(hint_level, "Beth watches the doubled arrow on the map, where the old direction still lingers.", "Follow the pale arrow for the middle vane; it points south.", "Point the western vane west, the middle vane south, and the eastern vane east.")
+			return _pick(hint_level, "Beth watches the three vanes turn over the valley.", "The map gives one direction for each vane, from west to east.", "Point the western vane west, the middle vane north, and the eastern vane east.")
 		if not story_flags.get("high_steps_cairn_seen", false):
 			return _pick(hint_level, "A small stack of stones stands beside the ridge path.", "Look near the fork below the eastern vane.", "Examine the little trail cairn near the eastern side of the path.")
-		if story_flags.get("high_steps_echo_variant", false):
-			return _pick(hint_level, "Beth watches the doubled arrow on the map, where the old direction still lingers.", "Follow the pale arrow for the middle vane; it points south.", "Point the western vane west, the middle vane south, and the eastern vane east.")
-		return _pick(hint_level, "Beth watches the three vanes turn over the valley.", "The map gives one direction for each vane, from west to east.", "Point the western vane west, the middle vane north, and the eastern vane east.")
+		return _pick(hint_level, "Beth watches the open ridge path in the wind.", "The upper door is ready whenever you are.", "Follow the marked trail through the open door.")
 	if phase == "highland_refuge":
 		return _pick(hint_level, "Beth rests in the sheltered light, then looks toward the ridge path.", "The guest book and lantern hold small pieces of the refuge's story.", "Examine the map, guest book, and lantern; the path to the high steps stays open.")
 	if phase == "quiet_garden":
