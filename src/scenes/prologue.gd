@@ -55,6 +55,8 @@ var objective_label: Label
 var status_label: Label
 var prompt_label: Label
 var inventory_label: Label
+var journal_hint_label: Label
+var controls_label: Label
 var target_icon: ColorRect
 var transition_cover: ColorRect
 var journal_panel: PanelContainer
@@ -117,6 +119,7 @@ func _ready() -> void:
 	_create_hud()
 	RunState.inventory_changed.connect(_update_hud)
 	RunState.hint_echo_changed.connect(_on_hint_echo_changed)
+	RunState.input_device_changed.connect(_on_input_device_changed)
 	_update_hud()
 	_update_objective()
 	queue_redraw()
@@ -296,9 +299,9 @@ func _create_hud() -> void:
 	hud.add_child(frame)
 	objective_label = _new_label("", 8, Color("#e5e1cf"), Vector2(8, 5), Vector2(214, 16))
 	frame.add_child(objective_label)
-	var journal_hint := _new_label("%s  NOTES  %s  HINTS" % [_action_mark("journal"), _action_mark("hints")], 6, Color("#b7c4bc"), Vector2(224, 7), Vector2(88, 12))
-	journal_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	frame.add_child(journal_hint)
+	journal_hint_label = _new_label("", 6, Color("#b7c4bc"), Vector2(224, 7), Vector2(88, 12))
+	journal_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	frame.add_child(journal_hint_label)
 	inventory_label = _new_label("", 6, Color("#bdc8bb"), Vector2(8, 22), Vector2(230, 12))
 	frame.add_child(inventory_label)
 	var status_back := ColorRect.new()
@@ -322,8 +325,9 @@ func _create_hud() -> void:
 	icon_center.size = Vector2(3, 3)
 	icon_center.color = Color("#52685e")
 	target_icon.add_child(icon_center)
-	var controls := _new_label("MOVE %s/%s/%s/%s   RUN %s   LOOK %s   PAUSE %s" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("pause")], 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
-	frame.add_child(controls)
+	controls_label = _new_label("", 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
+	frame.add_child(controls_label)
+	_update_action_prompts()
 	transition_cover = ColorRect.new()
 	transition_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	transition_cover.color = Color("#d7e4df")
@@ -347,6 +351,16 @@ func _new_label(text: String, size: int, color: Color, pos: Vector2, dimensions:
 func _action_mark(action_name: String) -> String:
 	var bindings := RunState.get_binding_text(action_name).split(" / ")
 	return str(bindings[0]) if not bindings.is_empty() else "?"
+
+func _on_input_device_changed(_device: String) -> void:
+	_update_action_prompts()
+	_update_hud()
+
+func _update_action_prompts() -> void:
+	if is_instance_valid(journal_hint_label):
+		journal_hint_label.text = "%s  NOTES  %s  HINTS" % [_action_mark("journal"), _action_mark("hints")]
+	if is_instance_valid(controls_label):
+		controls_label.text = "MOVE %s/%s/%s/%s   RUN %s   LOOK %s   PAUSE %s" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("pause")]
 
 func _motion_duration(seconds: float) -> float:
 	return 0.0 if bool(RunState.settings.get("reduced_motion", false)) else seconds

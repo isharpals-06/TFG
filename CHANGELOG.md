@@ -6,6 +6,7 @@ No versioned release has been published.
 
 ### Added
 
+- Context prompts follow the last-used keyboard or controller; controller movement labels show stick directions and button labels use positions such as South and East.
 - Main-route highland refuge between the bell garden and High Steps, with original background art, a separate ambient motif, three ordinary-history journal entries, a visible return arch, and safe return and onward paths.
 - Optional village-well gathering sequence that connects three history records across the route, saves its bowl-lamp-bell progress, and reveals a final account of ordinary valley life.
 - Optional lower cistern below the restored waterworks, with original background, water-clock clue, saved four-turn valve puzzle, three hint levels, a river-glass discovery, return stair, and water-sharing ledger.

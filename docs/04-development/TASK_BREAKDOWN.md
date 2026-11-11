@@ -36,6 +36,7 @@
 - [x] Keep authored three-level puzzle hints and hint variants in a separate catalog, while the journey controller owns hint costs and Beth's reactions.
 - [x] Add item replacement when full and optional keepsake discoveries.
 - [x] Add pause/resume, save-and-return, autosave time, save version handling, and remapping for movement, interaction, inventory, journal, hints, pause, and camera controls.
+- [x] Make HUD prompts follow the last-used input device and show readable controller button positions and analog-stick directions.
 - [ ] Review the inventory, rebinding, save migration, and pause flows in a runtime playthrough.
 - [x] Add temporary-file save replacement, previous-save backup, and fallback loading.
 - [x] Save and restore the current room and bounded player position, show a progress-aware status on resume, and pause the playtime counter in menus.

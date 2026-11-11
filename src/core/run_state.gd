@@ -4,6 +4,7 @@ signal inventory_changed(items: Array[String])
 signal clue_recorded(clue_id: String)
 signal hint_echo_changed(value: int)
 signal setting_changed(setting_name: String, value: Variant)
+signal input_device_changed(device: String)
 
 const SAVE_PATH := "user://forgotten_world_save.json"
 const SAVE_VERSION := 3
@@ -55,6 +56,7 @@ var settings: Dictionary = {
 	"snap_camera": false
 }
 var input_bindings: Dictionary = {}
+var last_input_device := "keyboard"
 
 func _ready() -> void:
 	_install_default_input_actions()
@@ -64,6 +66,20 @@ func _ready() -> void:
 	if has_save():
 		load_game()
 	set_process(true)
+
+func _input(event: InputEvent) -> void:
+	var next_device := ""
+	if event is InputEventKey and event.pressed and not event.echo:
+		next_device = "keyboard"
+	elif event is InputEventMouseButton and event.pressed:
+		next_device = "keyboard"
+	elif event is InputEventJoypadButton and event.pressed:
+		next_device = "controller"
+	elif event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) >= 0.35:
+		next_device = "controller"
+	if not next_device.is_empty() and next_device != last_input_device:
+		last_input_device = next_device
+		input_device_changed.emit(last_input_device)
 
 func _process(delta: float) -> void:
 	if not journey_started or not journey_active:
@@ -203,18 +219,50 @@ func _binding_is_in_use(action_name: String, candidate: Dictionary) -> bool:
 
 func get_binding_text(action_name: String) -> String:
 	var key_text := ""
-	var pad_text := ""
+	var pad_button_text := ""
+	var pad_motion_text := ""
 	for event in InputMap.action_get_events(action_name):
 		if event is InputEventKey and key_text.is_empty():
 			key_text = OS.get_keycode_string((event as InputEventKey).physical_keycode)
-		elif event is InputEventJoypadButton and pad_text.is_empty():
-			pad_text = "Pad %d" % int((event as InputEventJoypadButton).button_index)
-	var labels: Array[String] = []
+		elif event is InputEventJoypadButton and pad_button_text.is_empty():
+			pad_button_text = _joy_button_label((event as InputEventJoypadButton).button_index)
+		elif event is InputEventJoypadMotion and pad_motion_text.is_empty():
+			pad_motion_text = _joy_motion_label(event as InputEventJoypadMotion)
+	var pad_text := pad_button_text if not pad_button_text.is_empty() else pad_motion_text
+	if last_input_device == "controller" and not pad_text.is_empty():
+		return pad_text
 	if not key_text.is_empty():
-		labels.append(key_text)
-	if not pad_text.is_empty():
-		labels.append(pad_text)
-	return " / ".join(labels) if not labels.is_empty() else "Unbound"
+		return key_text
+	return pad_text if not pad_text.is_empty() else "Unbound"
+
+func _joy_button_label(button_index: int) -> String:
+	match button_index:
+		JOY_BUTTON_A: return "South"
+		JOY_BUTTON_B: return "East"
+		JOY_BUTTON_X: return "West"
+		JOY_BUTTON_Y: return "North"
+		JOY_BUTTON_LEFT_SHOULDER: return "LB"
+		JOY_BUTTON_RIGHT_SHOULDER: return "RB"
+		JOY_BUTTON_LEFT_STICK: return "L3"
+		JOY_BUTTON_RIGHT_STICK: return "R3"
+		JOY_BUTTON_BACK: return "Back"
+		JOY_BUTTON_START: return "Start"
+		JOY_BUTTON_DPAD_UP: return "D-pad Up"
+		JOY_BUTTON_DPAD_DOWN: return "D-pad Down"
+		JOY_BUTTON_DPAD_LEFT: return "D-pad Left"
+		JOY_BUTTON_DPAD_RIGHT: return "D-pad Right"
+		JOY_BUTTON_GUIDE: return "Guide"
+		_: return "Pad Button %d" % (button_index + 1)
+
+func _joy_motion_label(event: InputEventJoypadMotion) -> String:
+	match event.axis:
+		JOY_AXIS_LEFT_X: return "Left Stick Left" if event.axis_value < 0.0 else "Left Stick Right"
+		JOY_AXIS_LEFT_Y: return "Left Stick Up" if event.axis_value < 0.0 else "Left Stick Down"
+		JOY_AXIS_RIGHT_X: return "Right Stick Left" if event.axis_value < 0.0 else "Right Stick Right"
+		JOY_AXIS_RIGHT_Y: return "Right Stick Up" if event.axis_value < 0.0 else "Right Stick Down"
+		JOY_AXIS_TRIGGER_LEFT: return "Left Trigger"
+		JOY_AXIS_TRIGGER_RIGHT: return "Right Trigger"
+		_: return "Pad Axis %d" % int(event.axis + 1)
 
 func _add_action(action_name: String, key_codes: Array, axes: Array = [], buttons: Array = []) -> void:
 	if not InputMap.has_action(action_name):

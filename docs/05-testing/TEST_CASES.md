@@ -21,6 +21,7 @@ Planned runtime checks; none executed:
 - Review traveler facing in all eight movement directions and after each camera quarter-turn; confirm the left/right flip follows world movement and reduced motion holds the standing pose.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.
+- Move and interact first by keyboard, then controller, and confirm HUD prompts switch device labels; verify each direction names the expected stick or D-pad input and actions show the expected controller button.
 - Save, leave to title, continue, and confirm area/puzzles/clues/inventory/settings load.
 - Reach the cliffhanger and confirm the previously discovered gibberish transforms into the message.
 - Check text, focus order, integer scaling, reduced motion, audio cues, and visual alternatives on a controller and keyboard.

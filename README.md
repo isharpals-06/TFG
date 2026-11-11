@@ -34,7 +34,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - Beth's three hint levels; repeated use adds an escalating visual echo that changes her color and the ending image.
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
-- Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
+- Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts follow the last-used device and name controller buttons and stick directions.
 - Procedural ambient layers with crossfaded area changes, quiet area-specific chord motifs, and event chimes; original generated backgrounds for the title, twelve main locations, optional garden, causeway, reading room, and lower cistern, plus Beth's four-pose expression sheet.
 
 ## Run the project
