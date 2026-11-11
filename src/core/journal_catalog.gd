@@ -82,6 +82,8 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "The three cistern channels settle into an even flow."
 		"cistern_shared_water":
 			return "The water keeper recorded the dry seasons by household. Each family took one measure at dawn; anyone who missed a turn was written in the next day's margin."
+		"cistern_glass_memory":
+			return "Through river glass, a fourth waterline appears beneath the cistern clock. Three cups wait beside the mark, one for each shared channel."
 		"observatory_star_chart":
 			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
 		"observatory_weather_log":

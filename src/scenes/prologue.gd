@@ -428,7 +428,7 @@ func _get_targets() -> Array[Dictionary]:
 		return waterworks_targets
 	if phase == "cistern_vault":
 		var cistern_targets: Array[Dictionary] = []
-		if not RunState.story_flags.get("cistern_mural_seen", false):
+		if not RunState.story_flags.get("cistern_mural_seen", false) or (RunState.inventory.has("river_glass") and not RunState.journal_entries.has("cistern_glass_memory")):
 			cistern_targets.append({"id": "cistern_mural", "name": "the old water clock", "position": Vector2(320, 88)})
 		if not RunState.story_flags.get("cistern_solved", false):
 			for valve_name in ["west", "center", "east"]:
@@ -778,6 +778,7 @@ func _update_prompt() -> void:
 		["resonator_water", "old_bead"]: item_hint = "listen with the bead"
 		["archive_mural", "mirror_shard"]: item_hint = "look through the shard"
 		["archive_memory", "river_glass"]: item_hint = "hold up the glass"
+		["cistern_mural", "river_glass"]: item_hint = "hold up the glass"
 		["gallery_pool", "mirror_shard"]: item_hint = "look through the shard"
 	if not item_hint.is_empty() and not prompt_label.text.contains(_action_mark("use_item") + "  "):
 		prompt_label.text += "     %s  %s" % [_action_mark("use_item"), item_hint]
@@ -1220,6 +1221,11 @@ func _use_selected_item() -> void:
 	if target.id == "archive_memory" and item_id == "river_glass":
 		_record_clue_animated("river_glass_memory")
 		_set_status("The green glass catches a thread of reflected water beneath the false sky.")
+		return
+	if target.id == "cistern_mural" and item_id == "river_glass":
+		RunState.set_story_flag("cistern_glass_memory_seen")
+		_record_clue_animated("cistern_glass_memory")
+		_set_status("Through the green glass, a faint fourth waterline appears beneath the clock. Three small cups wait beside it.")
 		return
 	if target.id == "gallery_pool" and item_id == "mirror_shard":
 		_record_clue_animated("gallery_second_sky")
