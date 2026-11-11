@@ -2786,6 +2786,9 @@ func _draw_waterworks() -> void:
 
 func _draw_cistern_vault() -> void:
 	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size())
+	for mark_index in range(CISTERN_VALVE_SEQUENCE.size()):
+		var mark_color := Color("#a9d8ce") if mark_index < progress or RunState.story_flags.get("cistern_solved", false) else Color("#7c8274")
+		draw_rect(Rect2(303 + mark_index * 8, 110, 5, 2), mark_color)
 	for valve_name in ["west", "center", "east"]:
 		var point: Vector2 = CISTERN_VALVE_POSITIONS[valve_name]
 		var lit: bool = bool(RunState.story_flags.get("cistern_solved", false))
