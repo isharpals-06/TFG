@@ -283,7 +283,7 @@ func _create_hud() -> void:
 	icon_center.size = Vector2(3, 3)
 	icon_center.color = Color("#52685e")
 	target_icon.add_child(icon_center)
-	var controls := _new_label("Move %s/%s/%s/%s   %s Run   %s Look   %s Bag   %s Pause" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("inventory"), _action_mark("pause")], 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
+	var controls := _new_label("MOVE %s/%s/%s/%s   RUN %s   LOOK %s   PAUSE %s" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("pause")], 5, Color("#9ca9a4"), Vector2(8, 168), Vector2(304, 9))
 	frame.add_child(controls)
 	transition_cover = ColorRect.new()
 	transition_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

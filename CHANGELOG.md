@@ -26,6 +26,7 @@ No versioned release has been published.
 - Observatory's optional astrolabe puzzle aligns three marked arms from a keeper's chart and reveals a weather ledger; the inscription remains available throughout.
 - Old waterworks main-route room adds an original background, a saved four-mark waterwheel sequence, an optional waterline record, and a passage linking the orchard to the empty quarter. The optional causeway now rejoins through this room.
 - Solving the Archive opens a stair back to the village well. Returning there reveals an optional journal clue that echoes the starless reflection below.
+- Shortened the persistent journey control strip to reduce crowding with larger text; detailed, remappable actions remain visible in contextual prompts.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress
