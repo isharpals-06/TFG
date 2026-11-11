@@ -24,6 +24,7 @@
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.
+- [x] Add a quiet chord-tone motif to each area's procedural ambience; final level and headphone review remain open.
 
 ## Core-system work in progress
 

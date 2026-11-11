@@ -7,7 +7,7 @@
 - Windows PC first; keyboard and controller.
 - Local Git; repository supplied by the creator: `isharpals-06/TFG`.
 - Godot JSON save in the user-data directory.
-- Generated procedural audio; no external audio library.
+- Generated procedural ambience, slow area motifs, and event tones; no external audio library.
 - Built-in image generation was used for the title-screen illustration.
 - No third-party plugin or runtime service.
 

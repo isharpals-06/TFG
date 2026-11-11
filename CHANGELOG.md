@@ -7,6 +7,7 @@ No versioned release has been published.
 ### Added
 
 - Optional lower cistern below the restored waterworks, with original background, water-clock clue, saved four-turn valve puzzle, three hint levels, a river-glass discovery, return stair, and water-sharing ledger.
+- Added a slow, quiet chord-tone motif to the existing area-specific procedural ambience.
 - Main-route Archive map chamber with original background, saved spring-bridge-village tracing puzzle, three hint levels, a return stair, gallery passage, and optional flood-season ledger.
 - Godot 4.7.2 project, title menu, two traveler color choices, movement, camera controls, Beth, journal, and a first puzzle route.
 - Crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and the animated inscription cliffhanger.

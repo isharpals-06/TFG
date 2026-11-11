@@ -33,7 +33,7 @@ The current route is shorter than the intended 2–3 hour experience. Character 
 - A four-frame traveler walk animation that turns left/right with movement, plus Beth's four expressive faces, subtle floating, nearby-object investigations, and discovery reactions with reduced-motion support.
 - Scrollable clue journal, save/resume at the current room and position, playtime tracking that pauses in menus, and autosave.
 - Reduced camera motion, larger text, ambient-audio toggle, and remappable movement, interaction, journal, inventory, pause, and camera controls. Context prompts use the current binding.
-- Procedural ambient layers with crossfaded area changes and event chimes; original generated backgrounds for the title, eleven main locations, optional garden, causeway, reading room, and lower cistern, plus Beth's four-pose expression sheet.
+- Procedural ambient layers with crossfaded area changes, quiet area-specific chord motifs, and event chimes; original generated backgrounds for the title, eleven main locations, optional garden, causeway, reading room, and lower cistern, plus Beth's four-pose expression sheet.
 
 ## Run the project
 

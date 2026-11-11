@@ -141,6 +141,11 @@ func _make_ambience(frequencies: Array) -> AudioStreamWAV:
 			var strength := 0.48 / float(note_index + 1)
 			wave += sin(TAU * frequencies[note_index] * time) * strength
 		wave /= 1.0 + float(frequencies.size()) * 0.18
+		# A slow, quiet chord-tone motif gives each area a little musical shape.
+		var motif_step := int(time / 2.5) % frequencies.size()
+		var motif_age := fposmod(time, 2.5)
+		var motif_envelope := minf(motif_age * 1.8, 1.0) * exp(-motif_age * 2.0)
+		wave += sin(TAU * float(frequencies[motif_step]) * time) * motif_envelope * 0.08
 		var air := sin(TAU * 0.3 * time) * sin(TAU * 2.7 * time) * 0.045
 		wave = (wave + air) * slow_breath * 0.075
 		var sample := int(roundf(clampf(wave, -1.0, 1.0) * 32767.0))
