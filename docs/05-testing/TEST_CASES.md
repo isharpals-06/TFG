@@ -5,6 +5,7 @@ Planned runtime checks; none executed:
 - Move in all eight directions; check walking, running, camera turns, zoom, and snap mode.
 - Confirm each prompt supports its stated action and only the nearest object responds.
 - Examine clues and confirm journal IDs are recorded once.
+- Collect clues in multiple locations; open the journal and confirm newest-first notes show place headings, groups follow discovery order, and the clue wording remains unchanged rather than interpreted.
 - Take each keepsake; fill the four slots; exchange a non-story item; verify the medallion cannot be dropped.
 - Select and inspect items; use each authored item/target combination; try a mismatched item.
 - Solve the ruins sequence, orchard sluices, empty-quarter household niches, and archive lenses; confirm safe wrong attempts and saved progress.

@@ -65,4 +65,5 @@
 - [ ] Complete a full beginning-to-cliffhanger playthrough and accessibility review.
 - [x] Produce a local Windows x86_64 release build with an embedded PCK.
 - [x] Add an in-game credits screen that points to full asset provenance and identifies the Godot engine; keep the game's license decision with the creator.
+- [x] Label journal clues with their source area and group newest-first observations by place without inferring connections for the player.
 - [ ] Runtime-review the exported build, select a license, and finish release materials.

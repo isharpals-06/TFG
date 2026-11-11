@@ -1,5 +1,42 @@
 extends RefCounted
 
+static func get_place_name(clue_id: String) -> String:
+	if clue_id.begins_with("crossing_") or clue_id in ["gibberish_inscription", "bead_resonance", "resonance_mosaic"]:
+		return "The buried crossing"
+	if clue_id.begins_with("ruins_"):
+		return "The first ruins"
+	if clue_id.begins_with("orchard_"):
+		return "The quiet orchard"
+	if clue_id.begins_with("causeway_"):
+		return "The reed causeway"
+	if clue_id.begins_with("waterworks_"):
+		return "The old waterworks"
+	if clue_id.begins_with("cistern_"):
+		return "The lower cistern"
+	if clue_id.begins_with("quarter_") or clue_id.begins_with("village_"):
+		return "The empty quarter"
+	if clue_id.begins_with("reading_"):
+		return "The reading room"
+	if clue_id.begins_with("archive_") or clue_id == "river_glass_memory":
+		return "The Archive"
+	if clue_id.begins_with("map_chamber_"):
+		return "The map chamber"
+	if clue_id.begins_with("gallery_"):
+		return "The reflection gallery"
+	if clue_id.begins_with("bell_"):
+		return "The bell garden"
+	if clue_id.begins_with("refuge_"):
+		return "The highland refuge"
+	if clue_id.begins_with("high_steps_"):
+		return "The High Steps"
+	if clue_id.begins_with("quiet_garden_"):
+		return "The quiet garden"
+	if clue_id.begins_with("observatory_") or clue_id == "message_from_past":
+		return "The observatory"
+	if clue_id == "matching_stone_cuts":
+		return "The old inscription"
+	return "The journey"
+
 static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 	match clue_id:
 		"crossing_floodlines":

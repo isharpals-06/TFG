@@ -8,7 +8,7 @@ The game uses a 320×180 logical viewport with integer viewport scaling. Keep in
 
 - Title: Begin/Continue, traveler palette choice, Controls, Settings, Quit.
 - Play HUD: current objective, journal/hints prompts, selected-keepsake status, interaction icon and action prompt, short status line, keyboard reminder.
-- Journal: scrollable clue list, open with the current Journal binding; entries are observations, not automatic puzzle solutions.
+- Journal: scrollable clue list with place headings, open with the current Journal binding; newest discoveries appear first and stay grouped by their source area. Entries are observations, not automatic puzzle solutions.
 - Beth hints: H opens three choices, from gentle nudge to near-answer. 1/2/3 are available while open.
 - Keepsakes: the current Keepsakes binding opens four slots with descriptions, selection, dropping, and item exchange when full. The current Use binding uses the selected item on authored targets.
 - Pause: the current Pause binding opens Resume or Save and Return to Title.

@@ -38,6 +38,7 @@
 - As a player, I want repeated hint use to leave a meaningful in-world trace.
 - As a player, I want a heavy history of hint use to alter later puzzle details in a way I can observe and solve.
 - As a player, I want clues to enter a journal without the game connecting them for me.
+- As a player, I want each journal clue labeled with its place in the world so I can revisit a long journey's notes without losing their context.
 
 ## Comfort and continuity
 

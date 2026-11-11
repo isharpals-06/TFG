@@ -2394,8 +2394,14 @@ func _open_journal() -> void:
 	if RunState.journal_entries.is_empty():
 		entries.add_child(_new_label("No clues recorded yet.", 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO))
 	else:
+		var previous_place := ""
 		for entry_index in range(RunState.journal_entries.size() - 1, -1, -1):
 			var clue_id: String = RunState.journal_entries[entry_index]
+			var place_name := JOURNAL_CATALOG.get_place_name(clue_id)
+			if place_name != previous_place:
+				var place_header := _new_label("— %s —" % place_name, 6, Color("#a9c1b8"), Vector2.ZERO, Vector2.ZERO)
+				entries.add_child(place_header)
+				previous_place = place_name
 			var entry := _new_label("•  " + _clue_text(clue_id), 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO)
 			entry.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			entries.add_child(entry)
