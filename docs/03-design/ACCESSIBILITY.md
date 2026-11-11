@@ -7,6 +7,7 @@
 - Larger-text toggle applied to menu, journal, hint, inventory, pause, and ending text and buttons; long menu buttons widen to fit.
 - Reduced-motion option that removes the traveler step cycle and Beth's bobbing/reaction motion, makes area transitions and interface panels appear without slides/fades, and speeds up camera easing. The ending inscription resolves immediately while keeping its full reading pause.
 - Reduced motion skips the optional causeway hop animation while keeping the same safe stepping sequence and feedback.
+- Reduced motion also holds the lower-cistern water still; its gentle ripple strokes appear only when that setting is off.
 - Camera snap option.
 - Context prompts, short text feedback, and puzzle symbols/shapes so essential cues are not audio-only.
 - A compact journey control strip keeps primary actions legible at the bottom edge; nearby prompts show the current remapped interaction in detail.

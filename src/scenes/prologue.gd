@@ -68,6 +68,7 @@ var camera_target_rotation := 0.0
 var camera_snap := false
 var camera_zoom := 1.0
 var transitioning := false
+var _cistern_water_time := 0.0
 
 func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
@@ -117,6 +118,9 @@ func _ready() -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	if phase == "cistern_vault" and not bool(RunState.settings.get("reduced_motion", false)):
+		_cistern_water_time += delta
+		queue_redraw()
 	if is_instance_valid(traveler):
 		RunState.update_checkpoint(phase, traveler.global_position)
 		_update_traveler_occlusion()
@@ -2792,6 +2796,11 @@ func _draw_waterworks() -> void:
 
 func _draw_cistern_vault() -> void:
 	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size())
+	if not bool(RunState.settings.get("reduced_motion", false)):
+		for ripple_index in range(5):
+			var ripple_x := 184.0 + float(ripple_index) * 56.0 + sin(_cistern_water_time * 1.1 + float(ripple_index)) * 4.0
+			var ripple_y := 213.0 + float(ripple_index % 2) * 17.0
+			draw_line(Vector2(ripple_x, ripple_y), Vector2(ripple_x + 9.0, ripple_y), Color("#9dcfc8", 0.36), 1.0)
 	for mark_index in range(CISTERN_VALVE_SEQUENCE.size()):
 		var mark_color := Color("#a9d8ce") if mark_index < progress or RunState.story_flags.get("cistern_solved", false) else Color("#7c8274")
 		draw_rect(Rect2(303 + mark_index * 8, 110, 5, 2), mark_color)
