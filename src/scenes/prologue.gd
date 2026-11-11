@@ -1464,7 +1464,10 @@ func _enter_empty_quarter() -> void:
 	beth.visible = true
 	beth.awake = true
 	Soundscape.play_event("soft_fade")
-	_set_status("An empty village square gathers around a well. Four dark doorways face the water.")
+	if RunState.story_flags.get("archive_puzzle_solved", false):
+		_set_status("The square gathers again around the well. Its reflection holds a pale, starless sky.")
+	else:
+		_set_status("An empty village square gathers around a well. Four dark doorways face the water.")
 	_update_objective()
 	queue_redraw()
 	var fade_in := create_tween()
@@ -2314,6 +2317,8 @@ func _update_objective() -> void:
 				objective_label.text = "Read the well carving"
 			elif not RunState.story_flags.get("quarter_household_restored", false):
 				objective_label.text = "Return each household object to its doorway"
+			elif RunState.story_flags.get("archive_puzzle_solved", false):
+				objective_label.text = "Follow the well's reflection into the archive"
 			else:
 				objective_label.text = "Descend into the archive"
 		"archive":
