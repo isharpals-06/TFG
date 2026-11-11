@@ -13,6 +13,10 @@ if (-not (Test-Path -LiteralPath $templatePath)) {
 $outputDirectory = Join-Path $projectRoot 'build'
 New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 $outputFile = Join-Path $outputDirectory 'The Forgotten World.exe'
+$runningBuild = Get-Process -Name 'The Forgotten World' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $outputFile }
+if ($null -ne $runningBuild) {
+	throw 'Close the running game before exporting. Windows keeps the active executable locked and the previous build cannot be cleaned up safely.'
+}
 $tempBase = (Resolve-Path -LiteralPath $env:TEMP).Path
 $tempRoot = Join-Path $tempBase ("forgotten-world-export-" + [Guid]::NewGuid().ToString('N'))
 $exportProject = Join-Path $tempRoot 'project'

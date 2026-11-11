@@ -8,9 +8,9 @@ The Godot 4.7.2 editor is extracted in the workspace and excluded from Git. Orig
 
 ## Current implementation
 
-A route through crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory reaches the inscription cliffhanger. Optional orchard branches lead to a seed-restored garden and the seven-step reed causeway. The archive mirror shard unlocks a second lens path and an independent keeper's note after the main stair opens. Current source includes seven main puzzle mechanisms, three optional puzzles, optional valley-history records, scrollable field notes, hint-dependent Bell Court and High Steps variants, local saves, and remappable controls. Beth has four expression poses; the traveler has a four-frame walk cycle. The Windows export script builds from an isolated copy and checks parser errors before replacing the local executable.
+A route through crossing, ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory reaches the inscription cliffhanger. Optional orchard branches lead to a seed-restored garden and the seven-step reed causeway. The archive mirror shard unlocks a second lens path and an independent keeper's note after the main stair opens. The observatory chart guides an optional astrolabe alignment and weather ledger. Current source includes seven main puzzle mechanisms, four optional puzzles, optional valley-history records, scrollable field notes, hint-dependent Bell Court and High Steps variants, local saves, and remappable controls. Beth has four expression poses; the traveler has a four-frame walk cycle. The Windows export script builds from an isolated copy and checks parser errors before replacing the local executable.
 
-The isolated Godot 4.7.2 headless export completed and the local Windows executable/hash are current. No runtime playthrough has been completed. The route remains short; it does not yet meet the 2–3 hour target.
+The isolated Godot 4.7.2 headless export completed after the observatory astrolabe addition and the local Windows executable/hash are current. The exported executable has opened in Windows, but no complete runtime playthrough has been completed. The route remains short; it does not yet meet the 2–3 hour target.
 
 ## Next work
 

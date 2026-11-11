@@ -21,6 +21,6 @@ New-Item -ItemType Directory -Force -Path build | Out-Null
 powershell -ExecutionPolicy Bypass -File scripts/export_windows.ps1
 ```
 
-The export preset is stored in `export_presets.cfg`. The script checks for the expected template, writes to the ignored `build/` directory, and records a SHA-256 checksum in `build/SHA256SUMS.txt`. Pass `-GodotExe "C:\path\to\Godot.exe"` if the editor is installed elsewhere.
+The export preset is stored in `export_presets.cfg`. Close a running copy of the game before exporting; the script refuses to replace a locked executable. It checks for the expected template, writes to the ignored `build/` directory, and records a SHA-256 checksum in `build/SHA256SUMS.txt`. Pass `-GodotExe "C:\path\to\Godot.exe"` if the editor is installed elsewhere.
 
 Do not include editor binaries, Godot cache/import files, local save data, or secrets in the release package.

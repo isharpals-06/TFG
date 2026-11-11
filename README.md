@@ -4,7 +4,7 @@ An isometric exploration and puzzle adventure about a silent traveler, a sleepin
 
 ## Project status
 
-The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
+The project is in active development. The current main route connects the crossing, first ruins, orchard, empty quarter, archive, reflection gallery, bell garden, highland steps, and observatory and reaches the planned inscription cliffhanger. Restoring orchard water opens an optional reed causeway; planting the pale seed opens an optional hidden garden. In the observatory, a keeper's chart offers an optional three-arm astrolabe puzzle and a weather ledger. Core movement, interaction, journal, hints, local saving, settings, a small keepsake inventory, and procedural ambience are implemented.
 
 The current route is shorter than the intended 2–3 hour experience. Character animation and audio still need production passes, and no runtime playthrough or release review has been completed. An initial local Windows export exists under `build/`; it has not been runtime-reviewed and is not a finished release.
 

@@ -14,6 +14,7 @@
 - [x] Add generated backgrounds for the title and all nine main locations plus the optional garden, with asset credits.
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or into the village.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
+- [x] Add an optional chart-guided three-arm astrolabe puzzle and weather ledger in the observatory, independent of the cliffhanger.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
 - [x] Crossfade between the existing area ambience loops when the player changes rooms.

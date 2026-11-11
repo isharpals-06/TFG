@@ -20,6 +20,7 @@ const ARCHIVE_FOURTH_PATH_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
 const GALLERY_SOLUTION := {"west": 0, "center": 2, "east": 3}
 const HIGH_STEPS_SOLUTION := {"west": 3, "center": 0, "east": 1}
+const OBSERVATORY_SOLUTION := {"west": 3, "center": 0, "east": 1}
 const BELL_SEQUENCE := ["moon", "water", "seed", "moon"]
 const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
 const CAUSEWAY_STEP_PATTERN := [0, 1, 2, 3, 2, 1, 0]
@@ -452,9 +453,16 @@ func _get_targets() -> Array[Dictionary]:
 		garden_targets.append({"id": "garden_return", "name": "the arch back to the orchard", "position": Vector2(58, 190)})
 		return garden_targets
 	if phase == "observatory":
+		var observatory_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("observatory_chart_seen", false):
+			observatory_targets.append({"id": "observatory_chart", "name": "the keeper's star chart", "position": Vector2(148, 157)})
+		if not RunState.story_flags.get("observatory_orrery_solved", false):
+			observatory_targets.append({"id": "observatory_arm_west", "name": "the western astrolabe arm", "position": Vector2(87, 150)})
+			observatory_targets.append({"id": "observatory_arm_center", "name": "the upper astrolabe arm", "position": Vector2(108, 126)})
+			observatory_targets.append({"id": "observatory_arm_east", "name": "the eastern astrolabe arm", "position": Vector2(132, 150)})
 		if not RunState.story_flags.get("ending_revealed", false):
-			return [{"id": "final_inscription", "name": "the old inscription", "position": Vector2(320, 101)}]
-		return []
+			observatory_targets.append({"id": "final_inscription", "name": "the old inscription", "position": Vector2(320, 101)})
+		return observatory_targets
 	var targets: Array[Dictionary] = []
 	if phase == "ruins" and not RunState.story_flags.get("ruins_kiln_tag_seen", false):
 		targets.append({"id": "ruins_kiln_tag", "name": "the kiln's last clay tag", "position": Vector2(500, 255)})
@@ -563,6 +571,10 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  plant the pale seed" % [_action_mark("examine"), _action_mark("use_item")]
 		"final_inscription":
 			prompt_label.text = "%s  examine     %s  use the selected keepsake" % [_action_mark("examine"), _action_mark("use_item")]
+		"observatory_chart":
+			prompt_label.text = "%s  read the keeper's chart" % _action_mark("examine")
+		"observatory_arm_west", "observatory_arm_center", "observatory_arm_east":
+			prompt_label.text = "%s  examine     %s  turn the astrolabe arm" % [_action_mark("examine"), _action_mark("activate")]
 		"gallery_mirror_west", "gallery_mirror_center", "gallery_mirror_east":
 			prompt_label.text = "%s  examine     %s  turn the mirror" % [_action_mark("examine"), _action_mark("activate")]
 		"gallery_stair":
@@ -800,6 +812,14 @@ func _examine_target() -> void:
 			_set_status("A small glass chime bears the %s mark." % ["rain-line", "seed", "crescent"][chime_index])
 		"final_inscription":
 			_set_status("The same unreadable marks from the first ruin. The medallion warms in your hand.")
+		"observatory_chart":
+			_set_status("The keeper's chart says: the crescent faces west; the rain-line faces north; the seed faces east.")
+			RunState.set_story_flag("observatory_chart_seen")
+			_record_clue_animated("observatory_star_chart")
+		"observatory_arm_west", "observatory_arm_center", "observatory_arm_east":
+			var arm_name: String = target.id.trim_prefix("observatory_arm_")
+			var arms: Dictionary = RunState.puzzle_progress.get("observatory_arms", {})
+			_set_status("The %s astrolabe arm points %s." % [arm_name, _direction_name(int(arms.get(arm_name, 0)))])
 
 func _pick_up_target() -> void:
 	var target := _nearest_target()
@@ -900,6 +920,8 @@ func _activate_target() -> void:
 		_enter_high_steps()
 	elif target.id.begins_with("steps_vane_"):
 		_rotate_steps_vane(target.id.trim_prefix("steps_vane_"))
+	elif target.id.begins_with("observatory_arm_"):
+		_rotate_observatory_arm(target.id.trim_prefix("observatory_arm_"))
 	elif target.id == "steps_door" and RunState.story_flags.get("high_steps_aligned", false):
 		_enter_observatory()
 	elif target.id == "garden_gate" and RunState.story_flags.get("quiet_garden_restored", false):
@@ -1067,6 +1089,30 @@ func _rotate_steps_vane(which: String) -> void:
 	else:
 		Soundscape.play_event("resonance")
 		_set_status("The vane catches the wind, then turns away from the rising path.")
+	queue_redraw()
+
+func _rotate_observatory_arm(which: String) -> void:
+	if not RunState.story_flags.get("observatory_chart_seen", false):
+		_set_status("The astrolabe turns, but the keeper's chart may explain how the arms were set.")
+		return
+	var arms: Dictionary = RunState.puzzle_progress.get("observatory_arms", {"west": 0, "center": 0, "east": 0})
+	arms[which] = (int(arms.get(which, 0)) + 1) % 4
+	RunState.puzzle_progress["observatory_arms"] = arms
+	RunState.save_game()
+	var aligned := true
+	for name in ["west", "center", "east"]:
+		if int(arms.get(name, 0)) != int(OBSERVATORY_SOLUTION[name]):
+			aligned = false
+			break
+	if aligned:
+		RunState.set_story_flag("observatory_orrery_solved")
+		RunState.reset_local_hint_echo()
+		_record_clue_animated("observatory_weather_log")
+		Soundscape.play_event("complete")
+		_set_status("The astrolabe settles into the chart's pattern. A narrow drawer opens with a weather ledger inside.")
+	else:
+		Soundscape.play_event("resonance")
+		_set_status("The brass arm catches the starlight, then rests against another mark.")
 	queue_redraw()
 
 func _rotate_gallery_mirror(which: String) -> void:
@@ -1916,10 +1962,16 @@ func _give_hint(level: int) -> void:
 			3:
 				hint_text = "Ring rain-line, seed, then crescent."
 	elif phase == "observatory":
-		match level:
-			1: hint_text = "Beth's light lingers over the hollow beneath the inscription."
-			2: hint_text = "The medallion's edge fits the empty space in the old stone."
-			3: hint_text = "Choose the medallion and use it on the inscription."
+		if not RunState.story_flags.get("observatory_orrery_solved", false):
+			match level:
+				1: hint_text = "Beth keeps returning to the brass arms beside the old chart."
+				2: hint_text = "Read the keeper's chart, then point the three marked arms where it says."
+				3: hint_text = "Point the crescent west, the rain-line north, and the seed east."
+		else:
+			match level:
+				1: hint_text = "Beth's light lingers over the hollow beneath the inscription."
+				2: hint_text = "The medallion's edge fits the empty space in the old stone."
+				3: hint_text = "Choose the medallion and use it on the inscription."
 	else:
 		match level:
 			1:
@@ -2066,6 +2118,10 @@ func _clue_text(clue_id: String) -> String:
 			return "The wind-worn map marks west, south (under a doubled arrow), and east across the three vanes." if RunState.story_flags.get("high_steps_echo_variant", false) else "The wind-worn map marks west, north, and east across the three vanes."
 		"high_steps_open_door":
 			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
+		"observatory_star_chart":
+			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
+		"observatory_weather_log":
+			return "The drawer holds years of careful weather notes: first floodwater, last spring rain, and the nights the valley's lanterns were lit. The final page is a blank table for the next season."
 		"quiet_garden_order":
 			return "The small garden carving gives three marks: rain-line, seed, crescent."
 		"quiet_garden_bench":
@@ -2551,6 +2607,19 @@ func _draw_high_steps() -> void:
 
 func _draw_observatory() -> void:
 	_draw_final_inscription(Vector2(320, 101))
+	var arms: Dictionary = RunState.puzzle_progress.get("observatory_arms", {})
+	var arm_names := ["west", "center", "east"]
+	var arm_symbols := ["moon", "water", "seed"]
+	var arm_positions := [Vector2(87, 150), Vector2(108, 126), Vector2(132, 150)]
+	for index in range(arm_names.size()):
+		var arm_name: String = arm_names[index]
+		var pos: Vector2 = arm_positions[index]
+		draw_circle(pos, 5.0, Color("#554a39"))
+		draw_circle(pos, 3.0, Color("#c5a86c"))
+		_draw_arrow(pos, int(arms.get(arm_name, 0)), Color("#f0d798"))
+		_draw_symbol(pos + Vector2(0, -8), arm_symbols[index], Color("#e2d3a5"))
+	if RunState.story_flags.get("observatory_orrery_solved", false):
+		draw_rect(Rect2(132, 178, 14, 2), Color("#dfc891"))
 	if RunState.story_flags.get("ending_revealed", false):
 		draw_rect(Rect2(315, 143, 10, 2), Color("#e0d29d"))
 
