@@ -25,6 +25,7 @@
 
 - [x] Add four-slot keepsake inventory, descriptions, selection, item-use combinations, and a protected story item.
 - [x] Keep authored journal clue text in its own catalog file, separate from room and puzzle flow.
+- [x] Keep authored three-level puzzle hints and hint variants in a separate catalog, while the journey controller owns hint costs and Beth's reactions.
 - [x] Add item replacement when full and optional keepsake discoveries.
 - [x] Add pause/resume, save-and-return, autosave time, save version handling, and remapping for movement, interaction, inventory, journal, hints, pause, and camera controls.
 - [ ] Review the inventory, rebinding, save migration, and pause flows in a runtime playthrough.

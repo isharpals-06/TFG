@@ -29,6 +29,7 @@ No versioned release has been published.
 - Shortened the persistent journey control strip to reduce crowding with larger text; detailed, remappable actions remain visible in contextual prompts.
 - Resuming a saved room now begins with a location- and progress-aware status line instead of repeating the opening medallion message.
 - Moved authored journal clue descriptions into a dedicated catalog, keeping the journey controller focused on room flow.
+- Moved authored three-level hints into a dedicated catalog while leaving hint penalties, Beth's reactions, and presentation in the journey flow.
 - Windows x86_64 export script builds from an isolated copy, checks for GDScript parser errors, and records the verified output hash; runtime review remains due.
 
 ### In progress

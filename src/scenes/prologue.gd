@@ -3,6 +3,7 @@ extends Node2D
 const TRAVELER_SCENE := preload("res://src/scenes/traveler.tscn")
 const BETH_SCENE := preload("res://src/scenes/beth.tscn")
 const JOURNAL_CATALOG := preload("res://src/core/journal_catalog.gd")
+const HINT_CATALOG := preload("res://src/core/hint_catalog.gd")
 const CROSSING_BACKGROUND: Texture2D = preload("res://design/assets/crossing_clearing_pixel.png")
 const RUINS_BACKGROUND: Texture2D = preload("res://design/assets/first_ruins.png")
 const ORCHARD_BACKGROUND: Texture2D = preload("res://design/assets/quiet_orchard_dry.png")
@@ -2020,118 +2021,7 @@ func _close_hint_panel() -> void:
 func _give_hint(level: int) -> void:
 	var echo_cost := RunState.add_hint(level)
 	beth.react_to_hint(echo_cost)
-	var hint_text := ""
-	if phase == "crossing":
-		if not RunState.story_flags.get("medallion_found", false):
-			match level:
-				1: hint_text = "Beth peers through the grass beside the old stones."
-				2: hint_text = "A small glint rests just left of the worn path."
-				3: hint_text = "The medallion lies beside the path, near the buried stones."
-		else:
-			match level:
-				1: hint_text = "Beth's light circles the arch, then the medallion in your hand."
-				2: hint_text = "The disk's low pulse grows stronger beside the buried arch."
-				3: hint_text = "Choose the medallion and use it on the arch."
-	elif phase == "reed_causeway":
-		match level:
-			1: hint_text = "Beth follows a ripple up the stones, then watches it return to shore."
-			2: hint_text = "The shoreline marks rise to the far stone and descend in reverse."
-			3: hint_text = "Activate near, second, third, far, third, second, then near."
-	elif phase == "empty_quarter":
-		match level:
-			1: hint_text = "Beth watches the four doorways around the well."
-			2: hint_text = "The carving pairs a household symbol with each side of the square."
-			3: hint_text = "West holds the book, north the bowl, east the seed, and south the lamp."
-	elif phase == "orchard":
-		match level:
-			1:
-				hint_text = "Beth listens along the three dry channels."
-			2:
-				hint_text = "The mural shows each channel pointing inward toward the basin."
-			3:
-				hint_text = "Point the western sluice east, the northern sluice south, and the eastern sluice west."
-	elif phase == "waterworks":
-		match level:
-			1: hint_text = "Beth listens to the three waterwheels, then looks back toward the channel map."
-			2: hint_text = "The map's four marks give the wheel order; the crescents repeat on the middle wheel."
-			3: hint_text = "Turn western, middle, eastern, then middle waterwheel."
-	elif phase == "archive":
-		if RunState.story_flags.get("archive_puzzle_solved", false) and RunState.journal_entries.has("archive_second_image"):
-			match level:
-				1: hint_text = "Beth follows the shard's pale line back over the three lenses."
-				2: hint_text = "The fourth reflection points north from west, east from center, and south from east."
-				3: hint_text = "Turn west north, center east, and east south."
-		else:
-			match level:
-				1:
-					hint_text = "Beth watches the three lenses without blinking."
-				2:
-					hint_text = "The ceiling shows right, down, then left."
-				3:
-					hint_text = "Point west right, center down, and east left."
-	elif phase == "gallery":
-		match level:
-			1:
-				hint_text = "Beth watches the quiet water beneath the three mirror stones."
-			2:
-				hint_text = "Read the mural from west to east, then turn each stone to match the direction shown."
-			3:
-				hint_text = "Point west north, center south, and east west."
-	elif phase == "bell_court":
-		if RunState.story_flags.get("bell_echo_variant", false):
-			match level:
-				1: hint_text = "Beth's light lingers on a fifth, fainter mark at the end of the carving."
-				2: hint_text = "Follow the first four notes, then ring the pale rain-line once more."
-				3: hint_text = "Ring crescent, rain-line, seed, crescent, then rain-line."
-		else:
-			match level:
-				1:
-					hint_text = "Beth's light rises and falls with the marks on the garden wall."
-				2:
-					hint_text = "The carving gives four notes. Ring them from left to right, including the repeated mark."
-				3:
-					hint_text = "Ring crescent, rain-line, seed, then crescent."
-	elif phase == "high_steps":
-		if RunState.story_flags.get("high_steps_echo_variant", false):
-			match level:
-				1: hint_text = "Beth watches the doubled arrow on the map, where the old direction still lingers."
-				2: hint_text = "Follow the pale arrow for the middle vane; it points south."
-				3: hint_text = "Point the western vane west, the middle vane south, and the eastern vane east."
-		else:
-			match level:
-				1:
-					hint_text = "Beth watches the three vanes turn over the valley."
-				2:
-					hint_text = "The map gives one direction for each vane, from west to east."
-				3:
-					hint_text = "Point the western vane west, the middle vane north, and the eastern vane east."
-	elif phase == "quiet_garden":
-		match level:
-			1:
-				hint_text = "Beth listens to the glass chimes above the seedling."
-			2:
-				hint_text = "The wall carving gives three marks from left to right."
-			3:
-				hint_text = "Ring rain-line, seed, then crescent."
-	elif phase == "observatory":
-		if not RunState.story_flags.get("observatory_orrery_solved", false):
-			match level:
-				1: hint_text = "Beth keeps returning to the brass arms beside the old chart."
-				2: hint_text = "Read the keeper's chart, then point the three marked arms where it says."
-				3: hint_text = "Point the crescent west, the rain-line north, and the seed east."
-		else:
-			match level:
-				1: hint_text = "Beth's light lingers over the hollow beneath the inscription."
-				2: hint_text = "The medallion's edge fits the empty space in the old stone."
-				3: hint_text = "Choose the medallion and use it on the inscription."
-	else:
-		match level:
-			1:
-				hint_text = "Beth tilts toward the crescent-shaped stone."
-			2:
-				hint_text = "Start with the crescent. Follow it with the rain-line."
-			3:
-				hint_text = "Attune the crescent, then rain-line, then seed."
+	var hint_text := HINT_CATALOG.get_hint(phase, level, RunState.story_flags, RunState.journal_entries)
 	_set_status(hint_text)
 	Soundscape.play_event("hint")
 	_close_hint_panel()

@@ -5,6 +5,7 @@
 - `project.godot`: startup scene, display settings, autoloads, rendering.
 - `src/core/run_state.gd`: global state, input map, settings, JSON save, inventory, journal IDs, hint counter.
 - `src/core/journal_catalog.gd`: authored journal entries keyed by clue ID, including hint-variant descriptions.
+- `src/core/hint_catalog.gd`: the three authored hint levels for each puzzle and its hint-dependent variants.
 - `src/audio/soundscape.gd`: generated sound streams and area ambience.
 - `src/actors/traveler.gd`, `beth.gd`: player and companion.
 - `src/scenes/main_menu.gd`: menu, settings, controls, and remapping UI.
