@@ -21,6 +21,7 @@
 - `bell_garden.png` — original generated bell garden background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `quiet_garden.png` — original generated optional hidden-garden background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `highland_steps.png` — original generated highland approach background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
+- `highland_refuge.png` — original mountain-refuge background generated with OpenAI image generation on 2026-11-11 from a text prompt; no supplied reference image was used.
 - `roofless_observatory.png` — original generated final-area background, restyled as crisp pixel art from the original generated image on 2026-11-10; no supplied reference image was used.
 - `traveler_sprite.png` — original transparent character sprite for the silent traveler, generated from a text prompt on 2026-11-06.
 - `beth_sprite.png` — original transparent character sprite for Beth, generated from a text prompt on 2026-11-06.

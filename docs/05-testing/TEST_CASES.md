@@ -17,6 +17,7 @@ Planned runtime checks; none executed:
 - Use each hint level repeatedly; confirm later requests leave stronger traces, local echo recedes after a solved puzzle, and main progress remains possible.
 - Compare Bell Court with fewer than eight and at least eight earlier hints; confirm the extra note is visible in the carving, appears in the journal and hints, saves across Continue, and does not depend on color alone.
 - Compare High Steps below and above twelve prior hints; confirm the doubled map direction, journal, and Beth hints agree with the middle vane solution and the saved variant persists through Continue.
+- After solving Bell Court, enter the highland refuge; examine its map, guest book, and lantern, save and continue in the room, return to Bell Court, re-enter, then follow the route to High Steps. Confirm each journal entry appears once and room transitions restore the expected checkpoint.
 - Review traveler facing in all eight movement directions and after each camera quarter-turn; confirm the left/right flip follows world movement and reduced motion holds the standing pose.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.

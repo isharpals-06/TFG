@@ -11,7 +11,7 @@
 - [x] Add the optional seed-restored quiet garden and its chime puzzle.
 - [x] Add the highland approach and wind-vane alignment before the observatory.
 - [x] Add clue journal, three hint levels, initial escalating hint trace, and generated sound cues.
-- [x] Add generated backgrounds for the title and all eleven main locations plus optional areas, with asset credits.
+- [x] Add generated backgrounds for the title and all twelve main locations plus optional areas, with asset credits.
 - [x] Add the optional reed causeway art, rhythm crossing, valley record, and routes back to the orchard or onward to the waterworks.
 - [x] Give correct causeway steps a brief traveler hop animation; make wrong stones return safely to shore, with the hop removed in reduced-motion mode.
 - [x] Add an optional shard-revealed archive lens path with a hidden valley-history record, independent of the main stair.
@@ -22,6 +22,7 @@
 - [x] Extend the main Archive route through a map chamber with a saved spring-bridge-village sequence, three hint levels, a return stair, an open gallery route, and an optional valley-history ledger.
 - [x] Add an optional lower cistern beneath the restored waterworks with a saved four-turn valve puzzle, three hint levels, safe return, water-sharing history ledger, and an optional river-glass clue.
 - [x] Combine three ordinary-history records from separate areas into a saved optional village-well sequence and final gathering record.
+- [x] Add a highland refuge between the bell garden and High Steps, with three local history discoveries, distinct ambience, a return stair, a saved checkpoint, and original background art.
 - [x] Add subtle lower-cistern water ripples and suppress them when reduced motion is enabled.
 - [x] Add a four-frame traveler walk cycle with horizontal facing that follows isometric movement and camera turns.
 - [x] Add Beth's neutral, blink, curious, and happy face poses to her idle/reaction animation.
@@ -50,6 +51,7 @@
 - [ ] Deepen area exploration and multi-step puzzles to meet the 2–3 hour target.
 - [ ] Runtime-review the Archive map chamber sequence, its save/return paths, and its optional history ledger.
 - [ ] Runtime-review the lower cistern's entrance, four-turn valve sequence, save/return behavior, and history ledger.
+- [ ] Runtime-review the highland refuge checkpoint, three journal discoveries, Bell Court return, and onward transition to High Steps.
 - [x] Add a fair hint-dependent Bell Court variant: eight prior hints add a visible, clued fifth note.
 - [x] Add a fair hint-dependent High Steps variant: twelve prior hints change the middle vane and its visible clue.
 - [ ] Balance both hint-dependent variants in a full runtime playthrough and add further variations if needed.

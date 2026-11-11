@@ -22,6 +22,12 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
 		"high_steps_last_lantern":
 			return "A neatly trimmed wick waits beside a note: extinguish the last lantern after the descent."
+		"refuge_high_path":
+			return "The refuge map marks three shelters along the ridge path. A note says the upper stair remains open in every season."
+		"refuge_guest_book":
+			return "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path."
+		"refuge_last_lantern":
+			return "A keeper asks that the sheltered lantern stay lit until the last bell is answered."
 		"quiet_garden_cup":
 			return "An upside-down clay cup shelters a seed hollow from the rain."
 		"gibberish_inscription":

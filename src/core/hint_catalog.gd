@@ -36,6 +36,8 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		if story_flags.get("high_steps_echo_variant", false):
 			return _pick(hint_level, "Beth watches the doubled arrow on the map, where the old direction still lingers.", "Follow the pale arrow for the middle vane; it points south.", "Point the western vane west, the middle vane south, and the eastern vane east.")
 		return _pick(hint_level, "Beth watches the three vanes turn over the valley.", "The map gives one direction for each vane, from west to east.", "Point the western vane west, the middle vane north, and the eastern vane east.")
+	if phase == "highland_refuge":
+		return _pick(hint_level, "Beth rests in the sheltered light, then looks toward the ridge path.", "The guest book and lantern hold small pieces of the refuge's story.", "Examine the map, guest book, and lantern; the path to the high steps stays open.")
 	if phase == "quiet_garden":
 		return _pick(hint_level, "Beth listens to the glass chimes above the seedling.", "The wall carving gives three marks from left to right.", "Ring rain-line, seed, then crescent.")
 	if phase == "observatory":

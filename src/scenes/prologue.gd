@@ -16,6 +16,7 @@ const ARCHIVE_BACKGROUND: Texture2D = preload("res://design/assets/under_archive
 const MAP_CHAMBER_BACKGROUND: Texture2D = preload("res://design/assets/archive_map_chamber.png")
 const GALLERY_BACKGROUND: Texture2D = preload("res://design/assets/gallery_reflection_hall.png")
 const BELL_COURT_BACKGROUND: Texture2D = preload("res://design/assets/bell_garden.png")
+const HIGHLAND_REFUGE_BACKGROUND: Texture2D = preload("res://design/assets/highland_refuge.png")
 const QUIET_GARDEN_BACKGROUND: Texture2D = preload("res://design/assets/quiet_garden.png")
 const HIGHLAND_STEPS_BACKGROUND: Texture2D = preload("res://design/assets/highland_steps.png")
 const OBSERVATORY_BACKGROUND: Texture2D = preload("res://design/assets/roofless_observatory.png")
@@ -83,6 +84,8 @@ func _ready() -> void:
 		phase = "quiet_garden"
 	elif RunState.story_flags.get("reached_observatory", false):
 		phase = "observatory"
+	elif RunState.story_flags.get("in_highland_refuge", false):
+		phase = "highland_refuge"
 	elif RunState.story_flags.get("in_causeway", false):
 		phase = "reed_causeway"
 	elif RunState.story_flags.get("reached_high_steps", false):
@@ -210,6 +213,8 @@ func _create_traveler() -> void:
 				traveler.position = Vector2(320, 284)
 			"map_chamber":
 				traveler.position = Vector2(320, 282)
+			"highland_refuge":
+				traveler.position = Vector2(320, 284)
 			_:
 				traveler.position = Vector2(320, 248)
 	traveler.movement_bounds = Rect2(22, 40, 596, 300)
@@ -230,6 +235,7 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 		"map_chamber": return RunState.story_flags.get("in_map_chamber", false)
 		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
 		"bell_court": return RunState.story_flags.get("reached_bell_court", false) and not RunState.story_flags.get("reached_high_steps", false)
+		"highland_refuge": return RunState.story_flags.get("in_highland_refuge", false)
 		"high_steps": return RunState.story_flags.get("reached_high_steps", false) and not RunState.story_flags.get("reached_observatory", false)
 		"reed_causeway": return RunState.story_flags.get("in_causeway", false)
 		"observatory": return RunState.story_flags.get("reached_observatory", false)
@@ -371,6 +377,8 @@ func _initial_status_for_phase() -> String:
 			return "A quiet pool waits beneath the reflected sky."
 		"bell_court":
 			return "The garden bells stir in the mountain air."
+		"highland_refuge":
+			return "The refuge lantern keeps its small pool of warmth against the wind."
 		"high_steps":
 			return "The wind moves softly across the high steps."
 		"quiet_garden":
@@ -555,7 +563,7 @@ func _get_targets() -> Array[Dictionary]:
 			bell_targets.append({"id": "court_bell_2", "name": "the third hanging bell", "position": Vector2(395, 166)})
 			bell_targets.append({"id": "court_bell_3", "name": "the last hanging bell", "position": Vector2(520, 166)})
 		else:
-			bell_targets.append({"id": "bell_door", "name": "the opening under the observatory", "position": Vector2(582, 173)})
+			bell_targets.append({"id": "bell_door", "name": "the path beyond the bell garden", "position": Vector2(582, 173)})
 		if not RunState.story_flags.get("bell_keeper_names_seen", false):
 			bell_targets.append({"id": "bell_keeper_names", "name": "the bell keeper's list", "position": Vector2(548, 264)})
 		return bell_targets
@@ -572,6 +580,17 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("high_steps_lantern_seen", false):
 			steps_targets.append({"id": "high_steps_lantern", "name": "the last trail lantern", "position": Vector2(205, 262)})
 		return steps_targets
+	if phase == "highland_refuge":
+		var refuge_targets: Array[Dictionary] = []
+		if not RunState.story_flags.get("refuge_map_seen", false):
+			refuge_targets.append({"id": "refuge_map", "name": "the refuge's high-path map", "position": Vector2(110, 132)})
+		if not RunState.story_flags.get("refuge_guest_book_seen", false):
+			refuge_targets.append({"id": "refuge_guest_book", "name": "the guest book on the long table", "position": Vector2(304, 205)})
+		if not RunState.story_flags.get("refuge_lantern_seen", false):
+			refuge_targets.append({"id": "refuge_lantern", "name": "the sheltered lantern", "position": Vector2(78, 190)})
+		refuge_targets.append({"id": "refuge_return", "name": "the stair back to the bell garden", "position": Vector2(44, 303)})
+		refuge_targets.append({"id": "refuge_exit", "name": "the path climbing to the highland steps", "position": Vector2(588, 125)})
+		return refuge_targets
 	if phase == "quiet_garden":
 		var garden_targets: Array[Dictionary] = []
 		if not RunState.story_flags.get("garden_carving_seen", false):
@@ -703,8 +722,12 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  follow the covered channel" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_return":
 			prompt_label.text = "%s  return to the orchard" % _action_mark("activate")
-		"quarter_mural", "quarter_register", "village_gathering_marks", "village_gathering_record":
+		"quarter_mural", "quarter_register", "village_gathering_marks", "village_gathering_record", "refuge_map", "refuge_guest_book", "refuge_lantern":
 			prompt_label.text = "%s  study the old record" % _action_mark("examine")
+		"refuge_return":
+			prompt_label.text = "%s  return to the bell garden" % _action_mark("activate")
+		"refuge_exit":
+			prompt_label.text = "%s  climb to the highland steps" % _action_mark("activate")
 		"village_gathering_bowl", "village_gathering_lamp", "village_gathering_bell":
 			prompt_label.text = "%s  examine     %s  answer the mark" % [_action_mark("examine"), _action_mark("activate")]
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
@@ -925,6 +948,12 @@ func _examine_target() -> void:
 			_set_status("The %s mark is worn smooth by many hands." % target.id.trim_prefix("village_gathering_"))
 		"village_gathering_record":
 			_reveal_world_memory("village_gathering_record_seen", "village_last_gathering", "At the last gathering, the village set aside the first clean water, left a lamp in the doorway, and rang once when the road was empty. The register's blank final column is filled with a single word: together.")
+		"refuge_map":
+			_reveal_world_memory("refuge_map_seen", "refuge_high_path", "The refuge map marks three shelters along the ridge path. A small note says the upper stair remains open in every season.")
+		"refuge_guest_book":
+			_reveal_world_memory("refuge_guest_book_seen", "refuge_guest_book", "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path.")
+		"refuge_lantern":
+			_reveal_world_memory("refuge_lantern_seen", "refuge_last_lantern", "The sheltered lantern has been trimmed and filled. A keeper's note asks that it stay lit until the last bell is answered.")
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
 			var quarter_side: String = target.id.trim_prefix("quarter_slot_")
 			var quarter_room := {"west": "reading room", "north": "kitchen", "east": "seed room", "south": "entry hall"}
@@ -1025,7 +1054,7 @@ func _examine_target() -> void:
 			var bell_index := int(target.id.trim_prefix("court_bell_"))
 			_set_status("A small bell bears the %s mark." % ["crescent", "rain-line", "seed", "crescent"][bell_index])
 		"bell_door":
-			_set_status("The arch opens onto the roofless room above. A pale inscription waits in the dark.")
+			_set_status("Beyond the arch, a lantern glows beside the path climbing toward the highland steps.")
 		"high_steps_map":
 			if RunState.story_flags.get("high_steps_echo_variant", false):
 				_set_status("The map shows west and east, but a pale doubled arrow turns the middle vane south.")
@@ -1190,7 +1219,11 @@ func _activate_target() -> void:
 	elif target.id.begins_with("court_bell_"):
 		_ring_court_bell(int(target.id.trim_prefix("court_bell_")))
 	elif target.id == "bell_door" and RunState.story_flags.get("bell_court_solved", false):
+		_enter_highland_refuge()
+	elif target.id == "refuge_exit":
 		_enter_high_steps()
+	elif target.id == "refuge_return":
+		_return_to_bell_court()
 	elif target.id.begins_with("steps_vane_"):
 		_rotate_steps_vane(target.id.trim_prefix("steps_vane_"))
 	elif target.id.begins_with("observatory_arm_"):
@@ -2028,6 +2061,56 @@ func _enter_bell_court() -> void:
 	traveler.set_movement_enabled(true)
 	transitioning = false
 
+func _enter_highland_refuge() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
+	await fade_out.finished
+	phase = "highland_refuge"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 284)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.set_story_flag("in_highland_refuge")
+	RunState.set_story_flag("reached_highland_refuge")
+	beth.global_position = Vector2(337, 265)
+	beth.visible = true
+	beth.awake = true
+	_set_status("The bells fade behind you. A small refuge waits beside the climbing path.")
+	Soundscape.play_event("soft_fade")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.6))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
+func _return_to_bell_court() -> void:
+	if transitioning:
+		return
+	transitioning = true
+	traveler.set_movement_enabled(false)
+	var fade_out := create_tween()
+	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.35))
+	await fade_out.finished
+	RunState.set_story_flag("in_highland_refuge", false)
+	phase = "bell_court"
+	Soundscape.set_area(phase)
+	traveler.global_position = Vector2(320, 250)
+	RunState.update_checkpoint(phase, traveler.global_position)
+	RunState.save_game()
+	_set_status("The bell garden is quiet beneath the open sky.")
+	_update_objective()
+	queue_redraw()
+	var fade_in := create_tween()
+	fade_in.tween_property(transition_cover, "modulate:a", 0.0, _motion_duration(0.5))
+	await fade_in.finished
+	traveler.set_movement_enabled(true)
+	transitioning = false
+
 func _enter_high_steps() -> void:
 	if transitioning:
 		return
@@ -2036,12 +2119,14 @@ func _enter_high_steps() -> void:
 	var fade_out := create_tween()
 	fade_out.tween_property(transition_cover, "modulate:a", 1.0, _motion_duration(0.4))
 	await fade_out.finished
+	RunState.set_story_flag("in_highland_refuge", false)
 	phase = "high_steps"
 	Soundscape.set_area(phase)
 	traveler.global_position = Vector2(320, 252)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_high_steps")
 	RunState.set_story_flag("high_steps_echo_variant", RunState.hint_uses >= 12)
+	RunState.save_game()
 	beth.global_position = Vector2(337, 234)
 	beth.visible = true
 	beth.awake = true
@@ -2617,7 +2702,9 @@ func _update_objective() -> void:
 		"gallery":
 			objective_label.text = "Read the pool mural" if not RunState.story_flags.get("gallery_mural_seen", false) else ("Align the reflected stones" if not RunState.story_flags.get("gallery_lights_solved", false) else "Follow the stair below")
 		"bell_court":
-			objective_label.text = "Listen to the bell garden" if not RunState.story_flags.get("bell_mural_seen", false) else (("Return the five-note echo" if RunState.story_flags.get("bell_echo_variant", false) else "Return the four-note pattern") if not RunState.story_flags.get("bell_court_solved", false) else "Approach the roofless observatory")
+			objective_label.text = "Listen to the bell garden" if not RunState.story_flags.get("bell_mural_seen", false) else (("Return the five-note echo" if RunState.story_flags.get("bell_echo_variant", false) else "Return the four-note pattern") if not RunState.story_flags.get("bell_court_solved", false) else "Follow the path beyond the bell garden")
+		"highland_refuge":
+			objective_label.text = "Explore the refuge or continue to the highland steps"
 		"high_steps":
 			objective_label.text = "Study the wind-worn map" if not RunState.story_flags.get("high_steps_map_seen", false) else ("Align the three wind vanes" if not RunState.story_flags.get("high_steps_aligned", false) else "Enter the upper door")
 		"quiet_garden":
@@ -2653,6 +2740,7 @@ func _draw() -> void:
 			draw_texture_rect(GALLERY_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"bell_court":
 			draw_texture_rect(BELL_COURT_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
+		"highland_refuge": draw_texture_rect(HIGHLAND_REFUGE_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"quiet_garden":
 			draw_texture_rect(QUIET_GARDEN_BACKGROUND, Rect2(Vector2.ZERO, WORLD_SIZE), false)
 		"high_steps":
@@ -2675,6 +2763,7 @@ func _draw_scene_overlays() -> void:
 		"map_chamber": _draw_map_chamber()
 		"gallery": _draw_gallery()
 		"bell_court": _draw_bell_court()
+		"highland_refuge": _draw_highland_refuge()
 		"quiet_garden": _draw_quiet_garden()
 		"high_steps": _draw_high_steps()
 		"observatory": _draw_observatory()
@@ -2979,6 +3068,17 @@ func _draw_empty_quarter() -> void:
 	if RunState.story_flags.get("village_gathering_solved", false):
 		draw_circle(Vector2(320, 166), 16.0, Color("#e4d5a2", 0.16))
 		draw_circle(Vector2(320, 166), 8.0, Color("#e4d5a2", 0.22))
+
+func _draw_highland_refuge() -> void:
+	draw_rect(Rect2(99, 115, 24, 34), Color("#514b40"))
+	draw_rect(Rect2(102, 118, 18, 27), Color("#b3a47e"))
+	draw_line(Vector2(105, 125), Vector2(117, 125), Color("#5c6459"), 1.0)
+	draw_line(Vector2(105, 131), Vector2(117, 131), Color("#5c6459"), 1.0)
+	draw_line(Vector2(105, 137), Vector2(113, 137), Color("#5c6459"), 1.0)
+	draw_rect(Rect2(294, 197, 22, 13), Color("#695344"))
+	draw_rect(Rect2(296, 198, 9, 10), Color("#e0d3b6"))
+	draw_rect(Rect2(306, 198, 8, 10), Color("#d3c5a4"))
+	draw_line(Vector2(305, 198), Vector2(305, 208), Color("#6b6656"), 1.0)
 
 func _draw_quarter_object(point: Vector2, object_name: String, tint: Color) -> void:
 	match object_name:

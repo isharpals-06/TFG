@@ -23,7 +23,7 @@ const PUZZLE_SLOT_KEYS := {
 }
 const PUZZLE_ORIENTATION_LIMITS := {"reading_tiles": 2}
 const PUZZLE_COUNTER_LIMITS := {"first_gate": 3, "bell_sequence": 5, "quiet_garden_sequence": 3, "causeway_sequence": 7, "waterworks_sequence": 4, "map_route_sequence": 3, "cistern_sequence": 4, "village_gathering_sequence": 3}
-const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "waterworks", "cistern_vault", "empty_quarter", "reading_room", "archive", "map_chamber", "gallery", "bell_court", "quiet_garden", "high_steps", "observatory"]
+const SAVE_PHASES := ["crossing", "ruins", "orchard", "reed_causeway", "waterworks", "cistern_vault", "empty_quarter", "reading_room", "archive", "map_chamber", "gallery", "bell_court", "highland_refuge", "quiet_garden", "high_steps", "observatory"]
 const REBINDABLE_ACTIONS := [
 	"move_left", "move_right", "move_up", "move_down", "run",
 	"examine", "pick_up", "activate", "use_item", "inventory",
