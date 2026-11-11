@@ -72,7 +72,7 @@ var camera_target_rotation := 0.0
 var camera_snap := false
 var camera_zoom := 1.0
 var transitioning := false
-var _cistern_water_time := 0.0
+var _water_motion_time := 0.0
 
 func _ready() -> void:
 	camera_snap = bool(RunState.settings.get("snap_camera", false))
@@ -125,8 +125,9 @@ func _ready() -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
-	if phase == "cistern_vault" and not bool(RunState.settings.get("reduced_motion", false)):
-		_cistern_water_time += delta
+	var water_motion_enabled := not bool(RunState.settings.get("reduced_motion", false))
+	if water_motion_enabled and (phase == "cistern_vault" or (phase == "orchard" and RunState.story_flags.get("orchard_water_restored", false))):
+		_water_motion_time += delta
 		queue_redraw()
 	if is_instance_valid(traveler):
 		RunState.update_checkpoint(phase, traveler.global_position)
@@ -2934,6 +2935,12 @@ func _draw_orchard() -> void:
 	for name in ["west", "north", "east"]:
 		if _valve_orientation(valves.get(name, 0)) == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false):
 			_draw_water_channel(name)
+	if RunState.story_flags.get("orchard_water_restored", false) and not bool(RunState.settings.get("reduced_motion", false)):
+		var ripple_centers: Array[Vector2] = [Vector2(269, 170), Vector2(320, 155), Vector2(376, 170)]
+		for index in range(ripple_centers.size()):
+			var ripple: Vector2 = ripple_centers[index]
+			ripple.x += sin(_water_motion_time * 1.2 + float(index)) * 3.0
+			draw_line(ripple, ripple + Vector2(7, 0), Color("#c0e0d2", 0.65), 1.0)
 	_draw_arrow(Vector2(81, 152), 1, Color("#c2c09c"))
 	_draw_arrow(Vector2(93, 152), 2, Color("#a5c3bc"))
 	_draw_arrow(Vector2(105, 152), 3, Color("#b0bd99"))
@@ -2978,7 +2985,7 @@ func _draw_cistern_vault() -> void:
 	var progress := clampi(int(RunState.puzzle_progress.get("cistern_sequence", 0)), 0, CISTERN_VALVE_SEQUENCE.size())
 	if not bool(RunState.settings.get("reduced_motion", false)):
 		for ripple_index in range(5):
-			var ripple_x := 184.0 + float(ripple_index) * 56.0 + sin(_cistern_water_time * 1.1 + float(ripple_index)) * 4.0
+			var ripple_x := 184.0 + float(ripple_index) * 56.0 + sin(_water_motion_time * 1.1 + float(ripple_index)) * 4.0
 			var ripple_y := 213.0 + float(ripple_index % 2) * 17.0
 			draw_line(Vector2(ripple_x, ripple_y), Vector2(ripple_x + 9.0, ripple_y), Color("#9dcfc8", 0.36), 1.0)
 	for mark_index in range(CISTERN_VALVE_SEQUENCE.size()):
