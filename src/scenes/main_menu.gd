@@ -85,17 +85,42 @@ func _show_main_menu() -> void:
 	subtitle.size = Vector2(264, 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_view_root.add_child(subtitle)
-	var button_y := 76.0
-	_add_button("Begin journey", Vector2(98, 76), _show_identity_choice)
-	button_y += 20.0
+	var button_y := 64.0
+	_add_button("Begin journey", Vector2(98, button_y), _show_identity_choice)
+	button_y += 18.0
 	if RunState.has_save():
 		_add_button("Continue", Vector2(98, button_y), _continue_journey)
-		button_y += 20.0
+		button_y += 18.0
 	_add_button("Controls", Vector2(98, button_y), _show_controls)
-	button_y += 20.0
+	button_y += 18.0
 	_add_button("Settings", Vector2(98, button_y), _show_settings)
-	button_y += 20.0
+	button_y += 18.0
+	_add_button("About & credits", Vector2(98, button_y), _show_credits)
+	button_y += 18.0
 	_add_button("Quit", Vector2(98, button_y), _quit_game)
+
+func _show_credits() -> void:
+	_clear_view()
+	_add_centered_title("About & credits", 22)
+	var version: Dictionary = Engine.get_version_info()
+	var version_text := "%s.%s.%s" % [version.get("major", 0), version.get("minor", 0), version.get("patch", 0)]
+	var credits := _label(
+		"The Forgotten World\n\nArt, characters, writing, and code: original project work. Full asset provenance is in design/assets/ASSET_CREDITS.md.\n\nAudio: original procedural synthesis in the project.\n\nEngine: Godot %s (MIT; godotengine.org/license).\n\nGame license: not selected. Rights remain with the creator until release terms are chosen." % version_text,
+		7,
+		Color("#d2d7cb")
+	)
+	credits.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	credits.add_theme_constant_override("line_spacing", 1)
+	credits.custom_minimum_size.x = 268.0
+	credits.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(22, 43)
+	scroll.size = Vector2(276, 96)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	_view_root.add_child(scroll)
+	scroll.add_child(credits)
+	_add_button("Back", Vector2(98, 151), _show_main_menu)
 
 func _show_identity_choice() -> void:
 	_clear_view()

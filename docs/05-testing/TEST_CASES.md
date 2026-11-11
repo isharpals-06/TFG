@@ -23,6 +23,7 @@ Planned runtime checks; none executed:
 - Pause movement for at least seven seconds and observe Beth's brief orbit around the traveler; confirm examining clues interrupts it and reduced motion suppresses it.
 - Open/close journal, hints, inventory, and pause; confirm movement is disabled behind modal panels.
 - Change each setting and rebind keyboard/controller actions; relaunch and confirm preferences persist.
+- Open About & Credits from the main menu; confirm the text scrolls on a small display, returns to the menu, reflects the installed Godot version, and does not imply that the game's license is selected.
 - Move and interact first by keyboard, then controller, and confirm HUD prompts switch device labels; verify each direction names the expected stick or D-pad input and actions show the expected controller button.
 - Save, leave to title, continue, and confirm area/puzzles/clues/inventory/settings load.
 - In the observatory, confirm the star chart is required before the arms can be turned; align crescent west, rain-line north, and seed east, then confirm the inscription becomes interactable. Read the weather drawer separately as an optional record.
