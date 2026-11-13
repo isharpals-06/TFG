@@ -2,7 +2,7 @@ extends Control
 
 func _ready() -> void:
 	var title := Label.new()
-	title.text = "YOUR HAND HAS BEEN HERE BEFORE."
+	title.text = preload("res://src/core/journal_catalog.gd").INSCRIPTION_MESSAGE
 	title.position = Vector2(24, 48)
 	title.size = Vector2(272, 24)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -1,5 +1,8 @@
 extends RefCounted
 
+const INSCRIPTION_RUBBING := "/|:+ ~|/: +/: :|~/ |:~+ /:||~+."
+const INSCRIPTION_MESSAGE := "YOUR HAND HAS BEEN HERE BEFORE."
+
 static func get_place_name(clue_id: String) -> String:
 	if clue_id.begins_with("crossing_"):
 		return "The buried crossing"
@@ -70,7 +73,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"quiet_garden_cup":
 			return "An upside-down clay cup shelters a seed hollow from the rain."
 		"gibberish_inscription":
-			return "At the ruin wall: a line of marks, still unreadable."
+			return "A rubbing from the ruin wall:\n" + INSCRIPTION_RUBBING
 		"resonance_mosaic":
 			return "A worn mosaic repeats three shapes: crescent, rain-line, seed."
 		"orchard_memory":

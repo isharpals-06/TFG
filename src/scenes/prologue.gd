@@ -70,7 +70,7 @@ var inventory_description_label: Label
 var pending_pickup_id := ""
 var inscription_panel: PanelContainer
 var inscription_label: Label
-const FINAL_INSCRIPTION := "YOUR HAND HAS BEEN HERE BEFORE."
+const FINAL_INSCRIPTION := JOURNAL_CATALOG.INSCRIPTION_MESSAGE
 var camera_target_rotation := 0.0
 var camera_snap := false
 var camera_zoom := 1.0
@@ -901,7 +901,7 @@ func _examine_target() -> void:
 		"beth":
 			_wake_beth()
 		"inscription":
-			_set_status("The inscription shifts at the edge of sight, but the marks remain unreadable.")
+			_set_status(_clue_text("gibberish_inscription"))
 			var inscription_is_new := RunState.record_clue("gibberish_inscription")
 			RunState.set_story_flag("inscription_seen")
 			_update_objective()
@@ -2264,27 +2264,24 @@ func _begin_inscription_reveal() -> void:
 	inscription_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inscription_panel.add_child(inscription_label)
 	hud.add_child(inscription_panel)
+	_show_inscription_reveal(0)
 	var open_tween := create_tween()
 	open_tween.tween_property(inscription_panel, "position:y", 62.0, _motion_duration(0.55)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	await open_tween.finished
 	Soundscape.play_event("journal")
 	var reveal_tween := create_tween()
-	for count in range(1, FINAL_INSCRIPTION.length() + 1):
-		reveal_tween.tween_callback(_show_inscription_reveal.bind(count))
-		reveal_tween.tween_interval(_motion_duration(0.14))
+	reveal_tween.tween_interval(0.9)
+	if RunState.settings.get("reduced_motion", false):
+		reveal_tween.tween_callback(_show_inscription_reveal.bind(FINAL_INSCRIPTION.length()))
+	else:
+		for count in range(1, FINAL_INSCRIPTION.length() + 1):
+			reveal_tween.tween_callback(_show_inscription_reveal.bind(count))
+			reveal_tween.tween_interval(0.14)
 	reveal_tween.tween_interval(2.4)
 	reveal_tween.tween_callback(_finish_inscription_reveal)
 
 func _show_inscription_reveal(revealed_count: int) -> void:
-	var displayed := ""
-	var symbols := ["?", "/", "~", "+", ":", "#"]
-	for index in range(FINAL_INSCRIPTION.length()):
-		var character := FINAL_INSCRIPTION.substr(index, 1)
-		if index < revealed_count or character == " " or character == ".":
-			displayed += character
-		else:
-			displayed += symbols[(index + revealed_count) % symbols.size()]
-	inscription_label.text = displayed
+	inscription_label.text = FINAL_INSCRIPTION.left(revealed_count) + JOURNAL_CATALOG.INSCRIPTION_RUBBING.substr(revealed_count)
 
 func _finish_inscription_reveal() -> void:
 	RunState.set_journey_active(false)
@@ -3446,10 +3443,7 @@ func _draw_lane_steps(foot: Vector2) -> void:
 func _draw_final_inscription(pos: Vector2) -> void:
 	draw_rect(Rect2(pos.x - 30, pos.y - 38, 60, 48), Color("#66736a"))
 	draw_rect(Rect2(pos.x - 25, pos.y - 33, 50, 39), Color("#465551"))
-	for line_index in range(7):
-		var y := pos.y - 25 + line_index * 4
-		var width := 20 + (line_index % 3) * 7
-		draw_rect(Rect2(pos.x - width / 2, y, width, 2), Color("#9dbab0"))
+	_draw_inscription_marks(pos + Vector2(0, -8), 2, Color("#9dbab0"))
 	if RunState.story_flags.get("ending_revealed", false):
 		draw_rect(Rect2(pos.x - 20, pos.y + 15, 40, 2), Color("#ddcf9c"))
 
@@ -3507,10 +3501,21 @@ func _draw_inscription(pos: Vector2) -> void:
 	draw_rect(Rect2(pos.x - 13, pos.y - 21, 27, 34), Color("#66736a"))
 	draw_rect(Rect2(pos.x - 10, pos.y - 18, 21, 28), Color("#4e5b56"))
 	var glow := Color("#a5c6bd").lerp(Color("#d0a8c5"), clampf(float(RunState.hint_echo) / 12.0, 0.0, 0.7))
-	for index in range(7):
-		var y := pos.y - 13 + index * 3
-		draw_rect(Rect2(pos.x - 7 + (index % 2) * 2, y, 2, 1), glow)
-		draw_rect(Rect2(pos.x + 1 - (index % 3), y + 1, 3, 1), glow.darkened(0.2))
+	_draw_inscription_marks(pos, 1, glow)
+
+func _draw_inscription_marks(pos: Vector2, scale_factor: int, ink: Color) -> void:
+	var words := JOURNAL_CATALOG.INSCRIPTION_RUBBING.trim_suffix(".").split(" ")
+	for row in range(words.size()):
+		var word := words[row]
+		for col in range(word.length()):
+			var mark := pos + Vector2(col * 3 - word.length() * 1.5, row * 4 - 13) * scale_factor
+			var glyph := word.substr(col, 1)
+			if glyph == "/" or glyph == "~":
+				draw_line(mark + Vector2(0, 2) * scale_factor, mark + Vector2(2, 0) * scale_factor, ink, scale_factor)
+			else:
+				draw_rect(Rect2(mark, Vector2(scale_factor, 3 * scale_factor)), ink)
+			if glyph in ["+", "~", ":"]:
+				draw_rect(Rect2(mark + Vector2(0, 1) * scale_factor, Vector2(2, 1) * scale_factor), ink)
 
 func _draw_mosaic(pos: Vector2) -> void:
 	draw_rect(Rect2(pos.x - 19, pos.y - 15, 38, 23), Color("#726f5c"))
