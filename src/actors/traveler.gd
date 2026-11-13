@@ -33,7 +33,7 @@ func _physics_process(delta: float) -> void:
 	var input_direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var iso_direction := Vector2(input_direction.x - input_direction.y, (input_direction.x + input_direction.y) * 0.5)
 	if is_instance_valid(camera_reference):
-		iso_direction = iso_direction.rotated(-camera_reference.rotation)
+		iso_direction = iso_direction.rotated(camera_reference.rotation)
 	if iso_direction.length() > 1.0:
 		iso_direction = iso_direction.normalized()
 	if input_direction.length() > 0.01:

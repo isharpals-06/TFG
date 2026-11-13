@@ -111,11 +111,11 @@ func _install_default_input_actions() -> void:
 	_add_action("hint_2", [KEY_2])
 	_add_action("hint_3", [KEY_3])
 	_add_action("pause", [KEY_ESCAPE], [], [JOY_BUTTON_START])
-	_add_action("camera_left", [KEY_Z])
-	_add_action("camera_right", [KEY_C])
-	_add_action("camera_snap_toggle", [KEY_V])
-	_add_action("zoom_in", [KEY_EQUAL, KEY_KP_ADD])
-	_add_action("zoom_out", [KEY_MINUS, KEY_KP_SUBTRACT])
+	_add_action("camera_left", [KEY_Z], [], [JOY_BUTTON_DPAD_LEFT])
+	_add_action("camera_right", [KEY_C], [], [JOY_BUTTON_LEFT_SHOULDER])
+	_add_action("camera_snap_toggle", [KEY_V], [], [JOY_BUTTON_RIGHT_STICK])
+	_add_action("zoom_in", [KEY_EQUAL, KEY_KP_ADD], [], [JOY_BUTTON_DPAD_UP])
+	_add_action("zoom_out", [KEY_MINUS, KEY_KP_SUBTRACT], [], [JOY_BUTTON_DPAD_DOWN])
 
 func _load_saved_preferences() -> void:
 	var parsed := _read_save_data(false)

@@ -146,10 +146,10 @@ func _process(delta: float) -> void:
 		_update_traveler_occlusion()
 	if is_instance_valid(camera):
 		camera.global_position = traveler.global_position
-		if camera_snap:
+		if camera_snap or RunState.settings.get("reduced_motion", false):
 			camera.rotation = camera_target_rotation
 		else:
-			var turn_speed := 18.0 if RunState.settings.get("reduced_motion", false) else 7.0
+			var turn_speed := 7.0
 			camera.rotation = lerp_angle(camera.rotation, camera_target_rotation, 1.0 - exp(-delta * turn_speed))
 		camera.zoom = camera.zoom.lerp(Vector2.ONE * camera_zoom, 1.0 - exp(-delta * 5.0))
 	_update_prompt()
@@ -260,6 +260,7 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 
 func _create_camera() -> void:
 	camera = Camera2D.new()
+	camera.ignore_rotation = false
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 6.5
 	# Keep the traveler's feet below center so the next stretch of path is visible.
