@@ -60,6 +60,9 @@ var controls_label: Label
 var target_icon: ColorRect
 var transition_cover: ColorRect
 var journal_panel: PanelContainer
+var journal_place_picker: OptionButton
+var journal_scroll: ScrollContainer
+var journal_scroll_remainder := 0.0
 var hint_panel: PanelContainer
 var pause_panel: PanelContainer
 var inventory_panel: PanelContainer
@@ -125,6 +128,15 @@ func _ready() -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	if journal_panel != null and not journal_place_picker.get_popup().visible:
+		var axis := Input.get_axis("move_up", "move_down")
+		if axis == 0.0:
+			journal_scroll_remainder = 0.0
+		else:
+			journal_scroll_remainder += axis * 95.0 * delta
+			var pixels := int(journal_scroll_remainder)
+			journal_scroll.scroll_vertical += pixels
+			journal_scroll_remainder -= pixels
 	var water_motion_enabled := not bool(RunState.settings.get("reduced_motion", false))
 	if water_motion_enabled and (phase == "cistern_vault" or (phase == "orchard" and RunState.story_flags.get("orchard_water_restored", false)) or (phase == "waterworks" and RunState.story_flags.get("waterworks_solved", false))):
 		_water_motion_time += delta
@@ -2412,37 +2424,53 @@ func _open_journal() -> void:
 	journal_panel.add_child(column)
 	var title := _new_label("FIELD NOTES", 9, Color("#e2ddc9"), Vector2.ZERO, Vector2.ZERO)
 	column.add_child(title)
-	var hint := _new_label("Clues settle onto the page. Their meanings are yours to find.", 6, Color("#b8c2b9"), Vector2.ZERO, Vector2.ZERO)
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(hint)
-	var divider := HSeparator.new()
-	column.add_child(divider)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(224, 74)
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	column.add_child(scroll)
+	journal_place_picker = OptionButton.new()
+	journal_place_picker.add_theme_font_size_override("font_size", 9 if RunState.settings.get("large_text", false) else 7)
+	journal_place_picker.get_popup().add_theme_font_size_override("font_size", 9 if RunState.settings.get("large_text", false) else 7)
+	journal_place_picker.get_popup().max_size = Vector2i(245, 120)
+	journal_place_picker.add_item("All places")
+	column.add_child(journal_place_picker)
+	journal_scroll = ScrollContainer.new()
+	journal_scroll.custom_minimum_size = Vector2(224, 66)
+	journal_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	journal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(journal_scroll)
 	var entries := VBoxContainer.new()
 	entries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	entries.add_theme_constant_override("separation", 4)
-	scroll.add_child(entries)
+	journal_scroll.add_child(entries)
 	if RunState.journal_entries.is_empty():
 		entries.add_child(_new_label("No clues recorded yet.", 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO))
 	else:
+		var places: Array[String] = []
 		var previous_place := ""
 		for entry_index in range(RunState.journal_entries.size() - 1, -1, -1):
 			var clue_id: String = RunState.journal_entries[entry_index]
 			var place_name := JOURNAL_CATALOG.get_place_name(clue_id)
+			if not places.has(place_name):
+				places.append(place_name)
+				journal_place_picker.add_item(place_name)
 			if place_name != previous_place:
 				var place_header := _new_label("— %s —" % place_name, 6, Color("#a9c1b8"), Vector2.ZERO, Vector2.ZERO)
 				entries.add_child(place_header)
 				previous_place = place_name
 			var entry := _new_label("•  " + _clue_text(clue_id), 7, Color("#d2d5c8"), Vector2.ZERO, Vector2.ZERO)
 			entry.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			entry.set_meta("place", place_name)
 			entries.add_child(entry)
-	var close_hint := _new_label("%s / %s  close" % [_action_mark("journal"), _action_mark("pause")], 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
+	journal_place_picker.disabled = journal_place_picker.item_count < 2
+	journal_place_picker.item_selected.connect(func(index: int) -> void:
+		var selected_place := journal_place_picker.get_item_text(index)
+		for line in entries.get_children():
+			line.visible = index == 0 or line.get_meta("place", "") == selected_place
+		journal_scroll.scroll_vertical = 0
+	)
+	var close_hint := _new_label("%s / %s  scroll     %s  close" % [_action_mark("move_up"), _action_mark("move_down"), _action_mark("journal")], 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
+	close_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(close_hint)
 	hud.add_child(journal_panel)
+	if not journal_place_picker.disabled:
+		journal_place_picker.grab_focus()
 	var tween := create_tween()
 	tween.tween_property(journal_panel, "position:y", 20.0, _motion_duration(0.28)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
