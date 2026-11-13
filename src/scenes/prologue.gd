@@ -966,7 +966,7 @@ func _examine_target() -> void:
 		"causeway_village_gate":
 			_set_status("Beyond the last stepping stone, a covered channel leads toward the village waterworks.")
 		"quarter_mural":
-			_set_status("Four house marks circle the well: book, bowl, seed, lamp. Each belongs to one doorway.")
+			_set_status("Book, bowl, seed, lamp. Four doorways ring the carving, but rain has worn away their labels. The houses still stand.")
 			RunState.set_story_flag("quarter_mural_seen")
 			_record_clue_animated("quarter_household_map")
 			_update_objective()
@@ -989,10 +989,11 @@ func _examine_target() -> void:
 			_reveal_world_memory("refuge_lantern_seen", "refuge_last_lantern", "The sheltered lantern has been trimmed and filled. A keeper's note asks that it stay lit until the last bell is answered.")
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
 			var quarter_side: String = target.id.trim_prefix("quarter_slot_")
-			var quarter_room := {"west": "reading room", "north": "kitchen", "east": "seed room", "south": "entry hall"}
+			var evidence_id := "quarter_threshold_" + quarter_side
 			var quarter_slots := _get_quarter_slots()
 			var quarter_object: String = QUARTER_OBJECTS[int(quarter_slots.get(quarter_side, 0))]
-			_set_status("The %s doorway opens to a %s. Its niche currently holds the %s." % [quarter_side, quarter_room[quarter_side], quarter_object])
+			_record_clue_animated(evidence_id)
+			_set_status("%s The niche holds the %s." % [_clue_text(evidence_id), quarter_object])
 		"quarter_well_stair":
 			if RunState.story_flags.get("archive_puzzle_solved", false) and not RunState.story_flags.get("quarter_well_reflection_seen", false):
 				_set_status("The well holds the Archive's starless sky. Four warm reflections gather around one quiet gap.")

@@ -76,7 +76,15 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"orchard_memory":
 			return "A pale flower chimed as the orchard water returned."
 		"quarter_household_map":
-			return "A carving pairs the west doorway with a book, north with a bowl, east with a seed, and south with a lamp."
+			return "Four things were returned each evening: a book, a bowl, a seed and a lamp. The carving shows four doorways. Its labels have washed away."
+		"quarter_threshold_west":
+			return "West house. A strip of linen lies between two thin boards. On the sill someone practiced the same letter until the ink ran out."
+		"quarter_threshold_north":
+			return "North house. A ladle hangs above a round hollow in the counter. Dried broth marks its rim."
+		"quarter_threshold_east":
+			return "East house. Folded paper packets fill the shelves. A single green shoot has split the seam of one."
+		"quarter_threshold_south":
+			return "South house. Soot stains the underside of a hook. A coil of unused wick hangs beside the door."
 		"quarter_register":
 			return "The village register remembers readers, potters, growers, and lamplighters. Its last column is worn blank."
 		"quarter_household_restored":
