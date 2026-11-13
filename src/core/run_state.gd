@@ -376,10 +376,13 @@ func record_clue(clue_id: String) -> bool:
 	save_game()
 	return true
 
-func add_hint(level: int) -> int:
+func hint_cost(level: int) -> int:
 	var base_points := clampi(level, 1, 3)
 	# Every second request makes the old stones carry a stronger echo.
-	var points := mini(base_points + int(hint_uses / 2), SAVE_COUNTER_LIMIT)
+	return mini(base_points + int(hint_uses / 2), SAVE_COUNTER_LIMIT)
+
+func add_hint(level: int) -> int:
+	var points := hint_cost(level)
 	hint_uses = mini(hint_uses + 1, HINT_USE_LIMIT)
 	hint_echo = mini(hint_echo + points, SAVE_COUNTER_LIMIT)
 	total_hint_points = mini(total_hint_points + points, SAVE_COUNTER_LIMIT)

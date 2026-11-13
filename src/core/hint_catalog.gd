@@ -2,10 +2,14 @@ extends RefCounted
 
 static func get_hint(phase: String, level: int, story_flags: Dictionary, journal_entries: Array[String]) -> String:
 	var hint_level := clampi(level, 1, 3)
-	if phase == "crossing":
-		if not story_flags.get("medallion_found", false):
-			return _pick(hint_level, "Beth peers through the grass beside the old stones.", "A small glint rests just left of the worn path.", "The medallion lies beside the path, near the buried stones.")
-		return _pick(hint_level, "Beth's light circles the arch, then the medallion in your hand.", "The disk's low pulse grows stronger beside the buried arch.", "Choose the medallion and use it on the arch.")
+	if phase == "ruins":
+		if story_flags.get("first_gate_open", false):
+			return _pick(hint_level, "Beth slips through a patch of sunlight beyond the stones.", "The gate behind the middle stone has opened.", "Activate the open gate to enter the orchard.")
+		if not story_flags.get("inscription_seen", false):
+			return _pick(hint_level, "Beth brushes dust from a groove in the old wall.", "Above the place where Beth slept, a line of cuts runs across the stone.", "Examine the inscription on the western wall.")
+		if not story_flags.get("resonance_clue_seen", false):
+			return _pick(hint_level, "A fleck of colored plaster clings to Beth's light.", "Beyond the inscription, three shapes survive on the higher wall.", "Examine the faded mosaic above the crescent resonator.")
+		return _pick(hint_level, "Beth traces the first curve of the mosaic in the air.", "Match each shape on the mosaic to a stone, reading from left to right.", "Attune the crescent, then rain-line, then seed.")
 	if phase == "reed_causeway":
 		return _pick(hint_level, "Beth follows a ripple up the stones, then watches it return to shore.", "The shoreline marks rise to the far stone and descend in reverse.", "Activate near, second, third, far, third, second, then near.")
 	if phase == "empty_quarter":
@@ -50,7 +54,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		if not story_flags.get("observatory_orrery_solved", false):
 			return _pick(hint_level, "Beth keeps returning to the brass arms beside the old chart.", "Read the keeper's chart, then point the three marked arms where it says.", "Point the crescent west, the rain-line north, and the seed east.")
 		return _pick(hint_level, "Beth's light lingers over the hollow beneath the inscription.", "The medallion's edge fits the empty space in the old stone.", "Choose the medallion and use it on the inscription.")
-	return _pick(hint_level, "Beth tilts toward the crescent-shaped stone.", "Start with the crescent. Follow it with the rain-line.", "Attune the crescent, then rain-line, then seed.")
+	return "Beth rests quietly beside you."
 
 static func _pick(level: int, first: String, second: String, third: String) -> String:
 	match level:

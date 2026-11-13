@@ -372,7 +372,9 @@ func _on_input_device_changed(_device: String) -> void:
 
 func _update_action_prompts() -> void:
 	if is_instance_valid(journal_hint_label):
-		journal_hint_label.text = "%s  NOTES  %s  HINTS" % [_action_mark("journal"), _action_mark("hints")]
+		journal_hint_label.text = "%s  NOTES" % _action_mark("journal")
+		if RunState.story_flags.get("beth_awake", false):
+			journal_hint_label.text += "  %s  HINTS" % _action_mark("hints")
 	if is_instance_valid(controls_label):
 		controls_label.text = "MOVE %s/%s/%s/%s   RUN %s   LOOK %s   PAUSE %s" % [_action_mark("move_left"), _action_mark("move_right"), _action_mark("move_up"), _action_mark("move_down"), _action_mark("run"), _action_mark("examine"), _action_mark("pause")]
 
@@ -903,6 +905,7 @@ func _examine_target() -> void:
 			if RunState.record_clue("resonance_mosaic"):
 				Soundscape.play_event("journal")
 				RunState.set_story_flag("resonance_clue_seen")
+				_update_objective()
 				_animate_journal_signal()
 		"resonator_moon":
 			_set_status("A crescent mark is cut into the first resonator.")
@@ -2366,6 +2369,7 @@ func _activate_resonator(symbol: String) -> void:
 func _wake_beth() -> void:
 	RunState.set_story_flag("beth_awake")
 	beth.wake()
+	_update_action_prompts()
 	beth.react_to_discovery()
 	beth.global_position = Vector2(48, 230)
 	Soundscape.play_event("wake")
@@ -2588,19 +2592,20 @@ func _open_hint_panel() -> void:
 	hint_panel.add_child(column)
 	column.add_child(_new_label("BETH'S WHISPER", 9, Color("#d6f0f2"), Vector2.ZERO, Vector2.ZERO))
 	column.add_child(_new_label("Choose how much help you want.", 6, Color("#b8c5c2"), Vector2.ZERO, Vector2.ZERO))
-	column.add_child(_new_label("The old stones remember each whisper.", 6, Color("#a999b2"), Vector2.ZERO, Vector2.ZERO))
+	column.add_child(_new_label("Each whisper adds echo. Repeated use costs more.", 6, Color("#a999b2"), Vector2.ZERO, Vector2.ZERO))
 	_add_hint_button(column, "1  A gentle nudge", 1)
 	_add_hint_button(column, "2  A clearer clue", 2)
 	_add_hint_button(column, "3  Nearly the answer", 3)
 	var close_hint := _new_label("%s / %s  close" % [_action_mark("hints"), _action_mark("pause")], 6, Color("#94a39e"), Vector2.ZERO, Vector2.ZERO)
 	column.add_child(close_hint)
 	hud.add_child(hint_panel)
+	(column.get_child(3) as Button).grab_focus()
 	var tween := create_tween()
 	tween.tween_property(hint_panel, "position:y", 37.0, _motion_duration(0.28)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _add_hint_button(container: VBoxContainer, text: String, level: int) -> void:
 	var button := Button.new()
-	button.text = text
+	button.text = "%s   +%d echo" % [text, RunState.hint_cost(level)]
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size = Vector2(210, 15)
 	button.add_theme_font_size_override("font_size", 9 if RunState.settings.get("large_text", false) else 7)
@@ -2610,6 +2615,8 @@ func _add_hint_button(container: VBoxContainer, text: String, level: int) -> voi
 
 func _close_hint_panel() -> void:
 	var panel := hint_panel
+	for button in panel.find_children("*", "Button", true, false):
+		(button as Button).disabled = true
 	hint_panel = null
 	var tween := create_tween()
 	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.18))
@@ -2621,6 +2628,8 @@ func _close_hint_panel() -> void:
 	)
 
 func _give_hint(level: int) -> void:
+	if hint_panel == null:
+		return
 	var echo_cost := RunState.add_hint(level)
 	beth.react_to_hint(echo_cost)
 	var hint_text := HINT_CATALOG.get_hint(phase, level, RunState.story_flags, RunState.journal_entries)
@@ -2719,6 +2728,8 @@ func _update_objective() -> void:
 				objective_label.text = "Follow the small light"
 			elif not RunState.story_flags.get("inscription_seen", false):
 				objective_label.text = "Study the unreadable inscription"
+			elif not RunState.story_flags.get("resonance_clue_seen", false):
+				objective_label.text = "Find the faded mosaic"
 			elif not RunState.story_flags.get("first_gate_open", false):
 				objective_label.text = "Listen for the old stones"
 			else:
