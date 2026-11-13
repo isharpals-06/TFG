@@ -550,15 +550,16 @@ func _sanitize_puzzle_progress(value: Variant) -> Dictionary:
 	if not value is Dictionary:
 		return result
 	for puzzle_name in PUZZLE_SLOT_KEYS:
-		var saved_slots: Variant = value.get(puzzle_name, {})
+		var saved_slots: Variant = value.get(puzzle_name)
 		if not saved_slots is Dictionary:
 			continue
 		var slots: Dictionary = {}
 		for slot_name in PUZZLE_SLOT_KEYS[puzzle_name]:
-			var orientation: Variant = saved_slots.get(slot_name, 0)
+			var orientation: Variant = saved_slots.get(slot_name)
 			if orientation is int or orientation is float:
 				slots[slot_name] = clampi(int(orientation), 0, int(PUZZLE_ORIENTATION_LIMITS.get(puzzle_name, 3)))
-		result[puzzle_name] = slots
+		if not slots.is_empty():
+			result[puzzle_name] = slots
 	for puzzle_name in PUZZLE_COUNTER_LIMITS:
 		var counter: Variant = value.get(puzzle_name, 0)
 		if counter is int or counter is float:

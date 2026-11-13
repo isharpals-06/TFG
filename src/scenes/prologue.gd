@@ -49,7 +49,7 @@ var traveler: Traveler
 var beth: Beth
 var camera: Camera2D
 var phase := "crossing"
-var status_text := "A medallion rests beside the buried arch."
+var status_text := ""
 var hud: CanvasLayer
 var objective_label: Label
 var status_label: Label
@@ -382,7 +382,7 @@ func _motion_duration(seconds: float) -> float:
 func _initial_status_for_phase() -> String:
 	match phase:
 		"crossing":
-			return "A medallion rests beside the buried arch."
+			return "The medallion hums. Pairs of pale stones lead uphill to the arch." if RunState.inventory.has("medallion") else "Something brass catches the light between two pale stones."
 		"ruins":
 			return "Beth's small light waits among the old stones." if RunState.story_flags.get("beth_awake", false) else "A small light rests beside the silent gate."
 		"orchard":
@@ -429,8 +429,7 @@ func _get_targets() -> Array[Dictionary]:
 			crossing_targets.append({"id": "medallion", "name": "the medallion", "position": Vector2(278, 170)})
 		if not RunState.story_flags.get("moss_button_found", false):
 			crossing_targets.append({"id": "moss_button", "name": "the green brass button", "position": Vector2(190, 250)})
-		if RunState.story_flags.get("medallion_found", false):
-			crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(490, 123)})
+		crossing_targets.append({"id": "arch", "name": "the buried arch", "position": Vector2(490, 123)})
 		if not RunState.story_flags.get("crossing_stone_seen", false):
 			crossing_targets.append({"id": "crossing_stone", "name": "the old roadstone", "position": Vector2(103, 194)})
 		return crossing_targets
@@ -709,11 +708,13 @@ func _update_prompt() -> void:
 		"quarter_channel_lane", "quarter_bell_lane", "bell_village_lane":
 			prompt_label.text = "%s  follow %s" % [_action_mark("activate"), target.name]
 		"medallion":
-			prompt_label.text = "%s  examine     %s  take" % [_action_mark("examine"), _action_mark("pick_up")]
+			prompt_label.text = "%s  examine %s     %s  take" % [_action_mark("examine"), target.name, _action_mark("pick_up")]
 		"moss_button", "stone_chip", "old_bead", "seed_pod", "river_glass", "mirror_shard":
-			prompt_label.text = "%s  examine     %s  take" % [_action_mark("examine"), _action_mark("pick_up")]
+			prompt_label.text = "%s  examine %s     %s  take" % [_action_mark("examine"), target.name, _action_mark("pick_up")]
 		"arch":
-			prompt_label.text = "%s  examine     %s  cross" % [_action_mark("examine"), _action_mark("activate")]
+			prompt_label.text = "%s  examine arch" % _action_mark("examine")
+			if RunState.inventory.has("medallion"):
+				prompt_label.text += "     %s  cross" % _action_mark("activate")
 		"beth":
 			prompt_label.text = "%s  wake the small light" % _action_mark("examine")
 		"inscription":
@@ -882,7 +883,7 @@ func _examine_target() -> void:
 		"crossing_stone":
 			_reveal_world_memory("crossing_stone_seen", "crossing_floodlines", "Three floodlines climb the roadstone. Beyond the highest, someone carved a row of little boats.")
 		"arch":
-			_set_status("The buried arch is older than the path around it. The medallion stirs in your hand.")
+			_set_status("The medallion stirs beside a round hollow in the arch." if RunState.inventory.has("medallion") else "A round hollow sits at hand height. Below it, pairs of pale stones lead back down the path.")
 		"beth":
 			_wake_beth()
 		"inscription":
@@ -1176,7 +1177,7 @@ func _on_item_collected(item_id: String) -> void:
 	RunState.set_story_flag(flag)
 	Soundscape.play_event("pickup")
 	if item_id == "medallion":
-		_set_status("The medallion warms in your palm. The buried arch answers with a low vibration.")
+		_set_status("The medallion warms. Farther up the path of paired stones, the arch answers with a low hum.")
 	else:
 		_set_status("You tuck away %s. Press %s to choose or inspect keepsakes." % [_item_name(item_id), _action_mark("inventory")])
 	_update_hud()
@@ -1210,8 +1211,11 @@ func _activate_target() -> void:
 	if target.is_empty():
 		_set_status("Nothing nearby responds.")
 		return
-	if target.id == "arch" and RunState.inventory.has("medallion"):
-		_cross_into_world()
+	if target.id == "arch":
+		if RunState.inventory.has("medallion"):
+			_cross_into_world()
+		else:
+			_examine_target()
 	elif target.id == "quarter_channel_lane":
 		_enter_waterworks(false, true)
 	elif target.id == "quarter_bell_lane":
@@ -2934,7 +2938,12 @@ func _draw_ground() -> void:
 				draw_rect(Rect2(center.x + 3, center.y - 1, 1, 2), Color("#728d68"))
 
 func _draw_threshold() -> void:
-	# Small interactive glints are layered over the crossing background.
+	# Paired waystones link the brass find to the arch in either direction.
+	for marker: Vector2 in [Vector2(265, 176), Vector2(305, 161), Vector2(349, 158), Vector2(392, 143), Vector2(439, 139), Vector2(481, 129)]:
+		for offset: Vector2 in [Vector2.ZERO, Vector2(5, -9)]:
+			var foot := marker + offset
+			draw_rect(Rect2(foot, Vector2(6, 2)), Color("#52584d"))
+			draw_rect(Rect2(foot + Vector2(1, -2), Vector2(4, 3)), Color("#baaf91"))
 	if not RunState.story_flags.get("medallion_found", false):
 		draw_rect(Rect2(275, 167, 6, 2), Color("#b9aa74"))
 		draw_rect(Rect2(277, 165, 3, 6), Color("#d8ca91"))
