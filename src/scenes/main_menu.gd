@@ -27,6 +27,7 @@ func _finish_rebind(event: InputEvent) -> void:
 	_show_controls()
 
 func _ready() -> void:
+	Soundscape.leave_journey()
 	var backdrop := TextureRect.new()
 	backdrop.texture = load("res://design/assets/title_background.png")
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

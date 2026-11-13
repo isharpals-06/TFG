@@ -45,6 +45,17 @@ func _ready() -> void:
 	_effects["soft_fade"] = _make_tone([246.0, 293.0], 0.42, 0.07)
 	_effects["hint"] = _make_tone([349.0, 523.0], 0.48, 0.065)
 
+func leave_journey() -> void:
+	if is_instance_valid(_ambience_tween):
+		_ambience_tween.kill()
+		_ambience_tween = null
+	for player in _ambience_players:
+		player.stop()
+		player.stream = null
+	_effect_player.stop()
+	_effect_player.stream = null
+	_area_name = ""
+
 func play_event(event_name: String) -> void:
 	if not _effects.has(event_name) or not is_instance_valid(_effect_player):
 		return
