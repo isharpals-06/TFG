@@ -454,6 +454,7 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("orchard_memory_seen", false):
 			orchard_targets.append({"id": "memory_bloom", "name": "the pale bloom", "position": Vector2(563, 151)})
 		if not RunState.story_flags.get("orchard_water_restored", false):
+			orchard_targets.append({"id": "orchard_basin", "name": "the basin drawgate", "position": Vector2(320, 193)})
 			orchard_targets.append({"id": "sluice_west", "name": "the western sluice", "position": Vector2(228, 158)})
 			orchard_targets.append({"id": "sluice_north", "name": "the northern sluice", "position": Vector2(320, 130)})
 			orchard_targets.append({"id": "sluice_east", "name": "the eastern sluice", "position": Vector2(422, 158)})
@@ -766,7 +767,9 @@ func _update_prompt() -> void:
 		"memory_bloom":
 			prompt_label.text = "%s  listen to the pale bloom" % _action_mark("examine")
 		"sluice_west", "sluice_north", "sluice_east":
-			prompt_label.text = "%s  turn the sluice" % _action_mark("activate")
+			prompt_label.text = "%s  inspect channel     %s  turn sluice" % [_action_mark("examine"), _action_mark("activate")]
+		"orchard_basin":
+			prompt_label.text = "%s  inspect basin     %s  lift drawgate" % [_action_mark("examine"), _action_mark("activate")]
 		"waterworks_gate":
 			prompt_label.text = "%s  follow the water     %s  enter the old waterworks" % [_action_mark("examine"), _action_mark("activate")]
 		"causeway_gate":
@@ -930,9 +933,13 @@ func _examine_target() -> void:
 		"gate":
 			_set_status("Beyond the open arch, pale grasses move under a vast unfamiliar sky.")
 		"orchard_mural":
-			_set_status("Three channels meet at one basin. Each sluice must point along its channel toward the center.")
-			RunState.set_story_flag("orchard_mural_seen")
+			_reveal_world_memory("orchard_mural_seen", "orchard_drawgate", _clue_text("orchard_drawgate"))
+		"orchard_basin":
+			_set_status("Three floats sit beneath the gate bar. Each inlet must lift its float before the bar can slide.")
 		"memory_bloom":
+			if not RunState.story_flags.get("orchard_water_restored", false):
+				_set_status("The petals are folded tight. A dry furrow runs from the basin to its roots.")
+				return
 			_set_status("A pale flower releases a soft chime. For a moment, the orchard feels inhabited.")
 			if RunState.record_clue("orchard_memory"):
 				Soundscape.play_event("journal")
@@ -946,12 +953,11 @@ func _examine_target() -> void:
 			_set_status("An empty bed waits beside the old channel. A shallow hollow remains in the soil.")
 		"orchard_rope":
 			_reveal_world_memory("orchard_rope_seen", "orchard_grafts_uphill", "A tied label lists grafts sent uphill when the river failed. Every old tree began as a cutting.")
-		"sluice_west":
-			_set_status("The western sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("west")))
-		"sluice_north":
-			_set_status("The northern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("north")))
-		"sluice_east":
-			_set_status("The eastern sluice points %s. The mural shows the channel turning inward." % _direction_name(_get_valve_orientation("east")))
+		"sluice_west", "sluice_north", "sluice_east":
+			var side: String = target.id.trim_prefix("sluice_")
+			var note := "orchard_inlet_" + side
+			_record_clue_animated(note)
+			_set_status("%s The spout faces %s." % [_clue_text(note), _direction_name(_get_valve_orientation(side))])
 		"waterworks_map":
 			_set_status("A channel map gives four marks: rain-line, crescent, seed, crescent. The wheels answer in that order.")
 			RunState.set_story_flag("waterworks_map_seen")
@@ -1235,6 +1241,8 @@ func _activate_target() -> void:
 		_activate_resonator(target.id.trim_prefix("resonator_"))
 	elif target.id == "gate" and RunState.story_flags.get("first_gate_open", false):
 		_enter_orchard()
+	elif target.id == "orchard_basin":
+		_release_orchard_water()
 	elif target.id.begins_with("sluice_"):
 		_toggle_sluice(target.id.trim_prefix("sluice_"))
 	elif target.id == "waterworks_gate" and RunState.story_flags.get("orchard_water_restored", false):
@@ -1371,11 +1379,19 @@ func _toggle_sluice(which: String) -> void:
 	states[which] = (_valve_orientation(states.get(which, 0)) + 1) % 4
 	RunState.puzzle_progress["orchard_valves"] = states
 	RunState.save_game()
-	var opened := 0
-	for name in ["west", "north", "east"]:
-		if _valve_orientation(states.get(name, 0)) == int(ORCHARD_SOLUTION[name]):
-			opened += 1
-	if opened == 3:
+	Soundscape.play_event("resonance")
+	if _valve_orientation(states[which]) == int(ORCHARD_SOLUTION[which]):
+		_set_status("A thread of water reaches the basin. The %s float lifts." % which)
+	else:
+		_set_status("The spout faces %s. Water seeps into the grass beside the %s channel." % [_direction_name(int(states[which])), which])
+	queue_redraw()
+
+func _release_orchard_water() -> void:
+	var dry_channels: PackedStringArray = []
+	for side in ORCHARD_SOLUTION:
+		if _get_valve_orientation(side) != int(ORCHARD_SOLUTION[side]):
+			dry_channels.append(side)
+	if dry_channels.is_empty():
 		Soundscape.play_event("complete")
 		RunState.set_story_flag("orchard_water_restored")
 		RunState.reset_local_hint_echo()
@@ -1386,7 +1402,7 @@ func _toggle_sluice(which: String) -> void:
 		_update_objective()
 	else:
 		Soundscape.play_event("resonance")
-		_set_status("Stone turns beneath your hand. %d of 3 channels now point toward the basin." % opened)
+		_set_status("The bar catches. The floats still resting on the bottom are marked %s." % ", ".join(dry_channels))
 	queue_redraw()
 
 func _ring_waterworks_wheel(which: String) -> void:
@@ -3011,8 +3027,14 @@ func _draw_orchard() -> void:
 	_draw_orchard_sluice(Vector2(422, 151), "east", 2)
 	var valves: Dictionary = RunState.puzzle_progress.get("orchard_valves", {})
 	for name in ["west", "north", "east"]:
-		if _valve_orientation(valves.get(name, 0)) == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false):
-			_draw_water_channel(name)
+		var wet: bool = _valve_orientation(valves.get(name, 0)) == int(ORCHARD_SOLUTION[name]) or RunState.story_flags.get("orchard_water_restored", false)
+		_draw_water_channel(name, wet)
+	draw_rect(Rect2(305, 182, 30, 14), Color("#474f49"))
+	for index in range(3):
+		var side: String = ["west", "north", "east"][index]
+		var lifted := _get_valve_orientation(side) == int(ORCHARD_SOLUTION[side])
+		draw_rect(Rect2(309 + 8 * index, 183 if lifted else 190, 5, 3), Color("#d4bc8d"))
+	draw_rect(Rect2(303, 187, 34, 2), Color("#877b63"))
 	if RunState.story_flags.get("orchard_water_restored", false) and not bool(RunState.settings.get("reduced_motion", false)):
 		var ripple_centers: Array[Vector2] = [Vector2(269, 170), Vector2(320, 155), Vector2(376, 170)]
 		for index in range(ripple_centers.size()):
@@ -3235,8 +3257,8 @@ func _draw_quarter_object(point: Vector2, object_name: String, tint: Color) -> v
 			draw_rect(Rect2(point + Vector2(-2, -3), Vector2(4, 4)), Color("#e4c78a"))
 			draw_line(point + Vector2(0, 3), point + Vector2(0, 7), tint, 1.0)
 
-func _draw_water_channel(name: String) -> void:
-	var water := Color("#6eaaa8")
+func _draw_water_channel(name: String, wet: bool) -> void:
+	var water := Color("#6eaaa8") if wet else Color("#776958")
 	match name:
 		"west":
 			draw_line(Vector2(235, 155), Vector2(303, 185), water, 2.0)

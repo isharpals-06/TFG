@@ -76,6 +76,14 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 			return "A rubbing from the ruin wall:\n" + INSCRIPTION_RUBBING
 		"resonance_mosaic":
 			return "A worn mosaic repeats three shapes: crescent, rain-line, seed."
+		"orchard_drawgate":
+			return "The orchard keeper drew three floats above a wooden bar. A hand lifts the bar and water spills into the beds."
+		"orchard_inlet_west":
+			return "Chips of red pottery line the eastern lip of the western sluice. A clay gutter runs from them to the basin."
+		"orchard_inlet_north":
+			return "Only the southern sill of the northern sluice is worn smooth. Its groove feeds the basin below."
+		"orchard_inlet_east":
+			return "A trail of old reeds lies west of the eastern sluice. Their roots reach into the basin."
 		"orchard_memory":
 			return "A pale flower chimed as the orchard water returned."
 		"quarter_household_map":

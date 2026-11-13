@@ -19,7 +19,9 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 	if phase == "reading_room":
 		return _pick(hint_level, "Beth keeps drifting back to the children's lesson slate.", "Arrange the three study markers in the same order as the slate, from west to east.", "Set boat at the west mark, lantern at center, and reeds at the east mark.")
 	if phase == "orchard":
-		return _pick(hint_level, "Beth listens along the three dry channels.", "The mural shows each channel pointing inward toward the basin.", "Point the western sluice east, the northern sluice south, and the eastern sluice west.")
+		if story_flags.get("orchard_water_restored", false):
+			return _pick(hint_level, "Beth follows the running water.", "The bloom at the far edge has opened. The arch above the basin is clear.", "Examine the bloom for a seed, or enter the channel arch to continue.")
+		return _pick(hint_level, "Beth peers into the grooves beside the dry sluices.", "Inspect each spout for its old waterline. Try the basin bar to see which floats still sit low.", "Turn west eastward, north southward, and east westward. Lift the drawgate at the basin.")
 	if phase == "waterworks":
 		return _pick(hint_level, "Beth listens to the three waterwheels, then looks back toward the channel map.", "The map's four marks give the wheel order; the crescents repeat on the middle wheel.", "Turn western, middle, eastern, then middle waterwheel.")
 	if phase == "cistern_vault":
