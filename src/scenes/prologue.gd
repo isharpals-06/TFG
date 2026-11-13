@@ -145,13 +145,13 @@ func _process(delta: float) -> void:
 		RunState.update_checkpoint(phase, traveler.global_position)
 		_update_traveler_occlusion()
 	if is_instance_valid(camera):
-		camera.global_position = traveler.global_position
 		if camera_snap or RunState.settings.get("reduced_motion", false):
 			camera.rotation = camera_target_rotation
 		else:
 			var turn_speed := 7.0
 			camera.rotation = lerp_angle(camera.rotation, camera_target_rotation, 1.0 - exp(-delta * turn_speed))
 		camera.zoom = camera.zoom.lerp(Vector2.ONE * camera_zoom, 1.0 - exp(-delta * 5.0))
+		_frame_traveler(delta)
 	_update_prompt()
 
 func _unhandled_input(_event: InputEvent) -> void:
@@ -261,20 +261,32 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 func _create_camera() -> void:
 	camera = Camera2D.new()
 	camera.ignore_rotation = false
-	camera.position_smoothing_enabled = true
-	camera.position_smoothing_speed = 6.5
-	# Keep the traveler's feet below center so the next stretch of path is visible.
-	camera.offset = Vector2(0, -10)
-	camera.limit_enabled = true
-	camera.limit_left = 0
-	camera.limit_top = 0
-	camera.limit_right = int(WORLD_SIZE.x)
-	camera.limit_bottom = int(WORLD_SIZE.y)
+	# The viewport footprint changes with rotation. Apply limits in world space.
+	camera.limit_enabled = false
 	camera.zoom = Vector2.ONE
 	traveler.camera_reference = camera
 	add_child(camera)
 	camera.make_current()
 	camera.global_position = traveler.global_position
+	_frame_traveler(0.0)
+
+func _frame_traveler(delta: float) -> void:
+	var half_view := get_viewport_rect().size * 0.5 / camera.zoom
+	var right := Vector2.RIGHT.rotated(camera.rotation)
+	var down := Vector2.DOWN.rotated(camera.rotation)
+	var extent := right.abs() * half_view.x + down.abs() * half_view.y
+	var margin := extent.min(WORLD_SIZE * 0.5)
+	var target := traveler.global_position - down * 10.0
+	var center := target
+	if delta > 0.0 and not RunState.settings.get("reduced_motion", false):
+		center = camera.global_position.lerp(target, 1.0 - exp(-6.5 * delta))
+	center = center.clamp(margin, WORLD_SIZE - margin)
+	# During a diagonal turn the room corner can fall outside the rotated view.
+	# Keep the traveler on screen even when this exposes a sliver of the border.
+	var displacement := (traveler.global_position - center).rotated(-camera.rotation)
+	var safe := half_view - Vector2(12, 18) / camera.zoom
+	center += (displacement - displacement.clamp(-safe, safe)).rotated(camera.rotation)
+	camera.global_position = center
 
 func _update_traveler_occlusion() -> void:
 	# Orchard branches and canopy are painted into the backdrop. Fade the sprite
