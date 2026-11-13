@@ -231,13 +231,13 @@ func _checkpoint_matches_progress(checkpoint_name: String) -> bool:
 		"crossing": return not RunState.story_flags.get("crossed_into_world", false)
 		"ruins": return RunState.story_flags.get("crossed_into_world", false) and not RunState.story_flags.get("reached_orchard", false)
 		"orchard": return RunState.story_flags.get("reached_orchard", false) and not RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
-		"waterworks": return RunState.story_flags.get("reached_waterworks", false) and not RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"waterworks": return RunState.story_flags.get("reached_waterworks", false)
 		"cistern_vault": return RunState.story_flags.get("in_cistern_vault", false)
-		"empty_quarter": return RunState.story_flags.get("reached_quarter", false) and not RunState.story_flags.get("reached_archive", false)
+		"empty_quarter": return RunState.story_flags.get("reached_quarter", false)
 		"reading_room": return RunState.story_flags.get("in_reading_room", false)
-		"archive": return RunState.story_flags.get("reached_archive", false) and not RunState.story_flags.get("reached_gallery", false)
+		"archive": return RunState.story_flags.get("reached_archive", false)
 		"map_chamber": return RunState.story_flags.get("in_map_chamber", false)
-		"gallery": return RunState.story_flags.get("reached_gallery", false) and not RunState.story_flags.get("reached_bell_court", false)
+		"gallery": return RunState.story_flags.get("reached_gallery", false)
 		"bell_court": return RunState.story_flags.get("reached_bell_court", false) and not RunState.story_flags.get("reached_high_steps", false)
 		"highland_refuge": return RunState.story_flags.get("in_highland_refuge", false)
 		"high_steps": return RunState.story_flags.get("reached_high_steps", false) and not RunState.story_flags.get("reached_observatory", false)
@@ -487,6 +487,9 @@ func _get_targets() -> Array[Dictionary]:
 		return causeway_targets
 	if phase == "empty_quarter":
 		var quarter_targets: Array[Dictionary] = []
+		quarter_targets.append({"id": "quarter_channel_lane", "name": "the lane to the waterworks", "position": Vector2(65, 280)})
+		if RunState.story_flags.get("reached_bell_court", false):
+			quarter_targets.append({"id": "quarter_bell_lane", "name": "the steps to the bell garden", "position": Vector2(533, 286)})
 		if not RunState.story_flags.get("quarter_mural_seen", false):
 			quarter_targets.append({"id": "quarter_mural", "name": "the well's worn carving", "position": Vector2(320, 200)})
 		if not RunState.story_flags.get("quarter_household_restored", false):
@@ -574,6 +577,7 @@ func _get_targets() -> Array[Dictionary]:
 		return map_targets
 	if phase == "bell_court":
 		var bell_targets: Array[Dictionary] = []
+		bell_targets.append({"id": "bell_village_lane", "name": "the steps to the village well", "position": Vector2(59, 293)})
 		if not RunState.story_flags.get("bell_mural_seen", false):
 			bell_targets.append({"id": "bell_mural", "name": "the bell-garden carving", "position": Vector2(320, 157)})
 		if not RunState.story_flags.get("bell_bench_seen", false):
@@ -689,6 +693,8 @@ func _update_prompt() -> void:
 	target_icon.visible = true
 	var id: String = target.id
 	match id:
+		"quarter_channel_lane", "quarter_bell_lane", "bell_village_lane":
+			prompt_label.text = "%s  follow %s" % [_action_mark("activate"), target.name]
 		"medallion":
 			prompt_label.text = "%s  examine     %s  take" % [_action_mark("examine"), _action_mark("pick_up")]
 		"moss_button", "stone_chip", "old_bead", "seed_pod", "river_glass", "mirror_shard":
@@ -1194,6 +1200,12 @@ func _activate_target() -> void:
 		return
 	if target.id == "arch" and RunState.inventory.has("medallion"):
 		_cross_into_world()
+	elif target.id == "quarter_channel_lane":
+		_enter_waterworks(false, true)
+	elif target.id == "quarter_bell_lane":
+		_enter_bell_court()
+	elif target.id == "bell_village_lane":
+		_enter_empty_quarter()
 	elif target.id.begins_with("resonator_"):
 		_activate_resonator(target.id.trim_prefix("resonator_"))
 	elif target.id == "gate" and RunState.story_flags.get("first_gate_open", false):
@@ -1801,7 +1813,7 @@ func _enter_causeway() -> void:
 	traveler.set_movement_enabled(true)
 	transitioning = false
 
-func _enter_waterworks(from_causeway: bool = false) -> void:
+func _enter_waterworks(from_causeway: bool = false, from_village: bool = false) -> void:
 	if transitioning:
 		return
 	transitioning = true
@@ -1812,13 +1824,17 @@ func _enter_waterworks(from_causeway: bool = false) -> void:
 	phase = "waterworks"
 	Soundscape.set_area(phase)
 	traveler.global_position = Vector2(554, 260) if from_causeway else Vector2(94, 280)
+	if from_village:
+		traveler.global_position = Vector2(550, 113)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_waterworks")
 	RunState.set_story_flag("in_causeway", false)
-	beth.global_position = Vector2(531, 242) if from_causeway else Vector2(111, 262)
+	beth.global_position = traveler.global_position + Vector2(-13, -19)
 	beth.visible = true
 	beth.awake = true
 	_set_status("The reed path joins a roofless cistern. Water keeps moving beneath the old stone arches." if from_causeway else "The restored channel pours into a roofless cistern. Three wheels mark its quiet rhythm.")
+	if from_village:
+		_set_status("The village lane follows the channel back to the three waterwheels.")
 	Soundscape.play_event("soft_fade")
 	_update_objective()
 	queue_redraw()
@@ -2079,7 +2095,8 @@ func _enter_bell_court() -> void:
 	traveler.global_position = Vector2(320, 250)
 	RunState.update_checkpoint(phase, traveler.global_position)
 	RunState.set_story_flag("reached_bell_court")
-	RunState.set_story_flag("bell_echo_variant", RunState.hint_uses >= 8)
+	if not RunState.story_flags.has("bell_echo_variant"):
+		RunState.set_story_flag("bell_echo_variant", RunState.hint_uses >= 8)
 	beth.global_position = Vector2(337, 234)
 	beth.visible = true
 	beth.awake = true
@@ -3094,6 +3111,9 @@ func _draw_reading_mark(point: Vector2, mark: int, color: Color) -> void:
 			draw_line(point + Vector2(2, -4), point + Vector2(-2, -7), color, 1.0)
 
 func _draw_empty_quarter() -> void:
+	_draw_lane_steps(Vector2(65, 280))
+	if RunState.story_flags.get("reached_bell_court", false):
+		_draw_lane_steps(Vector2(533, 286))
 	var slots := _get_quarter_slots()
 	var positions := {"west": Vector2(137, 222), "north": Vector2(224, 152), "east": Vector2(438, 152), "south": Vector2(566, 210)}
 	for side in positions:
@@ -3266,6 +3286,7 @@ func _draw_gallery_mirror(pos: Vector2, name: String) -> void:
 		draw_rect(Rect2(pos.x - 5, pos.y + 7, 10, 1), Color("#a6d0c6"))
 
 func _draw_bell_court() -> void:
+	_draw_lane_steps(Vector2(59, 293))
 	var bell_positions := [Vector2(148, 112), Vector2(267, 112), Vector2(395, 112), Vector2(520, 112)]
 	for index in range(bell_positions.size()):
 		_draw_court_bell(bell_positions[index], index)
@@ -3356,6 +3377,12 @@ func _draw_observatory() -> void:
 		draw_rect(Rect2(132, 181, 14, 2), Color("#8f927e"))
 	if RunState.story_flags.get("ending_revealed", false):
 		draw_rect(Rect2(315, 143, 10, 2), Color("#e0d29d"))
+
+func _draw_lane_steps(foot: Vector2) -> void:
+	for step in range(4):
+		var corner := foot + Vector2(step * 2 - 9, -step * 3)
+		draw_rect(Rect2(corner, Vector2(18, 3)), Color("#737467"))
+		draw_line(corner, corner + Vector2(17, 0), Color("#b4aa91"))
 
 func _draw_final_inscription(pos: Vector2) -> void:
 	draw_rect(Rect2(pos.x - 30, pos.y - 38, 60, 48), Color("#66736a"))
