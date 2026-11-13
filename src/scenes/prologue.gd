@@ -1090,18 +1090,12 @@ func _examine_target() -> void:
 		"gallery_stair":
 			_set_status("The reflected path continues downward, though the water above it stays still.")
 		"bell_mural":
-			if RunState.story_flags.get("bell_echo_variant", false):
-				_set_status("Five marks cross the garden wall. The last rain-line is pale, like an echo left by too many whispers.")
-			else:
-				_set_status("Four marks are cut into the garden wall: crescent, rain-line, seed, crescent.")
-			RunState.set_story_flag("bell_mural_seen")
-			_record_clue_animated("bell_garden_pattern")
+			_reveal_world_memory("bell_mural_seen", "bell_garden_pattern", _clue_text("bell_garden_pattern"))
+			_update_objective()
 		"bell_bench":
-			_set_status("Beth settles on the warm stone. For a moment, the empty garden feels almost occupied.")
-			RunState.set_story_flag("bell_bench_seen")
-			_record_clue_animated("bell_bench_memory")
+			_reveal_world_memory("bell_bench_seen", "bell_bench_memory", _clue_text("bell_bench_memory"))
 		"bell_keeper_names":
-			_reveal_world_memory("bell_keeper_names_seen", "bell_keeper_list", "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest.")
+			_reveal_world_memory("bell_keeper_names_seen", "bell_keeper_list", _clue_text("bell_keeper_list"))
 		"court_bell_0", "court_bell_1", "court_bell_2", "court_bell_3":
 			var bell_index := int(target.id.trim_prefix("court_bell_"))
 			_set_status("A small bell bears the %s mark." % ["crescent", "rain-line", "seed", "crescent"][bell_index])
@@ -1625,34 +1619,32 @@ func _rotate_gallery_mirror(which: String) -> void:
 	queue_redraw()
 
 func _ring_court_bell(index: int) -> void:
+	var note: String = BELL_SEQUENCE[index]
 	if not RunState.story_flags.get("bell_mural_seen", false):
+		Soundscape.play_event("bell_" + note)
 		_set_status("The bell answers with a low note, but the old carving may tell you what to listen for.")
-		Soundscape.play_event("resonance")
 		return
 	var sequence := _current_bell_sequence()
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
-	var note: String = BELL_SEQUENCE[index]
 	if progress < sequence.size() and note == sequence[progress]:
 		progress += 1
 		RunState.puzzle_progress["bell_sequence"] = progress
 		RunState.save_game()
-		Soundscape.play_event("resonance")
 		if progress == sequence.size():
 			RunState.set_story_flag("bell_court_solved")
 			RunState.reset_local_hint_echo()
 			beth.react_to_discovery()
 			_record_clue_animated("bell_garden_answer")
-			Soundscape.play_event("complete")
 			_set_status("The five notes, including the borrowed echo, settle over the garden. Somewhere above, a stone door begins to open." if sequence.size() == 5 else "The four notes settle over the garden. Somewhere above, a stone door begins to open.")
 			_update_objective()
 		else:
-			_set_status("A clear note hangs in the air. Beth listens for the next one.")
+			_set_status("The %s sounds. %d of %d marks glow on the wall." % [["crescent", "rain-line", "seed", "crescent"][index], progress, sequence.size()])
 	else:
 		progress = 1 if note == BELL_SEQUENCE[0] else 0
 		RunState.puzzle_progress["bell_sequence"] = progress
 		RunState.save_game()
-		Soundscape.play_event("soft_fade")
 		_set_status("The notes drift apart. The garden grows quiet again.")
+	Soundscape.play_event("bell_" + note)
 	queue_redraw()
 
 func _current_bell_sequence() -> Array[String]:
@@ -3338,28 +3330,20 @@ func _draw_bell_court() -> void:
 		_draw_court_bell(bell_positions[index], index)
 	draw_rect(Rect2(300, 145, 40, 18), Color("#5d695f"))
 	draw_rect(Rect2(304, 148, 32, 12), Color("#3e4c49"))
-	_draw_symbol(Vector2(304, 154), "moon", Color("#c8c4a7"))
-	_draw_symbol(Vector2(312, 154), "water", Color("#a7c4bc"))
-	_draw_symbol(Vector2(320, 154), "seed", Color("#aeb98e"))
-	_draw_symbol(Vector2(328, 154), "moon", Color("#c8c4a7"))
-	if RunState.story_flags.get("bell_echo_variant", false):
-		_draw_symbol(Vector2(336, 154), "water", Color("#c693bd"))
 	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
-	for index in range(mini(progress, _current_bell_sequence().size())):
-		draw_rect(Rect2(290 + index * 15, 218, 5, 2), Color("#b8d2c6"))
+	var sequence := _current_bell_sequence()
+	for beat in range(sequence.size()):
+		var mark := Vector2(305 + 7 * beat, 154)
+		if beat < progress:
+			_draw_symbol(mark, sequence[beat], Color("#dce8cf"))
+		else:
+			draw_rect(Rect2(mark + Vector2(-2, 3), Vector2(5, 1)), Color("#aaa78b"))
 	if RunState.story_flags.get("bell_court_solved", false):
 		_draw_arch(Vector2(582, 174), true)
 		draw_line(Vector2(535, 174), Vector2(550, 174), Color("#aed4c8"), 1.0)
 
 func _draw_court_bell(pos: Vector2, index: int) -> void:
-	var progress := int(RunState.puzzle_progress.get("bell_sequence", 0))
-	var lit: bool = (index < progress) or RunState.story_flags.get("bell_court_solved", false)
-	var bell_color := Color("#e4ead0") if lit else Color("#b6ad87")
-	if RunState.story_flags.get("bell_echo_variant", false) and progress == 4 and index == 1:
-		bell_color = Color("#c693bd")
-	_draw_symbol(pos, BELL_SEQUENCE[index], bell_color)
-	if lit:
-		draw_rect(Rect2(pos.x - 7, pos.y + 11, 14, 1), Color("#a8d3c7"))
+	_draw_symbol(pos, BELL_SEQUENCE[index], Color("#e4d9ac"))
 
 func _draw_quiet_garden() -> void:
 	draw_rect(Rect2(204, 93, 30, 16), Color("#687266"))

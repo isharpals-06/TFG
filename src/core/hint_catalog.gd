@@ -34,8 +34,8 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		return _pick(hint_level, "Beth watches the quiet water beneath the three mirror stones.", "Read the mural from west to east, then turn each stone to match the direction shown.", "Point west north, center south, and east west.")
 	if phase == "bell_court":
 		if story_flags.get("bell_echo_variant", false):
-			return _pick(hint_level, "Beth's light lingers on a fifth, fainter mark at the end of the carving.", "Follow the first four notes, then ring the pale rain-line once more.", "Ring crescent, rain-line, seed, crescent, then rain-line.")
-		return _pick(hint_level, "Beth's light rises and falls with the marks on the garden wall.", "The carving gives four notes. Ring them from left to right, including the repeated mark.", "Ring crescent, rain-line, seed, then crescent.")
+			return _pick(hint_level, "Beth follows the faint last line to the boat crews on the keeper's list.", "Follow the four callers on the wall, then give the boat crews one more call.", "Ring crescent, rain-line, seed, crescent, then rain-line.")
+		return _pick(hint_level, "Beth settles on a worn seat, then darts toward the list at the far end of the garden.", "Match the callers on the wall to their marks on the bench and the keeper's list.", "Ring crescent, rain-line, seed, then crescent.")
 	if phase == "high_steps":
 		if not story_flags.get("high_steps_map_seen", false):
 			return _pick(hint_level, "Beth pauses by the wind-worn map above the trail.", "Study the map set into the stone beside the upper path.", "Examine the wind-worn map before turning the vanes.")

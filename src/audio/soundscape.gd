@@ -43,6 +43,9 @@ func _ready() -> void:
 	_effects["resonance"] = _make_tone([392.0, 523.0], 0.34, 0.10)
 	_effects["complete"] = _make_tone([392.0, 494.0, 587.0, 784.0], 1.1, 0.12)
 	_effects["soft_fade"] = _make_tone([246.0, 293.0], 0.42, 0.07)
+	_effects["bell_moon"] = _make_tone([246.94, 493.88, 739.9], 0.95, 0.19)
+	_effects["bell_water"] = _make_tone([329.63, 659.26, 984.0], 0.82, 0.18)
+	_effects["bell_seed"] = _make_tone([369.99, 739.98, 1114.0], 0.72, 0.17)
 	_effects["hint"] = _make_tone([349.0, 523.0], 0.48, 0.065)
 
 func leave_journey() -> void:

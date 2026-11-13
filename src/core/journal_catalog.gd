@@ -56,7 +56,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"gallery_procession":
 			return "Three faceless figures carry bowls and lanterns toward a path cut into the mountain."
 		"bell_keeper_list":
-			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
+			return "The keeper listed twelve names. Beside the boat crews is a rain-line. Beside the sowers is a seed. Four names are crossed out."
 		"high_steps_last_lantern":
 			return "The lamp has two shutters. NORTH faces the upper stair. SOUTH faces the refuge. The keeper trimmed both wicks."
 		"high_steps_trail_cairn":
@@ -120,11 +120,11 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"gallery_hidden_stair":
 			return "Three aligned reflections reveal a stair beneath the starless pool."
 		"bell_garden_pattern":
-			return "The bell garden's carving repeats five marks: crescent, rain-line, seed, crescent, then a pale rain-line echo." if story_flags.get("bell_echo_variant", false) else "The bell garden's carving repeats four marks: crescent, rain-line, seed, crescent."
+			return "The wall names the callers: watch, boat crews, sowers, watch again. Below, a faint extra line calls the boats back." if story_flags.get("bell_echo_variant", false) else "The wall names the callers: the watch at dawn, boat crews at the landing, sowers in the fields, then the watch at dusk."
 		"bell_bench_memory":
-			return "Beth rested on the old garden bench as if she had sat there many times before."
+			return "Beth curls up on the bench. A watchman carved a crescent into the seat: my call opens and closes each working day."
 		"bell_garden_answer":
-			return "The bells answered in the order of the four marks carved into the garden wall."
+			return "The bells carried the calls of an ordinary working day across the empty garden."
 		"high_steps_wind_map":
 			return "Three sockets read: village, upper stair, beacon. A newer plate covers the middle label: guide stragglers back to the refuge." if story_flags.get("high_steps_echo_variant", false) else "Three sockets read, left to right: village, upper stair, beacon. Each vane guided travelers toward its named landmark."
 		"high_steps_open_door":
