@@ -58,11 +58,11 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"bell_keeper_list":
 			return "The keeper marked twelve names beside the bells. Four are crossed out; rain has softened the rest."
 		"high_steps_last_lantern":
-			return "A neatly trimmed wick waits beside a note: extinguish the last lantern after the descent."
+			return "The lamp has two shutters. NORTH faces the upper stair. SOUTH faces the refuge. The keeper trimmed both wicks."
 		"high_steps_trail_cairn":
-			return "At the ridge fork, travelers added one stone before continuing. Its three marks point to the village, the refuge, and the upper path."
+			return "Travelers added a stone at the fork. The base reads: village to the west, beacon to the east."
 		"refuge_high_path":
-			return "The refuge map marks three shelters along the ridge path. A note says the upper stair remains open in every season."
+			return "North of the refuge the stair climbs to the ridge. From the ridge the village lies west and the beacon east."
 		"refuge_guest_book":
 			return "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path."
 		"refuge_last_lantern":
@@ -126,7 +126,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"bell_garden_answer":
 			return "The bells answered in the order of the four marks carved into the garden wall."
 		"high_steps_wind_map":
-			return "The wind-worn map marks west, south (under a doubled arrow), and east across the three vanes." if story_flags.get("high_steps_echo_variant", false) else "The wind-worn map marks west, north, and east across the three vanes."
+			return "Three sockets read: village, upper stair, beacon. A newer plate covers the middle label: guide stragglers back to the refuge." if story_flags.get("high_steps_echo_variant", false) else "Three sockets read, left to right: village, upper stair, beacon. Each vane guided travelers toward its named landmark."
 		"high_steps_open_door":
 			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
 		"waterworks_channel_map":

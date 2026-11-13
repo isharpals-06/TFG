@@ -995,7 +995,7 @@ func _examine_target() -> void:
 		"village_gathering_record":
 			_reveal_world_memory("village_gathering_record_seen", "village_last_gathering", "At the last gathering, the village set aside the first clean water, left a lamp in the doorway, and rang once when the road was empty. The register's blank final column is filled with a single word: together.")
 		"refuge_map":
-			_reveal_world_memory("refuge_map_seen", "refuge_high_path", "The refuge map marks three shelters along the ridge path. A small note says the upper stair remains open in every season.")
+			_reveal_world_memory("refuge_map_seen", "refuge_high_path", _clue_text("refuge_high_path"))
 		"refuge_guest_book":
 			_reveal_world_memory("refuge_guest_book_seen", "refuge_guest_book", "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path.")
 		"refuge_lantern":
@@ -1104,10 +1104,7 @@ func _examine_target() -> void:
 		"bell_door":
 			_set_status("Beyond the arch, a lantern glows beside the path climbing toward the highland steps.")
 		"high_steps_map":
-			if RunState.story_flags.get("high_steps_echo_variant", false):
-				_set_status("The map shows west and east, but a pale doubled arrow turns the middle vane south.")
-			else:
-				_set_status("A wind-worn map shows the three vanes pointing west, north, and east along the rising path.")
+			_set_status(_clue_text("high_steps_wind_map"))
 			RunState.set_story_flag("high_steps_map_seen")
 			_record_clue_animated("high_steps_wind_map")
 		"steps_vane_west", "steps_vane_center", "steps_vane_east":
@@ -1116,9 +1113,9 @@ func _examine_target() -> void:
 		"steps_door":
 			_set_status("The upper door stands open. Beyond it, the night sky presses close to the stone.")
 		"high_steps_lantern":
-			_reveal_world_memory("high_steps_lantern_seen", "high_steps_last_lantern", "The wick is neatly trimmed. Its note asks the last keeper to extinguish it after the descent.")
+			_reveal_world_memory("high_steps_lantern_seen", "high_steps_last_lantern", _clue_text("high_steps_last_lantern"))
 		"high_steps_cairn":
-			_reveal_world_memory("high_steps_cairn_seen", "high_steps_trail_cairn", "A small cairn marks the old ridge fork. Three flat stones carry faded marks for the village, the refuge, and the upper path; the trail keeper's note says each traveler added one stone before continuing.")
+			_reveal_world_memory("high_steps_cairn_seen", "high_steps_trail_cairn", _clue_text("high_steps_trail_cairn"))
 		"garden_gate":
 			_set_status("The planted seed has opened a narrow arch beneath the old tree.")
 		"garden_return":
@@ -1570,7 +1567,7 @@ func _rotate_steps_vane(which: String) -> void:
 		_update_objective()
 	else:
 		Soundscape.play_event("resonance")
-		_set_status("The vane catches the wind, then turns away from the rising path.")
+		_set_status("The %s vane clicks into place, pointing %s." % [which, _direction_name(int(vanes[which]))])
 	queue_redraw()
 
 func _rotate_observatory_arm(which: String) -> void:
@@ -3364,13 +3361,14 @@ func _draw_high_steps() -> void:
 	draw_rect(Rect2(483, 247, 7, 3), Color("#b3ad91"))
 	draw_rect(Rect2(294, 96, 32, 18), Color("#606d63"))
 	draw_rect(Rect2(298, 99, 24, 12), Color("#3d4a47"))
-	_draw_arrow(Vector2(302, 105), 3, Color("#c2c09c"))
+	draw_polyline(PackedVector2Array([Vector2(299, 106), Vector2(302, 102), Vector2(305, 106)]), Color("#c2c09c"))
+	draw_rect(Rect2(300, 106, 4, 3), Color("#c2c09c"))
+	for step_index in range(3):
+		draw_rect(Rect2(307 + step_index * 2, 107 - step_index * 2, 3, 2), Color("#a5c3bc"))
 	if RunState.story_flags.get("high_steps_echo_variant", false):
-		_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc").darkened(0.25))
-		_draw_arrow(Vector2(310, 105), 2, Color("#c693bd"))
-	else:
-		_draw_arrow(Vector2(310, 105), 0, Color("#a5c3bc"))
-	_draw_arrow(Vector2(318, 105), 1, Color("#b0bd99"))
+		draw_rect(Rect2(307, 104, 7, 3), Color("#c693bd"))
+	draw_rect(Rect2(317, 105, 2, 4), Color("#b0bd99"))
+	draw_circle(Vector2(318, 103), 2, Color("#eadbb1"))
 	var vane_positions := [Vector2(118, 137), Vector2(268, 119), Vector2(423, 109)]
 	for index in range(vane_positions.size()):
 		var name: String = ["west", "center", "east"][index]

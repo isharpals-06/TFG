@@ -37,8 +37,8 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 			return _pick(hint_level, "Beth pauses by the wind-worn map above the trail.", "Study the map set into the stone beside the upper path.", "Examine the wind-worn map before turning the vanes.")
 		if not story_flags.get("high_steps_aligned", false):
 			if story_flags.get("high_steps_echo_variant", false):
-				return _pick(hint_level, "Beth watches the doubled arrow on the map, where the old direction still lingers.", "Follow the pale arrow for the middle vane; it points south.", "Point the western vane west, the middle vane south, and the eastern vane east.")
-			return _pick(hint_level, "Beth watches the three vanes turn over the valley.", "The map gives one direction for each vane, from west to east.", "Point the western vane west, the middle vane north, and the eastern vane east.")
+				return _pick(hint_level, "Beth brushes dust off the newer plate, then circles the trail lantern.", "The middle vane now guides people back to the refuge. Read the lantern shutters and cairn for bearings.", "Point the western vane west, the middle vane south, and the eastern vane east.")
+			return _pick(hint_level, "Beth flits from the little cairn to the shutters on the trail lantern.", "Read the destinations on the map from left to right. Match each to a bearing on the cairn or lantern.", "Point the western vane west, the middle vane north, and the eastern vane east.")
 		if not story_flags.get("high_steps_cairn_seen", false):
 			return _pick(hint_level, "A small stack of stones stands beside the ridge path.", "Look near the fork below the eastern vane.", "Examine the little trail cairn near the eastern side of the path.")
 		return _pick(hint_level, "Beth watches the open ridge path in the wind.", "The upper door is ready whenever you are.", "Follow the marked trail through the open door.")
