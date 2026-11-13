@@ -305,17 +305,30 @@ func _create_hud() -> void:
 	frame.add_child(journal_hint_label)
 	inventory_label = _new_label("", 6, Color("#bdc8bb"), Vector2(8, 22), Vector2(230, 12))
 	frame.add_child(inventory_label)
-	var status_back := ColorRect.new()
-	status_back.position = Vector2(5, 137)
-	status_back.size = Vector2(310, 27)
-	status_back.color = Color("#111b20")
-	status_back.modulate.a = 0.88
-	frame.add_child(status_back)
-	status_label = _new_label(status_text, 7, Color("#e3dfd2"), Vector2(10, 140), Vector2(300, 22))
+	var messages := VBoxContainer.new()
+	frame.add_child(messages)
+	messages.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	messages.offset_left = 5
+	messages.offset_right = -5
+	messages.offset_top = -16
+	messages.offset_bottom = -16
+	messages.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	messages.add_theme_constant_override("separation", 2)
+	prompt_label = _new_label("", 7, Color("#d5e8dd"), Vector2.ZERO, Vector2.ZERO)
+	prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	messages.add_child(prompt_label)
+	var status_back := PanelContainer.new()
+	var backing := StyleBoxFlat.new()
+	backing.bg_color = Color("#111b20", 0.88)
+	backing.content_margin_left = 5
+	backing.content_margin_right = 5
+	backing.content_margin_top = 3
+	backing.content_margin_bottom = 3
+	status_back.add_theme_stylebox_override("panel", backing)
+	messages.add_child(status_back)
+	status_label = _new_label(status_text, 7, Color("#e3dfd2"), Vector2.ZERO, Vector2.ZERO)
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	frame.add_child(status_label)
-	prompt_label = _new_label("", 7, Color("#d5e8dd"), Vector2(9, 120), Vector2(300, 14))
-	frame.add_child(prompt_label)
+	status_back.add_child(status_label)
 	target_icon = ColorRect.new()
 	target_icon.size = Vector2(7, 7)
 	target_icon.color = Color("#dcead4")
