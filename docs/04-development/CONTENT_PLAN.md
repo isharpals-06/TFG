@@ -37,3 +37,5 @@ The main chapter targets total approximately 135 minutes. Optional paths should 
 An isolated Godot run walked between all required targets using movement actions at normal walking speed. With known answers, direct approaches and immediate interactions, the saved journey clock reached 194.5 seconds at the cliffhanger. This measures traversal and puzzle execution. A first-time player's search, reading and solving time still needs measurement.
 
 In the village, the well carving lists four objects. Examining the houses records physical evidence of reading, cooking, planting and lamplighting. Players can compare those observations in the journal and request increasingly explicit hints.
+
+The Archive map asks players to deliver spring water during a flood. They can inspect five landmarks and compare three crossings. The submerged ford and the missing ferry each explain why the cart cannot pass. Trying either preserves the traced spring. A fresh-save Godot run tried both crossings, completed the delivery, reached the cliffhanger and reloaded all five map notes.

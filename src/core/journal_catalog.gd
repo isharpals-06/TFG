@@ -168,7 +168,17 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"archive_hidden_register":
 			return "A loose leaf is headed “Borrowed skies.” Its final line asks the keeper to leave the east windows uncovered so the last light has somewhere to go."
 		"map_chamber_route":
-			return "The keeper's valley map marks a route in travel order: spring, bridge, village."
+			return "Flood duty. Fill the cart with clean water. Find a crossing its wheels can use and take the load to the waiting households."
+		"map_chamber_spring":
+			return "Spring. Water runs clear above the flood line. Two wheel ruts lead away from the filling trough."
+		"map_chamber_ford":
+			return "Ford. The flood gauge stands a hand above the tallest stepping stone. A cart would sink to its axles."
+		"map_chamber_ferry":
+			return "Ferry. The landing posts stand on opposite banks. A frayed length of towrope hangs from one. The boat is gone."
+		"map_chamber_bridge":
+			return "Bridge. Silt streaks the stone below the deck. Paired wheel ruts cross its dry planks."
+		"map_chamber_village":
+			return "Village. Empty pitchers line the steps. Each door has a chalk mark for the day's water."
 		"map_chamber_route_open":
 			return "The spring, bridge, and village answer in sequence. A quiet arch opens toward the reflected pool."
 		"map_chamber_ledger":

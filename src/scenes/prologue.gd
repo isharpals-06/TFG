@@ -42,7 +42,7 @@ const QUARTER_SOLUTION := {"west": 0, "north": 1, "east": 2, "south": 3}
 const READING_START := {"west": 2, "center": 2, "east": 0}
 const READING_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const MAP_ROUTE_SEQUENCE := ["spring", "bridge", "village"]
-const MAP_ROUTE_POSITIONS := {"spring": Vector2(240, 144), "bridge": Vector2(320, 165), "village": Vector2(402, 144)}
+const MAP_ROUTE_POSITIONS := {"spring": Vector2(240, 144), "bridge": Vector2(320, 165), "village": Vector2(402, 144), "ford": Vector2(283, 204), "ferry": Vector2(368, 201)}
 const VILLAGE_GATHERING_SEQUENCE := ["bowl", "lamp", "bell"]
 
 var traveler: Traveler
@@ -567,7 +567,7 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("map_chamber_mural_seen", false):
 			map_targets.append({"id": "map_chamber_mural", "name": "the old valley map", "position": Vector2(320, 95)})
 		if not RunState.story_flags.get("map_route_solved", false):
-			for route_node in ["spring", "bridge", "village"]:
+			for route_node in MAP_ROUTE_POSITIONS:
 				map_targets.append({"id": "map_route_%s" % route_node, "name": "the %s on the map" % route_node, "position": MAP_ROUTE_POSITIONS[route_node]})
 		elif not RunState.story_flags.get("map_chamber_record_seen", false):
 			map_targets.append({"id": "map_chamber_record", "name": "the keeper's route ledger", "position": Vector2(88, 274)})
@@ -789,8 +789,8 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  climb back to the village well" % _action_mark("activate")
 		"map_chamber_mural":
 			prompt_label.text = "%s  study the valley map" % _action_mark("examine")
-		"map_route_spring", "map_route_bridge", "map_route_village":
-			prompt_label.text = "%s  trace this place" % _action_mark("activate")
+		"map_route_spring", "map_route_bridge", "map_route_village", "map_route_ford", "map_route_ferry":
+			prompt_label.text = "%s  inspect     %s  trace" % [_action_mark("examine"), _action_mark("activate")]
 		"map_chamber_record":
 			prompt_label.text = "%s  read the route ledger" % _action_mark("examine")
 		"map_chamber_return":
@@ -1043,13 +1043,14 @@ func _examine_target() -> void:
 		"archive_stair":
 			_set_status("A narrow stair descends toward a pale, starless glow. Another room waits below.")
 		"map_chamber_mural":
-			_set_status("A spring, an old bridge, and the village are linked by one safe route. The keeper marked them in the order a traveler would follow.")
+			_set_status(_clue_text("map_chamber_route"))
 			RunState.set_story_flag("map_chamber_mural_seen")
 			_record_clue_animated("map_chamber_route")
 			_update_objective()
-		"map_route_spring", "map_route_bridge", "map_route_village":
-			var route_progress := int(RunState.puzzle_progress.get("map_route_sequence", 0))
-			_set_status("The %s is the %s mark in the keeper's route." % [target.id.trim_prefix("map_route_"), "first" if route_progress == 0 else ("second" if route_progress == 1 else "last")])
+		"map_route_spring", "map_route_bridge", "map_route_village", "map_route_ford", "map_route_ferry":
+			var field_note := "map_chamber_" + String(target.id).trim_prefix("map_route_")
+			_record_clue_animated(field_note)
+			_set_status(_clue_text(field_note))
 		"map_chamber_record":
 			_reveal_world_memory("map_chamber_record_seen", "map_chamber_ledger", "The keeper's ledger records flood seasons, repaired bridges, and which homes shared lantern oil. On its last page, a blank map waits for a river that never came.")
 		"map_chamber_return":
@@ -1982,6 +1983,12 @@ func _trace_map_route(node_name: String) -> void:
 		_set_status("The route marks are difficult to follow until you study the map.")
 		return
 	var progress := clampi(int(RunState.puzzle_progress.get("map_route_sequence", 0)), 0, MAP_ROUTE_SEQUENCE.size() - 1)
+	if node_name in ["ford", "ferry"]:
+		var field_note := "map_chamber_" + node_name
+		_record_clue_animated(field_note)
+		_set_status(_clue_text(field_note))
+		Soundscape.play_event("soft_fade")
+		return
 	if node_name == MAP_ROUTE_SEQUENCE[progress]:
 		progress += 1
 		RunState.puzzle_progress["map_route_sequence"] = progress
@@ -2751,7 +2758,7 @@ func _update_objective() -> void:
 			if not RunState.story_flags.get("map_chamber_mural_seen", false):
 				objective_label.text = "Study the keeper's valley map"
 			elif not RunState.story_flags.get("map_route_solved", false):
-				objective_label.text = "Trace spring, bridge, then village"
+				objective_label.text = "Find a dry crossing for the water cart"
 			elif not RunState.story_flags.get("map_chamber_record_seen", false):
 				objective_label.text = "Read the route ledger or enter the open arch"
 			else:
@@ -3219,6 +3226,14 @@ func _draw_archive() -> void:
 		draw_rect(Rect2(70, 199, 5, 2), Color("#e0dcc4"))
 
 func _draw_map_chamber() -> void:
+	var ford: Vector2 = MAP_ROUTE_POSITIONS["ford"]
+	var ferry: Vector2 = MAP_ROUTE_POSITIONS["ferry"]
+	for stone in range(3):
+		draw_rect(Rect2(ford + Vector2(stone * 5 - 7, -stone), Vector2(4, 3)), Color("#b1ac93"))
+	draw_line(ford + Vector2(-10, -3), ford + Vector2(8, -3), Color("#79abb0"))
+	draw_line(ferry + Vector2(-8, -5), ferry + Vector2(-8, 4), Color("#a18b69"), 2)
+	draw_line(ferry + Vector2(7, -5), ferry + Vector2(7, 4), Color("#a18b69"), 2)
+	draw_line(ferry + Vector2(-8, -3), ferry + Vector2(-3, 1), Color("#d8be86"))
 	var progress := int(RunState.puzzle_progress.get("map_route_sequence", 0))
 	var route_colors := [Color("#c5d7aa"), Color("#9ed8ce"), Color("#e3c990")]
 	for index in range(MAP_ROUTE_SEQUENCE.size()):

@@ -25,7 +25,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 			return _pick(hint_level, "Beth follows the shard's pale line back over the three lenses.", "The fourth reflection points north from west, east from center, and south from east.", "Turn west north, center east, and east south.")
 		return _pick(hint_level, "Beth watches the three lenses without blinking.", "The ceiling shows right, down, then left.", "Point west right, center down, and east left.")
 	if phase == "map_chamber":
-		return _pick(hint_level, "Beth traces the river from its spring toward the old bridge.", "The keeper marked the spring first, then the bridge, then the village.", "Activate spring, bridge, then village in that order.")
+		return _pick(hint_level, "Beth peers at the little cart tracks. Inspect the places along the river.", "Start where clean water fills the cart. Compare the flood marks and look for wheel ruts on dry ground.", "Trace the spring, the bridge, then the village.")
 	if phase == "gallery":
 		return _pick(hint_level, "Beth watches the quiet water beneath the three mirror stones.", "Read the mural from west to east, then turn each stone to match the direction shown.", "Point west north, center south, and east west.")
 	if phase == "bell_court":
