@@ -33,7 +33,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 	if phase == "map_chamber":
 		return _pick(hint_level, "Beth peers at the little cart tracks. Inspect the places along the river.", "Start where clean water fills the cart. Compare the flood marks and look for wheel ruts on dry ground.", "Trace the spring, the bridge, then the village.")
 	if phase == "gallery":
-		return _pick(hint_level, "Beth watches the quiet water beneath the three mirror stones.", "Read the mural from west to east, then turn each stone to match the direction shown.", "Point west north, center south, and east west.")
+		return _pick(hint_level, "Beth follows the lantern bearers, then leans over the pool rim.", "Read the procession from left to right. The pool rim shows which directions reverse in a reflection.", "Point west north, center south, and east west.")
 	if phase == "bell_court":
 		if story_flags.get("bell_echo_variant", false):
 			return _pick(hint_level, "Beth follows the faint last line to the boat crews on the keeper's list.", "Follow the four callers on the wall, then give the boat crews one more call.", "Ring crescent, rain-line, seed, crescent, then rain-line.")

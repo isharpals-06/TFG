@@ -57,7 +57,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"archive_last_entry":
 			return "The last catalogue line says: carry the books east; leave one lamp in the doorway."
 		"gallery_procession":
-			return "Three faceless figures carry bowls and lanterns toward a path cut into the mountain."
+			return "Three travelers carry bowls along a painted shore. From left to right their lanterns point south, north, then west."
 		"bell_keeper_list":
 			return "The keeper listed twelve names. Beside the boat crews is a rain-line. Beside the sowers is a seed. Four names are crossed out."
 		"high_steps_last_lantern":
@@ -123,9 +123,9 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"archive_hidden_stair":
 			return "Aligned lenses reveal a stair below the archive."
 		"gallery_reflection_map":
-			return "The pool-side mural shows west pointing north, center pointing south, and east turning west."
+			return "Each mirror stands beneath one of the procession's lanterns. The mason carved a line between the real shore and its reflection."
 		"gallery_memory":
-			return "Beth's light is the only star reflected in the lower pool."
+			return "On the pool rim, north and south trade places beneath the waterline. The west mark stays west. Beth's light rests between them."
 		"gallery_second_sky":
 			return "The mirror shard catches the same stars around a missing place in the reflected sky."
 		"gallery_hidden_stair":

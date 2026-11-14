@@ -592,7 +592,7 @@ func _get_targets() -> Array[Dictionary]:
 		if not RunState.story_flags.get("gallery_mural_seen", false):
 			gallery_targets.append({"id": "gallery_mural", "name": "the pool-side mural", "position": Vector2(246, 154)})
 		if not RunState.story_flags.get("gallery_memory_seen", false) or (RunState.inventory.has("mirror_shard") and not RunState.journal_entries.has("gallery_second_sky")):
-			gallery_targets.append({"id": "gallery_pool", "name": "the starless pool", "position": Vector2(320, 184)})
+			gallery_targets.append({"id": "gallery_pool", "name": "the starless pool", "position": Vector2(320, 223)})
 		if not RunState.story_flags.get("gallery_lights_solved", false):
 			gallery_targets.append({"id": "gallery_mirror_west", "name": "the western mirror stone", "position": Vector2(160, 190)})
 			gallery_targets.append({"id": "gallery_mirror_center", "name": "the central mirror stone", "position": Vector2(320, 190)})
@@ -1104,15 +1104,12 @@ func _examine_target() -> void:
 		"map_chamber_exit":
 			_set_status("Beyond the arch, a still pool catches the light from below.")
 		"gallery_mural":
-			_set_status("The mural shows three reflections: west points north, the center points south, and east turns west.")
-			RunState.set_story_flag("gallery_mural_seen")
-			_record_clue_animated("gallery_reflection_map")
+			_reveal_world_memory("gallery_mural_seen", "gallery_reflection_map", _clue_text("gallery_reflection_map"))
+			_update_objective()
 		"gallery_pool":
-			_set_status("The pool holds no star except the one Beth's light seems to make.")
-			RunState.set_story_flag("gallery_memory_seen")
-			_record_clue_animated("gallery_memory")
+			_reveal_world_memory("gallery_memory_seen", "gallery_memory", _clue_text("gallery_memory"))
 		"gallery_figures":
-			_reveal_world_memory("gallery_figures_seen", "gallery_procession", "Three faceless figures carry bowls and lanterns toward a path cut into the mountain.")
+			_reveal_world_memory("gallery_figures_seen", "gallery_procession", _clue_text("gallery_procession"))
 		"gallery_mirror_west", "gallery_mirror_center", "gallery_mirror_east":
 			var mirror_name: String = target.id.trim_prefix("gallery_mirror_")
 			_set_status("The %s mirror points %s." % [mirror_name, _direction_name(_get_gallery_orientation(mirror_name))])
@@ -1654,7 +1651,7 @@ func _rotate_gallery_mirror(which: String) -> void:
 		_update_objective()
 	else:
 		Soundscape.play_event("resonance")
-		_set_status("The reflected light shifts, then settles against the stone.")
+		_set_status("The %s mirror now points %s." % [which, _direction_name(int(mirrors[which]))])
 	queue_redraw()
 
 func _ring_court_bell(index: int) -> void:
@@ -3365,9 +3362,12 @@ func _draw_gallery() -> void:
 	# Small runes sit on the three mirror faces painted into the background.
 	draw_rect(Rect2(239, 141, 34, 18), Color("#626c62"))
 	draw_rect(Rect2(242, 144, 28, 12), Color("#414e4b"))
-	_draw_symbol(Vector2(248, 150), "moon", Color("#c7bd9b"))
-	_draw_symbol(Vector2(256, 150), "water", Color("#9cbcb8"))
-	_draw_symbol(Vector2(264, 150), "seed", Color("#abb98f"))
+	draw_line(Vector2(244, 150), Vector2(268, 150), Color("#9cbcb8"))
+	for x in [248, 256, 264]:
+		draw_rect(Rect2(x, 146, 2, 2), Color("#d3bd8f"))
+		draw_rect(Rect2(x, 153, 2, 2), Color("#98b9af"))
+	draw_rect(Rect2(307, 219, 26, 5), Color("#69766c"))
+	draw_line(Vector2(310, 220), Vector2(330, 220), Color("#b6cebd"))
 	_draw_gallery_mirror(Vector2(160, 158), "west")
 	_draw_gallery_mirror(Vector2(320, 158), "center")
 	_draw_gallery_mirror(Vector2(464, 158), "east")
