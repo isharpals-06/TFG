@@ -27,8 +27,12 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 	if phase == "cistern_vault":
 		return _pick(hint_level, "Beth follows the quiet water from the eastern channel toward the western one.", "The water clock gives four turns: east, west, center, west.", "Turn the eastern valve, western, center, then western again.")
 	if phase == "archive":
-		if story_flags.get("archive_puzzle_solved", false) and journal_entries.has("archive_second_image"):
-			return _pick(hint_level, "Beth follows the shard's pale line back over the three lenses.", "The fourth reflection points north from west, east from center, and south from east.", "Turn west north, center east, and east south.")
+		if story_flags.get("archive_fourth_path_solved", false):
+			return _pick(hint_level, "Beth drifts along the beam under the shelves.", "A loose page lies at the end of the beam.", "Read the leaf on the low western shelf, or take the stair to the map chamber.")
+		if story_flags.get("archive_puzzle_solved", false) and not journal_entries.has("archive_second_image"):
+			return _pick(hint_level, "Beth catches a glint beyond the eastern lens.", "A scrap of silvered glass can show older lines on the ceiling.", "Take the shard in the southeast corner and use it on the ceiling mural, or follow the open stair.")
+		if story_flags.get("archive_puzzle_solved", false):
+			return _pick(hint_level, "Beth follows the shard's pale line back over the three lenses.", "Compare each older groove to the ceiling arrow above its lens. One backward turn takes three clockwise clicks.", "Turn west north, center east, and east south.")
 		return _pick(hint_level, "Beth watches the three lenses without blinking.", "The ceiling shows right, down, then left.", "Point west right, center down, and east left.")
 	if phase == "map_chamber":
 		return _pick(hint_level, "Beth peers at the little cart tracks. Inspect the places along the river.", "Start where clean water fills the cart. Compare the flood marks and look for wheel ruts on dry ground.", "Trace the spring, the bridge, then the village.")

@@ -1080,12 +1080,10 @@ func _examine_target() -> void:
 			_reveal_world_memory("archive_last_entry_seen", "archive_last_entry", "The last catalogue line says: carry the books east; leave one lamp in the doorway.")
 		"archive_hidden_ledger":
 			_reveal_world_memory("archive_hidden_ledger_seen", "archive_hidden_register", "A loose leaf is headed “Borrowed skies.” Its last line asks the keeper to leave the east windows uncovered so the final light has somewhere to go.")
-		"lens_west":
-			_set_status("The western lens can turn through four resting positions.")
-		"lens_center":
-			_set_status("The central lens catches a thin thread of light.")
-		"lens_east":
-			_set_status("The eastern lens points toward the sealed stair.")
+		"lens_west", "lens_center", "lens_east":
+			var side: String = target.id.trim_prefix("lens_")
+			var lenses: Dictionary = RunState.puzzle_progress.get("archive_lenses", {})
+			_set_status("The %s lens faces %s. Each click turns the glass clockwise." % [side, _direction_name(int(lenses.get(side, 0)))])
 		"archive_stair":
 			_set_status("A narrow stair descends toward a pale, starless glow. Another room waits below.")
 		"map_chamber_mural":
@@ -1359,7 +1357,8 @@ func _use_selected_item() -> void:
 		return
 	if target.id == "archive_mural" and item_id == "mirror_shard":
 		_record_clue_animated("archive_second_image")
-		_set_status("In the shard, a fourth path crosses the ceiling map: west points north, center east, and east south.")
+		_set_status(_clue_text("archive_second_image"))
+		queue_redraw()
 		return
 	if target.id == "archive_memory" and item_id == "river_glass":
 		_record_clue_animated("river_glass_memory")
@@ -2354,7 +2353,7 @@ func _rotate_archive_lens(which: String) -> void:
 			Soundscape.play_event("complete")
 			_set_status("A narrow beam slips beneath the shelf. Something pale rests in the newly lit space.")
 		else:
-			_set_status("The extra reflection skims the pool and falls away.")
+			_set_status("The %s lens faces %s. The older beam skims the pool." % [which, _direction_name(int(lenses[which]))])
 	queue_redraw()
 
 func _activate_resonator(symbol: String) -> void:

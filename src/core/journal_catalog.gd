@@ -179,7 +179,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"quiet_garden_memory":
 			return "A small green shoot returned where the orchard channels meet."
 		"archive_second_image":
-			return "In the silvered shard, a fourth archive path points north from west, east from center, and south from east."
+			return "The shard shows an older groove beside each ceiling arrow. Each groove is one quarter turn counterclockwise from its arrow."
 		"archive_fourth_path":
 			return "A fourth path of reflected light opens a narrow shelf beneath the archive's western wall."
 		"archive_hidden_register":
