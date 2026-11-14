@@ -903,6 +903,7 @@ func _examine_target() -> void:
 	if target.is_empty():
 		_set_status("The quiet gives you time to look around.")
 		return
+	traveler.inspect_at(target.position)
 	if target.id != "beth" and is_instance_valid(beth):
 		beth.investigate(target.position)
 	match target.id:
@@ -1191,6 +1192,7 @@ func _pick_up_target() -> void:
 			_set_status("That cannot be carried.")
 			return
 	if RunState.add_item(item_id):
+		traveler.inspect_at(target.position)
 		_on_item_collected(item_id)
 	else:
 		pending_pickup_id = item_id
