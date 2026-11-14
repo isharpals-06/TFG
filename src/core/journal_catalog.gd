@@ -67,7 +67,9 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"refuge_high_path":
 			return "North of the refuge the stair climbs to the ridge. From the ridge the village lies west and the beacon east."
 		"refuge_guest_book":
-			return "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path."
+			return "The last guest wrote: leave a stool by the hearth, a blanket against the cold, and a bowl for whoever comes up after dark."
+		"refuge_place_set":
+			return "A blanket lies folded on the stool. Beth rests in the empty bowl a moment, then lifts out and leaves it ready for the next traveler."
 		"refuge_last_lantern":
 			return "A keeper asks that the sheltered lantern stay lit until the last bell is answered."
 		"quiet_garden_cup":

@@ -27,6 +27,12 @@ const ARCHIVE_FOURTH_PATH_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
 const GALLERY_SOLUTION := {"west": 0, "center": 2, "east": 3}
 const HIGH_STEPS_SOLUTION := {"west": 3, "center": 0, "east": 1}
+const REFUGE_SUPPLIES := {
+	"bowl": Vector2(226, 207),
+	"blanket": Vector2(404, 144),
+	"stool": Vector2(490, 236)
+}
+const REFUGE_PLACE := Vector2(146, 235)
 const OBSERVATORY_SIGHTS := {
 	"observatory_sunset": Vector2(60, 207),
 	"observatory_storm": Vector2(320, 57),
@@ -660,6 +666,11 @@ func _get_targets() -> Array[Dictionary]:
 			refuge_targets.append({"id": "refuge_guest_book", "name": "the guest book on the long table", "position": Vector2(304, 205)})
 		if not RunState.story_flags.get("refuge_lantern_seen", false):
 			refuge_targets.append({"id": "refuge_lantern", "name": "the sheltered lantern", "position": Vector2(78, 190)})
+		if RunState.story_flags.get("refuge_guest_book_seen", false) and not RunState.journal_entries.has("refuge_place_set"):
+			for supply in REFUGE_SUPPLIES:
+				if not RunState.story_flags.get("refuge_set_" + supply, false):
+					refuge_targets.append({"id": "refuge_supply_" + supply, "name": "the " + supply, "position": REFUGE_SUPPLIES[supply]})
+			refuge_targets.append({"id": "refuge_place", "name": "the empty place by the hearth", "position": REFUGE_PLACE})
 		refuge_targets.append({"id": "refuge_return", "name": "the stair back to the bell garden", "position": Vector2(44, 303)})
 		refuge_targets.append({"id": "refuge_exit", "name": "the path climbing to the highland steps", "position": Vector2(588, 125)})
 		return refuge_targets
@@ -809,6 +820,10 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  study the old record" % _action_mark("examine")
 		"refuge_return":
 			prompt_label.text = "%s  return to the bell garden" % _action_mark("activate")
+		"refuge_supply_bowl", "refuge_supply_blanket", "refuge_supply_stool":
+			prompt_label.text = "%s  carry %s to the hearth" % [_action_mark("activate"), target.name]
+		"refuge_place":
+			prompt_label.text = "%s  set the place by the fire" % _action_mark("activate")
 		"refuge_exit":
 			prompt_label.text = "%s  climb to the highland steps" % _action_mark("activate")
 		"village_gathering_bowl", "village_gathering_lamp", "village_gathering_bell":
@@ -1040,7 +1055,7 @@ func _examine_target() -> void:
 		"refuge_map":
 			_reveal_world_memory("refuge_map_seen", "refuge_high_path", _clue_text("refuge_high_path"))
 		"refuge_guest_book":
-			_reveal_world_memory("refuge_guest_book_seen", "refuge_guest_book", "The guest book records two long winters. Its final entry asks whoever leaves last to keep one place by the fire for anyone still on the path.")
+			_reveal_world_memory("refuge_guest_book_seen", "refuge_guest_book", "The last guest wrote: leave a stool by the hearth, a blanket against the cold, and a bowl for whoever comes up after dark.")
 		"refuge_lantern":
 			_reveal_world_memory("refuge_lantern_seen", "refuge_last_lantern", "The sheltered lantern has been trimmed and filled. A keeper's note asks that it stay lit until the last bell is answered.")
 		"quarter_slot_west", "quarter_slot_north", "quarter_slot_east", "quarter_slot_south":
@@ -1313,6 +1328,15 @@ func _activate_target() -> void:
 		_ring_court_bell(int(target.id.trim_prefix("court_bell_")))
 	elif target.id == "bell_door" and RunState.story_flags.get("bell_court_solved", false):
 		_enter_highland_refuge()
+	elif target.id.begins_with("refuge_supply_"):
+		var supply: String = target.id.trim_prefix("refuge_supply_")
+		for other in REFUGE_SUPPLIES:
+			RunState.story_flags["refuge_carry_" + other] = other == supply
+		RunState.save_game()
+		_set_status("You lift the %s. An empty place waits near the sheltered lantern." % supply)
+		queue_redraw()
+	elif target.id == "refuge_place":
+		_set_refuge_place()
 	elif target.id == "refuge_exit":
 		_enter_high_steps()
 	elif target.id == "refuge_return":
@@ -2173,6 +2197,22 @@ func _enter_bell_court() -> void:
 	await fade_in.finished
 	traveler.set_movement_enabled(true)
 	transitioning = false
+
+func _set_refuge_place() -> void:
+	for supply in REFUGE_SUPPLIES:
+		if RunState.story_flags.get("refuge_carry_" + supply, false):
+			RunState.story_flags["refuge_carry_" + supply] = false
+			RunState.set_story_flag("refuge_set_" + supply)
+			traveler.inspect_at(REFUGE_PLACE)
+			Soundscape.play_event("pickup")
+			_set_status("You leave the %s by the hearth." % supply)
+			queue_redraw()
+			if RunState.story_flags.get("refuge_set_bowl", false) and RunState.story_flags.get("refuge_set_blanket", false) and RunState.story_flags.get("refuge_set_stool", false):
+				_record_clue_animated("refuge_place_set")
+				beth.react_to_discovery()
+				_set_status(_clue_text("refuge_place_set"))
+			return
+	_set_status("Three shapes remain in the dust: the feet of a stool, a folded blanket and the rim of a bowl.")
 
 func _enter_highland_refuge() -> void:
 	if transitioning:
@@ -3248,6 +3288,23 @@ func _draw_empty_quarter() -> void:
 		draw_circle(Vector2(320, 166), 8.0, Color("#e4d5a2", 0.22))
 
 func _draw_highland_refuge() -> void:
+	for supply in REFUGE_SUPPLIES:
+		if RunState.story_flags.get("refuge_carry_" + supply, false):
+			continue
+		var point: Vector2 = REFUGE_SUPPLIES[supply]
+		if RunState.story_flags.get("refuge_set_" + supply, false):
+			point = REFUGE_PLACE
+		match supply:
+			"stool":
+				draw_rect(Rect2(point + Vector2(-8, -4), Vector2(12, 3)), Color("#ad8059"))
+				draw_rect(Rect2(point + Vector2(-7, -1), Vector2(2, 5)), Color("#735643"))
+				draw_rect(Rect2(point, Vector2(2, 5)), Color("#735643"))
+			"bowl":
+				draw_line(point + Vector2(4,-2), point + Vector2(12,-2), Color("#dcc399"), 2)
+				draw_rect(Rect2(point + Vector2(6,-1), Vector2(5, 3)), Color("#ab7458"))
+			"blanket":
+				draw_rect(Rect2(point + Vector2(-8,-9), Vector2(12, 5)), Color("#87998b"))
+				draw_line(point + Vector2(-6,-8), point + Vector2(2,-8), Color("#c7bea7"))
 	var return_stone := Color("#74766a")
 	draw_rect(Rect2(27, 278, 32, 6), return_stone)
 	draw_rect(Rect2(30, 283, 7, 28), Color("#424c47"))
