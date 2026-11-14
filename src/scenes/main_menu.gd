@@ -267,7 +267,7 @@ func _add_button(text: String, pos: Vector2, callback: Callable) -> void:
 	_view_root.add_child(button)
 	if not _has_focus_target:
 		_has_focus_target = true
-		button.call_deferred("grab_focus")
+		button.grab_focus()
 
 func _button_style(fill: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
