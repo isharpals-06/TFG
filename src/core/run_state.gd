@@ -336,6 +336,7 @@ func add_item(item_id: String) -> bool:
 	if inventory.size() >= INVENTORY_LIMIT:
 		return false
 	inventory.append(item_id)
+	story_flags[item_id + "_found"] = true
 	if selected_item_id.is_empty():
 		selected_item_id = item_id
 	inventory_changed.emit(inventory)
@@ -347,6 +348,8 @@ func replace_item(old_item_id: String, new_item_id: String) -> bool:
 		return false
 	var old_index := inventory.find(old_item_id)
 	inventory[old_index] = new_item_id
+	story_flags[old_item_id + "_found"] = false
+	story_flags[new_item_id + "_found"] = true
 	if selected_item_id == old_item_id:
 		selected_item_id = new_item_id
 	inventory_changed.emit(inventory)
@@ -363,6 +366,7 @@ func select_item(item_id: String) -> bool:
 func remove_item(item_id: String) -> void:
 	if inventory.has(item_id) and item_id != "medallion":
 		inventory.erase(item_id)
+		story_flags[item_id + "_found"] = (item_id == "seed_pod" and story_flags.get("quiet_garden_restored", false))
 		if selected_item_id == item_id:
 			selected_item_id = inventory[0] if not inventory.is_empty() else ""
 		inventory_changed.emit(inventory)
@@ -498,6 +502,9 @@ func load_game() -> bool:
 	puzzle_progress = _sanitize_puzzle_progress(loaded_puzzles)
 	var loaded_flags: Variant = parsed.get("story_flags", {})
 	story_flags = _sanitize_story_flags(loaded_flags)
+	for item_id in ITEM_IDS:
+		var consumed_seed: bool = item_id == "seed_pod" and story_flags.get("quiet_garden_restored", false)
+		story_flags[item_id + "_found"] = inventory.has(item_id) or consumed_seed
 	hint_echo = clampi(int(parsed.get("hint_echo", 0)), 0, SAVE_COUNTER_LIMIT)
 	total_hint_points = clampi(int(parsed.get("total_hint_points", hint_echo)), 0, SAVE_COUNTER_LIMIT)
 	local_hint_points = clampi(int(parsed.get("local_hint_points", 0)), 0, SAVE_COUNTER_LIMIT)

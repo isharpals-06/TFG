@@ -1200,8 +1200,6 @@ func _pick_up_target() -> void:
 		_set_status("Your hands are full. Leave one keepsake to take this one.")
 
 func _on_item_collected(item_id: String) -> void:
-	var flag := "%s_found" % item_id
-	RunState.set_story_flag(flag)
 	Soundscape.play_event("pickup")
 	if item_id == "medallion":
 		_set_status("The medallion warms. Farther up the path of paired stones, the arch answers with a low hum.")
@@ -1350,8 +1348,8 @@ func _use_selected_item() -> void:
 		_set_status("The brass button fits a shallow mark. A small sun appears in the arch's stonework.")
 		return
 	if target.id == "seed_bed" and item_id == "seed_pod":
+		RunState.story_flags["quiet_garden_restored"] = true
 		RunState.remove_item(item_id)
-		RunState.set_story_flag("quiet_garden_restored")
 		_record_clue_animated("quiet_garden_memory")
 		Soundscape.play_event("complete")
 		_set_status("A small green shoot lifts through the soil. Beth rests beside it for a moment.")
@@ -2559,6 +2557,7 @@ func _open_inventory() -> void:
 				item_action.text = "Keep" if item_id == "medallion" else "Drop"
 				if item_id != "medallion":
 					item_action.pressed.connect(_drop_inventory_item.bind(item_id))
+			item_action.disabled = item_id == "medallion"
 			row.add_child(item_action)
 			column.add_child(row)
 	var close := Button.new()
@@ -2568,6 +2567,12 @@ func _open_inventory() -> void:
 	close.pressed.connect(_close_inventory)
 	column.add_child(close)
 	hud.add_child(inventory_panel)
+	var focus_button: Button = close
+	for row in column.get_children():
+		if row is HBoxContainer:
+			focus_button = row.get_child(0)
+			break
+	focus_button.grab_focus()
 	if RunState.inventory.has(RunState.selected_item_id):
 		inventory_description_label.text = _item_description(RunState.selected_item_id)
 	var tween := create_tween()
@@ -2603,7 +2608,6 @@ func _select_inventory_item(item_id: String) -> void:
 
 func _drop_inventory_item(item_id: String) -> void:
 	RunState.remove_item(item_id)
-	RunState.set_story_flag("%s_found" % item_id, false)
 	_set_status("You leave %s where someone else may find it." % _item_name(item_id))
 	_close_inventory()
 
@@ -2613,7 +2617,6 @@ func _swap_pending_item(old_item_id: String) -> void:
 	var new_item_id := pending_pickup_id
 	if RunState.replace_item(old_item_id, new_item_id):
 		pending_pickup_id = ""
-		RunState.set_story_flag("%s_found" % old_item_id, false)
 		_on_item_collected(new_item_id)
 		_close_inventory()
 
