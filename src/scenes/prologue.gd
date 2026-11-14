@@ -2505,9 +2505,7 @@ func _close_journal() -> void:
 	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.2))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
-		if is_instance_valid(traveler) and not transitioning:
-			traveler.set_movement_enabled(true)
-			RunState.set_journey_active(true)
+		_resume_after_panel()
 	)
 
 func _open_inventory() -> void:
@@ -2590,9 +2588,7 @@ func _close_inventory() -> void:
 	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.16))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
-		if is_instance_valid(traveler) and not transitioning:
-			traveler.set_movement_enabled(true)
-			RunState.set_journey_active(true)
+		_resume_after_panel()
 	)
 
 func _select_inventory_item(item_id: String) -> void:
@@ -2671,9 +2667,7 @@ func _close_hint_panel() -> void:
 	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.18))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
-		if is_instance_valid(traveler) and not transitioning:
-			traveler.set_movement_enabled(true)
-			RunState.set_journey_active(true)
+		_resume_after_panel()
 	)
 
 func _give_hint(level: int) -> void:
@@ -2686,6 +2680,12 @@ func _give_hint(level: int) -> void:
 	Soundscape.play_event("hint")
 	_close_hint_panel()
 	queue_redraw()
+
+func _resume_after_panel() -> void:
+	if transitioning or journal_panel != null or inventory_panel != null or hint_panel != null or pause_panel != null:
+		return
+	traveler.set_movement_enabled(true)
+	RunState.set_journey_active(true)
 
 func _open_pause_menu() -> void:
 	if pause_panel != null or transitioning:
@@ -2717,7 +2717,7 @@ func _open_pause_menu() -> void:
 	save_and_leave.pressed.connect(_save_and_return_to_title)
 	column.add_child(save_and_leave)
 	hud.add_child(pause_panel)
-	resume.call_deferred("grab_focus")
+	resume.grab_focus()
 	var tween := create_tween()
 	tween.tween_property(pause_panel, "position:y", 49.0, _motion_duration(0.22)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
@@ -2730,9 +2730,7 @@ func _close_pause_menu() -> void:
 	tween.tween_property(panel, "position:y", 180.0, _motion_duration(0.16))
 	tween.tween_callback(func() -> void:
 		panel.queue_free()
-		if is_instance_valid(traveler) and not transitioning:
-			traveler.set_movement_enabled(true)
-			RunState.set_journey_active(true)
+		_resume_after_panel()
 	)
 
 func _save_and_return_to_title() -> void:
