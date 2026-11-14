@@ -972,17 +972,14 @@ func _examine_target() -> void:
 			_record_clue_animated(note)
 			_set_status("%s The spout faces %s." % [_clue_text(note), _direction_name(_get_valve_orientation(side))])
 		"waterworks_map":
-			_set_status("A channel map gives four marks: rain-line, crescent, seed, crescent. The wheels answer in that order.")
-			RunState.set_story_flag("waterworks_map_seen")
-			_record_clue_animated("waterworks_channel_map")
+			_reveal_world_memory("waterworks_map_seen", "waterworks_channel_map", _clue_text("waterworks_channel_map"))
+			_update_objective()
 		"waterworks_bowls":
 			_reveal_world_memory("waterworks_bowl_record_seen", "waterworks_waiting_bowls", "Three clay bowls sit at the waterline. A faded note says the children waited here for the first cool water after summer, and no one drank from the first spill.")
-		"waterwheel_west":
-			_set_status("A rain-line mark is cut into the western wheel.")
-		"waterwheel_center":
-			_set_status("A crescent mark is cut into the middle wheel.")
-		"waterwheel_east":
-			_set_status("A seed mark is cut into the eastern wheel.")
+		"waterwheel_west", "waterwheel_center", "waterwheel_east":
+			var note := "waterworks_wheel_" + str(target.id).trim_prefix("waterwheel_")
+			_record_clue_animated(note)
+			_set_status(_clue_text(note))
 		"waterworks_exit":
 			_set_status("The sluice gate has lifted. A dry lane leads into the empty quarter.")
 		"waterworks_cistern_stair":
@@ -1422,11 +1419,10 @@ func _ring_waterworks_wheel(which: String) -> void:
 	if not RunState.story_flags.get("waterworks_map_seen", false):
 		_set_status("The wheel groans against its frame. The channel map may tell you the keeper's order.")
 		return
-	var progress := int(RunState.puzzle_progress.get("waterworks_sequence", 0))
+	var progress := clampi(int(RunState.puzzle_progress.get("waterworks_sequence", 0)), 0, WATERWORKS_WHEEL_SEQUENCE.size() - 1)
 	if which == WATERWORKS_WHEEL_SEQUENCE[progress]:
 		progress += 1
 		RunState.puzzle_progress["waterworks_sequence"] = progress
-		RunState.save_game()
 		Soundscape.play_event("resonance")
 		if progress >= WATERWORKS_WHEEL_SEQUENCE.size():
 			RunState.set_story_flag("waterworks_solved")
@@ -1434,8 +1430,10 @@ func _ring_waterworks_wheel(which: String) -> void:
 			_record_clue_animated("waterworks_gate_open")
 			Soundscape.play_event("complete")
 			_set_status("The wheels answer one another. Water lifts the old gate, and the dry village lane appears beyond it.")
+			_update_objective()
 		else:
-			_set_status("The wheel settles into its notch. Water travels farther beneath the cistern.")
+			RunState.save_game()
+			_set_status(["Silt tumbles into the trap. The intake runs clear.", "Water fills the bowls along the shelf.", "A dark line of wet earth spreads along the planting beds."][progress - 1])
 	else:
 		progress = 1 if which == WATERWORKS_WHEEL_SEQUENCE[0] else 0
 		RunState.puzzle_progress["waterworks_sequence"] = progress
@@ -2786,7 +2784,7 @@ func _update_objective() -> void:
 			if not RunState.story_flags.get("waterworks_map_seen", false):
 				objective_label.text = "Study the channel map"
 			elif not RunState.story_flags.get("waterworks_solved", false):
-				objective_label.text = "Follow the four-mark wheel pattern"
+				objective_label.text = "Restore the keeper's water round"
 			else:
 				objective_label.text = "Enter the empty quarter"
 		"cistern_vault":
@@ -3087,8 +3085,11 @@ func _draw_waterworks() -> void:
 		var wheel_name: String = WATERWORKS_WHEEL_SEQUENCE[index]
 		var mark_index := ["west", "center", "east"].find(wheel_name)
 		var mark_name: String = wheel_marks[mark_index]
-		var mark_color := Color("#f2dca3") if index <= int(RunState.puzzle_progress.get("waterworks_sequence", 0)) - 1 else Color("#c5c2a5")
-		_draw_symbol(Vector2(302 + index * 12, 75), mark_name, mark_color)
+		var notch := Vector2(302 + index * 12, 75)
+		if index < int(RunState.puzzle_progress.get("waterworks_sequence", 0)):
+			_draw_symbol(notch, mark_name, Color("#f2dca3"))
+		else:
+			draw_rect(Rect2(notch, Vector2(4, 1)), Color("#564f42"))
 	if RunState.story_flags.get("waterworks_solved", false):
 		draw_rect(Rect2(559, 104, 31, 3), Color("#a9d7cc"))
 		draw_rect(Rect2(571, 107, 3, 16), Color("#c7b788"))

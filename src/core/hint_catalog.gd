@@ -23,7 +23,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 			return _pick(hint_level, "Beth follows the running water.", "The bloom at the far edge has opened. The arch above the basin is clear.", "Examine the bloom for a seed, or enter the channel arch to continue.")
 		return _pick(hint_level, "Beth peers into the grooves beside the dry sluices.", "Inspect each spout for its old waterline. Try the basin bar to see which floats still sit low.", "Turn west eastward, north southward, and east westward. Lift the drawgate at the basin.")
 	if phase == "waterworks":
-		return _pick(hint_level, "Beth listens to the three waterwheels, then looks back toward the channel map.", "The map's four marks give the wheel order; the crescents repeat on the middle wheel.", "Turn western, middle, eastern, then middle waterwheel.")
+		return _pick(hint_level, "Beth peers into a chute, then follows its runnel downhill.", "Inspect each wheel to find what it supplies. The keeper serves the drinking bowls twice.", "Turn western, middle, eastern, then middle waterwheel.")
 	if phase == "cistern_vault":
 		return _pick(hint_level, "Beth follows the quiet water from the eastern channel toward the western one.", "The water clock gives four turns: east, west, center, west.", "Turn the eastern valve, western, center, then western again.")
 	if phase == "archive":

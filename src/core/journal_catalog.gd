@@ -141,7 +141,13 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"high_steps_open_door":
 			return "When the three vanes faced the rising path, a lantern appeared beside the upper door."
 		"waterworks_channel_map":
-			return "The channel map gives four wheel marks in order: rain-line, crescent, seed, crescent."
+			return "The keeper wrote: wash the silt away, fill the drinking bowls, water the beds, then fill the bowls for those still walking."
+		"waterworks_wheel_west":
+			return "Grit cakes the western wheel. Its chute empties into a sand trap below the intake."
+		"waterworks_wheel_center":
+			return "Cup rims have worn rings into the shelf below the middle wheel. Its spout reaches the bowls."
+		"waterworks_wheel_east":
+			return "Strands of orchard root cling to the eastern wheel. Its trough feeds the planting beds."
 		"waterworks_gate_open":
 			return "The waterwheels raise the sluice gate and uncover the dry lane into the village."
 		"waterworks_waiting_bowls":
