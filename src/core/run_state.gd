@@ -307,19 +307,30 @@ func start_new_journey(selected_presentation: int = 0) -> void:
 	seconds_since_autosave = 0.0
 	save_game()
 
-func _read_file_as_dictionary(path: String) -> Dictionary:
+func _read_supported_save(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return {}
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	var json := JSON.new()
+	var error := json.parse(file.get_as_text())
 	file.close()
-	return parsed if parsed is Dictionary else {}
+	if error != OK or not json.data is Dictionary:
+		return {}
+	var data: Dictionary = json.data
+	var version: Variant = data.get("version")
+	if not (version is int or version is float):
+		return {}
+	if version < 1 or version > SAVE_VERSION or version != floor(version):
+		return {}
+	if not data.get("journey_started") is bool:
+		return {}
+	return data
 
 func _read_save_data(require_journey: bool = true) -> Dictionary:
 	for path in [SAVE_PATH, SAVE_PATH + ".bak"]:
-		var data := _read_file_as_dictionary(path)
+		var data := _read_supported_save(path)
 		if data.is_empty():
 			continue
 		if require_journey and not bool(data.get("journey_started", false)):
@@ -458,7 +469,7 @@ func save_game() -> void:
 	var absolute_backup := ProjectSettings.globalize_path(SAVE_PATH + ".bak")
 	var absolute_temporary := ProjectSettings.globalize_path(temporary_path)
 	if FileAccess.file_exists(SAVE_PATH):
-		var existing_data := _read_file_as_dictionary(SAVE_PATH)
+		var existing_data := _read_supported_save(SAVE_PATH)
 		if not existing_data.is_empty():
 			if FileAccess.file_exists(SAVE_PATH + ".bak"):
 				DirAccess.remove_absolute(absolute_backup)
@@ -480,8 +491,6 @@ func load_game() -> bool:
 	if parsed.is_empty():
 		return false
 	var version := int(parsed.get("version", 0))
-	if version < 1 or version > SAVE_VERSION:
-		return false
 	presentation = clampi(int(parsed.get("presentation", 0)), 0, 1)
 	inventory.clear()
 	var loaded_inventory: Variant = parsed.get("inventory", [])
