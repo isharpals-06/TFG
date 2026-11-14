@@ -153,7 +153,8 @@ func _process(delta: float) -> void:
 		_water_motion_time += delta
 		queue_redraw()
 	if is_instance_valid(traveler):
-		RunState.update_checkpoint(phase, traveler.global_position)
+		if not transitioning:
+			RunState.update_checkpoint(phase, traveler.global_position)
 		_update_traveler_occlusion()
 	if is_instance_valid(camera):
 		if camera_snap or RunState.settings.get("reduced_motion", false):
@@ -1727,39 +1728,32 @@ func _step_causeway(step_index: int) -> void:
 	if not RunState.story_flags.get("causeway_marks_seen", false):
 		_set_status("The stepping stones stay quiet. Study the waterlines on the shore first.")
 		return
-	var progress := int(RunState.puzzle_progress.get("causeway_sequence", 0))
-	if progress < CAUSEWAY_STEP_PATTERN.size() and step_index == int(CAUSEWAY_STEP_PATTERN[progress]):
+	var progress := clampi(int(RunState.puzzle_progress.get("causeway_sequence", 0)), 0, CAUSEWAY_STEP_PATTERN.size() - 1)
+	var correct := step_index == int(CAUSEWAY_STEP_PATTERN[progress])
+	if correct:
 		progress += 1
-		RunState.puzzle_progress["causeway_sequence"] = progress
-		RunState.save_game()
-		Soundscape.play_event("resonance")
-		var next_order_index := mini(progress, CAUSEWAY_STEP_PATTERN.size() - 1)
-		await _hop_causeway_to(int(CAUSEWAY_STEP_PATTERN[next_order_index]))
-		if progress == CAUSEWAY_STEP_PATTERN.size():
-			RunState.set_story_flag("causeway_solved")
-			RunState.reset_local_hint_echo()
-			beth.react_to_discovery()
-			_record_clue_animated("causeway_crossing_open")
-			Soundscape.play_event("complete")
-			_set_status("The last stone answers. A line of pale light joins shore to gate.")
-			_update_objective()
-		else:
-			_set_status("The stone answers with a soft note. Follow the waterlines onward.")
 	else:
 		progress = 1 if step_index == int(CAUSEWAY_STEP_PATTERN[0]) else 0
-		RunState.puzzle_progress["causeway_sequence"] = progress
-		RunState.save_game()
-		Soundscape.play_event("soft_fade")
-		await _hop_causeway_to(int(CAUSEWAY_STEP_PATTERN[progress]))
-		_set_status("The note fades into the water. The stones wait without hurry.")
-	queue_redraw()
-
-func _hop_causeway_to(stone_index: int) -> void:
+	var next_index := mini(progress, CAUSEWAY_STEP_PATTERN.size() - 1)
+	var landing: Vector2 = CAUSEWAY_STONE_POSITIONS[int(CAUSEWAY_STEP_PATTERN[next_index])]
 	transitioning = true
-	await traveler.hop_to(CAUSEWAY_STONE_POSITIONS[stone_index], _motion_duration(0.28))
-	RunState.update_checkpoint(phase, traveler.global_position)
-	RunState.save_game()
+	Soundscape.play_event("resonance" if correct else "soft_fade")
+	await traveler.hop_to(landing, _motion_duration(0.28))
+	RunState.update_checkpoint(phase, landing)
+	RunState.puzzle_progress["causeway_sequence"] = progress
+	if progress == CAUSEWAY_STEP_PATTERN.size():
+		RunState.set_story_flag("causeway_solved")
+		RunState.reset_local_hint_echo()
+		beth.react_to_discovery()
+		_record_clue_animated("causeway_crossing_open")
+		Soundscape.play_event("complete")
+		_set_status("The last stone answers. A line of pale light joins shore to gate.")
+		_update_objective()
+	else:
+		RunState.save_game()
+		_set_status("The stone answers with a soft note. Follow the waterlines onward." if correct else "The note fades into the water. The stones wait without hurry.")
 	transitioning = false
+	queue_redraw()
 
 func _ring_garden_chime(index: int) -> void:
 	if not RunState.story_flags.get("garden_carving_seen", false):
