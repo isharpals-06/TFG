@@ -58,7 +58,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		return _pick(hint_level, "Beth listens to the glass chimes above the seedling.", "The wall carving gives three marks from left to right.", "Ring rain-line, seed, then crescent.")
 	if phase == "observatory":
 		if not story_flags.get("observatory_orrery_solved", false):
-			return _pick(hint_level, "Beth keeps returning to the brass arms beside the old chart.", "Read the keeper's chart, then point the three marked arms where it says.", "Point the crescent west, the rain-line north, and the seed east.")
+			return _pick(hint_level, "Beth peers between two brass teeth at the terrace edge.", "Match each sign on the chart to a view through a terrace notch. Turn its arm toward that horizon.", "Point the crescent west, the rain-line north, and the seed east.")
 		return _pick(hint_level, "Beth's light lingers over the hollow beneath the inscription.", "The medallion's edge fits the empty space in the old stone.", "Choose the medallion and use it on the inscription.")
 	return "Beth rests quietly beside you."
 

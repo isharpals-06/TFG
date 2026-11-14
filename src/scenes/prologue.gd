@@ -27,6 +27,11 @@ const ARCHIVE_FOURTH_PATH_SOLUTION := {"west": 0, "center": 1, "east": 2}
 const ORCHARD_SOLUTION := {"west": 1, "north": 2, "east": 3}
 const GALLERY_SOLUTION := {"west": 0, "center": 2, "east": 3}
 const HIGH_STEPS_SOLUTION := {"west": 3, "center": 0, "east": 1}
+const OBSERVATORY_SIGHTS := {
+	"observatory_sunset": Vector2(60, 207),
+	"observatory_storm": Vector2(320, 57),
+	"observatory_dawn": Vector2(558, 207)
+}
 const OBSERVATORY_SOLUTION := {"west": 3, "center": 0, "east": 1}
 const BELL_SEQUENCE := ["moon", "water", "seed", "moon"]
 const QUIET_GARDEN_SEQUENCE := ["water", "seed", "moon"]
@@ -674,6 +679,9 @@ func _get_targets() -> Array[Dictionary]:
 		return garden_targets
 	if phase == "observatory":
 		var observatory_targets: Array[Dictionary] = []
+		for sight in OBSERVATORY_SIGHTS:
+			if not RunState.journal_entries.has(sight):
+				observatory_targets.append({"id": sight, "name": "the sighting notch", "position": OBSERVATORY_SIGHTS[sight]})
 		if not RunState.story_flags.get("observatory_chart_seen", false):
 			observatory_targets.append({"id": "observatory_chart", "name": "the keeper's star chart", "position": Vector2(148, 157)})
 		if RunState.story_flags.get("observatory_chart_seen", false) and not RunState.story_flags.get("observatory_orrery_solved", false):
@@ -845,6 +853,8 @@ func _update_prompt() -> void:
 			prompt_label.text = "%s  examine     %s  plant the pale seed" % [_action_mark("examine"), _action_mark("use_item")]
 		"final_inscription":
 			prompt_label.text = "%s  examine     %s  use the selected keepsake" % [_action_mark("examine"), _action_mark("use_item")]
+		"observatory_sunset", "observatory_storm", "observatory_dawn":
+			prompt_label.text = "%s  look through the sighting notch" % _action_mark("examine")
 		"observatory_chart":
 			prompt_label.text = "%s  read the keeper's chart" % _action_mark("examine")
 		"observatory_weather_drawer":
@@ -1158,10 +1168,11 @@ func _examine_target() -> void:
 		"final_inscription":
 			_set_status("The same unreadable marks from the first ruin. The medallion warms in your hand.")
 		"observatory_chart":
-			_set_status("The keeper's chart says: the crescent faces west; the rain-line faces north; the seed faces east.")
-			RunState.set_story_flag("observatory_chart_seen")
-			_record_clue_animated("observatory_star_chart")
+			_reveal_world_memory("observatory_chart_seen", "observatory_star_chart", _clue_text("observatory_star_chart"))
 			_update_objective()
+		"observatory_sunset", "observatory_storm", "observatory_dawn":
+			_record_clue_animated(target.id)
+			_set_status(_clue_text(target.id))
 		"observatory_weather_drawer":
 			_reveal_world_memory("observatory_weather_log_seen", "observatory_weather_log", "The drawer holds years of careful weather notes: first floodwater, last spring rain, and the nights the valley's lanterns were lit. The final page is a blank table for the next season.")
 		"observatory_arm_west", "observatory_arm_center", "observatory_arm_east":
@@ -3452,6 +3463,11 @@ func _draw_high_steps() -> void:
 		draw_rect(Rect2(546, 61, 38, 45), Color("#1e2a31"))
 
 func _draw_observatory() -> void:
+	for sight in OBSERVATORY_SIGHTS:
+		var foot: Vector2 = OBSERVATORY_SIGHTS[sight]
+		draw_rect(Rect2(foot - Vector2(8, 6), Vector2(17, 8)), Color("#63736d"))
+		draw_rect(Rect2(foot - Vector2(6, 11), Vector2(5, 7)), Color("#bfad86"))
+		draw_rect(Rect2(foot + Vector2(2, -11), Vector2(5, 7)), Color("#bfad86"))
 	_draw_final_inscription(Vector2(320, 101))
 	var arms: Dictionary = RunState.puzzle_progress.get("observatory_arms", {})
 	var arm_names := ["west", "center", "east"]

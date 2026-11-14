@@ -161,7 +161,13 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"cistern_glass_memory":
 			return "Through river glass, a fourth waterline appears beneath the cistern clock. Three cups wait beside the mark, one for each shared channel."
 		"observatory_star_chart":
-			return "The keeper's star chart sets the crescent west, the rain-line north, and the seed east."
+			return "The chart pairs crescent with last light, rain-line with the storm pass, and seed with first light. Three notches on the terrace frame the sightings."
+		"observatory_sunset":
+			return "The western notch frames the last strip of sunset. A watchman's thumb has polished the brass smooth."
+		"observatory_storm":
+			return "Through the northern notch, a band of rain trails into the mountain pass. The keeper cut flood dates into the sill."
+		"observatory_dawn":
+			return "The eastern notch frames a gap above the orchard. A planting calendar marks the mornings when first light reaches the seed beds."
 		"observatory_orrery_aligned":
 			return "The three brass arms settle into the keeper's star chart. A narrow drawer opens beneath the astrolabe."
 		"observatory_weather_log":
