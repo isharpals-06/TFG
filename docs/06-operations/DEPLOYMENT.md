@@ -2,7 +2,9 @@
 
 ## Status
 
-The latest single-file Windows x86_64 development export exists at `build/The Forgotten World.exe` (about 144 MB). Its PCK is embedded. Godot 4.7.2 stable release templates were installed from the official release mirror. A prior export was opened on Windows: the title menu, traveler selection, and transition into the crossing all appeared. The latest export, including the ridge-fork cairn, revised High Steps hint order, required chart-led observatory alignment, Beth's playful idle orbit, reduced-motion-aware water ripples in the orchard and waterworks, the About & Credits page, and place-labeled journal entries, has not been opened in runtime. No complete playthrough, full controls review, or release review has been performed. This is not an approved public release.
+The development build is a standalone Windows x86_64 executable with embedded game data. For a playtest, give the player `build/The Forgotten World.exe` and its matching `build/SHA256SUMS.txt`. They can launch the executable directly without installing Godot.
+
+Build `5f67feb` started from an empty working directory on Windows with an isolated save folder. Its SHA-256 matched the export manifest. This was a headless startup check. An automated journey against the embedded game data also reached the cliffhanger and resumed through Continue. First-time puzzle comprehension, physical controller use and the 2–3 hour duration still need player testing.
 
 ## Release preparation
 
