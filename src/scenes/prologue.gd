@@ -555,7 +555,7 @@ func _get_targets() -> Array[Dictionary]:
 			quarter_targets.append({"id": "quarter_register", "name": "the stone register", "position": Vector2(572, 232)})
 		if _village_gathering_clues_complete() and not RunState.story_flags.get("village_gathering_solved", false):
 			if not RunState.story_flags.get("village_gathering_marks_seen", false):
-				quarter_targets.append({"id": "village_gathering_marks", "name": "the three worn marks around the well", "position": Vector2(320, 166)})
+				quarter_targets.append({"id": "village_gathering_marks", "name": "the three worn marks around the well", "position": Vector2(320, 139)})
 			quarter_targets.append({"id": "village_gathering_bowl", "name": "the bowl mark beside the well", "position": Vector2(292, 166)})
 			quarter_targets.append({"id": "village_gathering_lamp", "name": "the lamp mark beside the well", "position": Vector2(320, 166)})
 			quarter_targets.append({"id": "village_gathering_bell", "name": "the bell mark beside the well", "position": Vector2(348, 166)})
@@ -1001,7 +1001,7 @@ func _examine_target() -> void:
 			_reveal_world_memory("waterworks_map_seen", "waterworks_channel_map", _clue_text("waterworks_channel_map"))
 			_update_objective()
 		"waterworks_bowls":
-			_reveal_world_memory("waterworks_bowl_record_seen", "waterworks_waiting_bowls", "Three clay bowls sit at the waterline. A faded note says the children waited here for the first cool water after summer, and no one drank from the first spill.")
+			_reveal_world_memory("waterworks_bowl_record_seen", "waterworks_waiting_bowls", _clue_text("waterworks_waiting_bowls"))
 		"waterwheel_west", "waterwheel_center", "waterwheel_east":
 			var note := "waterworks_wheel_" + str(target.id).trim_prefix("waterwheel_")
 			_record_clue_animated(note)
@@ -1044,7 +1044,7 @@ func _examine_target() -> void:
 		"quarter_register":
 			_reveal_world_memory("quarter_register_seen", "quarter_register", "A stone register lists the village trades: readers, potters, growers, lamplighters. The last column is worn blank.")
 		"village_gathering_marks":
-			_set_status("A line circles the rim: set aside water, leave one lamp, then ring once after the road is empty.")
+			_set_status(_clue_text("village_gathering_order"))
 			RunState.set_story_flag("village_gathering_marks_seen")
 			_record_clue_animated("village_gathering_order")
 			_update_objective()
@@ -1102,7 +1102,7 @@ func _examine_target() -> void:
 		"mirror_shard":
 			_set_status("A silvered shard reflects the room as it might have looked before the roof fell.")
 		"archive_last_entry":
-			_reveal_world_memory("archive_last_entry_seen", "archive_last_entry", "The last catalogue line says: carry the books east; leave one lamp in the doorway.")
+			_reveal_world_memory("archive_last_entry_seen", "archive_last_entry", _clue_text("archive_last_entry"))
 		"archive_hidden_ledger":
 			_reveal_world_memory("archive_hidden_ledger_seen", "archive_hidden_register", "A loose leaf is headed “Borrowed skies.” Its last line asks the keeper to leave the east windows uncovered so the final light has somewhere to go.")
 		"lens_west", "lens_center", "lens_east":
@@ -3268,6 +3268,7 @@ func _draw_empty_quarter() -> void:
 		draw_circle(Vector2(320, 166), 5.0, Color("#d6e2c7", 0.72))
 	if _village_gathering_clues_complete() and not RunState.story_flags.get("village_gathering_solved", false):
 		var gathering_progress := int(RunState.puzzle_progress.get("village_gathering_sequence", 0))
+		draw_rect(Rect2(310, 134, 20, 6), Color("#919080"))
 		var gathering_positions := [Vector2(292, 166), Vector2(320, 166), Vector2(348, 166)]
 		for index in range(gathering_positions.size()):
 			var lit := index < gathering_progress

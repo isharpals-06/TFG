@@ -14,7 +14,7 @@ static func get_hint(phase: String, level: int, story_flags: Dictionary, journal
 		return _pick(hint_level, "Beth follows a ripple up the stones, then watches it return to shore.", "The shoreline marks rise to the far stone and descend in reverse.", "Activate near, second, third, far, third, second, then near.")
 	if phase == "empty_quarter":
 		if story_flags.get("village_gathering_marks_seen", false) and not story_flags.get("village_gathering_solved", false):
-			return _pick(hint_level, "Beth follows the carved line around the well, then pauses at its first mark.", "The rim says to set aside water, leave a lamp, then ring once.", "Activate bowl, lamp, then bell.")
+			return _pick(hint_level, "Beth follows the carved line around the well, then pauses at its first mark.", "The water carriers came before the lamplighter. The bell keeper waited for the lamp to go dark.", "Activate bowl, lamp, then bell.")
 		return _pick(hint_level, "Beth peers past the niches into the houses. Examine a doorway to see what its owner left behind.", "The ink belonged to a reader, the ladle to a cook. Look for signs of planting and lamplight at the other doors.", "West holds the book, north the bowl, east the seed, and south the lamp.")
 	if phase == "reading_room":
 		return _pick(hint_level, "Beth keeps drifting back to the children's lesson slate.", "Arrange the three study markers in the same order as the slate, from west to east.", "Set boat at the west mark, lantern at center, and reeds at the east mark.")

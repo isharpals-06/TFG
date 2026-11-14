@@ -55,11 +55,11 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"causeway_crossing_open":
 			return "The old stepping stones answered in a path that rose toward the gate and returned to shore."
 		"archive_last_entry":
-			return "The last catalogue line says: carry the books east; leave one lamp in the doorway."
+			return "The last catalogue line reads: carry the books east. When water reaches the village well, leave one lamp to guide the stragglers."
 		"gallery_procession":
 			return "Three travelers carry bowls along a painted shore. From left to right their lanterns point south, north, then west."
 		"bell_keeper_list":
-			return "The keeper listed twelve names. Beside the boat crews is a rain-line. Beside the sowers is a seed. Four names are crossed out."
+			return "The keeper listed twelve names. Beside the boat crews is a rain-line. Beside the sowers is a seed. Below the names: when the lamp at the village well goes dark, ring once for the empty road."
 		"high_steps_last_lantern":
 			return "The lamp has two shutters. NORTH faces the upper stair. SOUTH faces the refuge. The keeper trimmed both wicks."
 		"high_steps_trail_cairn":
@@ -105,7 +105,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"quarter_well_reflection":
 			return "After the Archive opens, the village well reflects its starless sky. Four warm lights gather around a quiet gap."
 		"village_gathering_order":
-			return "A worn line around the village well says: set aside water, leave one lamp, then ring once after the road is empty."
+			return "Three trades signed the well rim. A water carrier, a keeper of books, and a bell keeper each left a mark for the last gathering."
 		"village_gathering_restored":
 			return "The three marks answer around the well. A hidden line remembers how the village gathered before the road closed."
 		"village_last_gathering":
@@ -153,7 +153,7 @@ static func get_text(clue_id: String, story_flags: Dictionary) -> String:
 		"waterworks_gate_open":
 			return "The waterwheels raise the sluice gate and uncover the dry lane into the village."
 		"waterworks_waiting_bowls":
-			return "Three bowls waited at the waterline each summer. A note says no one drank from the first spill."
+			return "Three bowls waited at the waterline. Each summer the children carried the first clean bowl to the village well before anyone drank."
 		"cistern_valve_pattern":
 			return "The lower cistern's water clock gives four turns: east, west, center, west."
 		"cistern_basin_balanced":
